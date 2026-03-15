@@ -30,6 +30,8 @@ public class Control {
     @CollectionTable(name="control_references", joinColumns = @JoinColumn(name="control_id"))
     private Set<String> references;
 
+    
+
     // Getters
     public Long getId() { return this.id; }
     public String getName() { return this.name; }
