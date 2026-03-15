@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: html}">
+<head>
+    <th:block th:with="pageTitle='ERROR'"></th:block>
+</head>
+<body>
+<div th:fragment="content">
+    <img th:src="${error}">
+</div>
+</body>
+</html>

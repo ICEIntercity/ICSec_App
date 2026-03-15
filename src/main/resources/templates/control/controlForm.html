@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/form :: html}">
+<head>
+    <th:block th:with="pageTitle='Edit Control'"></th:block>
+</head>
+<body>
+<div th:fragment="form">
+    <form th:action="@{/control/edit}" th:object="${control}" method="post">
+        <legend>Edit Topic</legend>
+        <div class="mb-3">
+            <label for="controlCode" class="form-label">Control Code</label>
+            <input type="text" class="form-control" id="controlCode" aria-describedby="controlCodeHelp" th:value="${control.getCode()}" disabled/>
+            <div id="controlCodeHelp" class="form-text">Control code is generated automatically.</div>
+        </div>
+        <div class="mb-3">
+            <label for="controlName" class="form-label">Control Name</label>
+            <input type="text" class="form-control" id="controlName" th:field="*{name}"/>
+        </div>
+        <div class="mb-3">
+            <label for="controlDescription" class="form-label">Control Description</label>
+            <textarea id="controlDescription" class="form-control" th:field="*{description}">
+            </textarea>
+        </div>
+        <div class="mb-3">
+            <label for="controlTopic" class="form-label">Topic</label>
+            <select id="controlTopic" class="form-control" th:field="*{topic}">
+                <option th:each="topic : ${topics}" th:value="${topic.id}" th:text="${topic.code} + '-' +${topic.name}"></option>
+            </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+</div>
+</body>
+</html>

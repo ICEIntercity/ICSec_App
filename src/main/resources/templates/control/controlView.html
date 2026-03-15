@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: html}">
+<head>
+  <th:block th:with="pageTitle='Control'"></th:block>
+</head>
+<body>
+<div th:fragment="content">
+  <a th:href="@{/control/all}">< Back</a>
+  <h1 th:text="${control.getName()}"> <span class="badge text-bg-secondary"></span></h1>
+  <a th:href="@{/topic/{id}(id = ${control.getTopic().getId()})}" class="btn btn-danger" th:text="${control.getTopic()}"/>
+  <hr>
+  <p th:text="${control.getDescription()}"/>
+  <hr>
+</div>
+</body>
+</html>

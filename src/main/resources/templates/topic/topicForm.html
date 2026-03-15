@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/form :: html}">
+<head>
+    <th:block th:with="pageTitle='Edit Topic'"></th:block>
+</head>
+<body>
+<div th:fragment="form">
+    <form th:action="@{/topic/edit}" th:object="${topic}" method="post">
+        <legend>Edit Topic</legend>
+        <div class="mb-3">
+            <label for="topicCode" class="form-label">Topic Code</label>
+            <input type="text" class="form-control" id="topicCode" aria-describedby="topicCodeHelp" th:field="*{code}"/>
+            <div id="topicCodeHelp" class="form-text">Select a topic code of 3 characters.</div>
+        </div>
+        <div class="mb-3">
+            <label for="topicName" class="form-label">Topic Name</label>
+            <input type="text" class="form-control" id="topicName" th:field="*{name}"/>
+        </div>
+        <div class="mb-3">
+            <label for="topicDescription" class="form-label">Topic Description</label>
+            <textarea id="topicDescription" class="form-control" th:field="*{description}">
+            </textarea>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+</div>
+</body>
+</html>

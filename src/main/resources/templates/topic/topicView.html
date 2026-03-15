@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: html}">
+<head>
+  <th:block th:with="pageTitle='Topics'"></th:block>
+</head>
+<body>
+<div th:fragment="content">
+      <a th:href="@{/topic/all}">< Back</a>
+      <h1 th:text="${topic.getName()}"> <span class="badge text-bg-secondary"></span></h1>
+      <hr>
+      <p th:text="${topic.getDescription()}"/>
+      <hr>
+      <h3>Defensive controls:</h3>
+      <div class="col" th:each="control : ${topic.getControls()}">
+          <div class="card h-100 shadow-sm">
+              <div class="card-body d-flex flex-column text-start">
+                  <h6 class="card-title fw-bold text-truncate" th:text="${control.getName()}"/>
+                  <p class="card-text small text-muted text-description"
+                     th:text="${control.getDescription()}"/>
+                  <div class="mt-auto">
+                      <a th:href="@{/control/{id}( id = ${control.getId()})}">View Details</a>
+                  </div>
+              </div>
+          </div>
+      </div>
+</div>
+</body>
+</html>

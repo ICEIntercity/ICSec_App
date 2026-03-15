@@ -1,0 +1,17 @@
+/* Truncation: Limits description to 3 lines with ellipsis */
+.card-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 4.5em; /* Keeps cards aligned even with short text */
+}
+
+/* Ensuring the card has a consistent height */
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+.card:hover {
+    transform: translateY(-5px);
+}

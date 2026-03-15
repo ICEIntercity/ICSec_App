@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: html}">
+<body>
+<div th:fragment="content">
+  <div th:if="${formError != null}" class="alert alert-danger" role="alert">
+    <ul>
+      <li th:each="err: ${formError}" th:text="${err.getDefaultMessage()}"/>
+    </ul>
+  </div>
+  <div th:if="${formSuccess != null}" th:text="${formSuccess}" class="alert alert-success d-flex align-items-center" role="alert"/>
+  <div id="form-container" th:insert="~{this :: form}">
+    <div class="alert alert-warning">Supposed to be a form here...</div>
+  </div>
+</div>
+</body>
+</html>
