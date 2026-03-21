@@ -5,5 +5,6 @@ public enum CoverageType {
     PREVENTATIVE,
     DETECTIVE,
     CORRECTIVE,
-    RECOVERY
+    RECOVERY,
+    UNKNOWN
 }

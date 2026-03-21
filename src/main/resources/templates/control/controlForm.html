@@ -4,21 +4,39 @@
     <th:block th:with="pageTitle='Edit Control'"></th:block>
 </head>
 <body>
+
+<!-- Relationship Modal -->
 <div th:fragment="form">
-    <form th:action="@{/control/edit}" th:object="${control}" method="post">
+    <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" id="modalHolder">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="formModalLabel">Edit Relationship</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                Nope.
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form th:action="@{/control/edit}" th:object="${controlForm}" method="post">
         <legend>Edit Topic</legend>
+        <h5>Basic information</h5>
         <div class="mb-3">
             <label for="controlCode" class="form-label">Control Code</label>
-            <input type="text" class="form-control" id="controlCode" aria-describedby="controlCodeHelp" th:value="${control.getCode()}" disabled/>
+            <input type="text" class="form-control" id="controlCode" aria-describedby="controlCodeHelp" th:value="*{controlCode}" disabled/>
             <div id="controlCodeHelp" class="form-text">Control code is generated automatically.</div>
         </div>
         <div class="mb-3">
             <label for="controlName" class="form-label">Control Name</label>
-            <input type="text" class="form-control" id="controlName" th:field="*{name}"/>
+            <input type="text" class="form-control" id="controlName" th:field="*{controlName}"/>
         </div>
         <div class="mb-3">
             <label for="controlDescription" class="form-label">Control Description</label>
-            <textarea id="controlDescription" class="form-control" th:field="*{description}">
+            <textarea id="controlDescription" class="form-control" th:field="*{controlDescription}">
             </textarea>
         </div>
         <div class="mb-3">
@@ -27,7 +45,27 @@
                 <option th:each="topic : ${topics}" th:value="${topic.id}" th:text="${topic.code} + '-' +${topic.name}"></option>
             </select>
         </div>
-        <button class="btn btn-primary" type="submit">Submit</button>
+        <hr>
+        <h5>Technique Coverage</h5>
+        <div id="relationshipListContainer">
+            <button type="button"
+                    th:hx-get="@{/techniqueCoverage/add}"
+                    hx-target="#modalHolder"
+                    hx-swap="outerHtml"
+                    class="btn btn-secondary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#formModal"
+            >
+                Add Technique Coverage
+            </button>
+            <div th:each="coverage, iter : *{defaultTechniqueCoverage}">
+                LMAO TOP KEK
+            </div>
+        </div>
+        <hr>
+        <div>
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
     </form>
 </div>
 </body>

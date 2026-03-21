@@ -36,6 +36,7 @@ public class Technique {
     }
 
     // GETTERS
+    public Long getId() { return this.id; }
     public String getName() { return this.name; }
     public String getMitreId(){ return this.mitreId; }
     public String getDescription(){ return this.description; }

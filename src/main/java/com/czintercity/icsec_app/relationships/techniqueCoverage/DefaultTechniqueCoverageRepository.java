@@ -12,4 +12,5 @@ import java.util.List;
 public interface DefaultTechniqueCoverageRepository extends JpaRepository<DefaultTechniqueCoverage, Long> {
     List<DefaultTechniqueCoverage> findByControl(Control control);
     List<DefaultTechniqueCoverage> findByTechnique(Technique technique);
+    List<DefaultTechniqueCoverage> findByControlAndTechnique(Control control, Technique technique);
 }

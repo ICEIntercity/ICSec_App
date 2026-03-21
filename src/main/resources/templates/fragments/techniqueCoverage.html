@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="techniqueCoverageModal" class="modal-body" id="relationshipModal" tabindex="-1" aria-labelledby="relationshipModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="relationshipModalLabel">Edit relationship</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="targetTechnique" class="form-label">Target Technique</label>
+                    <select id="targetTechnique" class="form-control" th:field="*{techniqueCoverage.technique}">
+                        <option th:each="technique : ${techniques}" th:value="${technique.id}" th:text="${technique.mitreId} + '-' +${technique.name}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

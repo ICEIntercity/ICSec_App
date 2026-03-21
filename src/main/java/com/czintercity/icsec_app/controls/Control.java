@@ -1,10 +1,13 @@
 package com.czintercity.icsec_app.controls;
 
+import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.TechniqueCoverage;
 import com.czintercity.icsec_app.topics.Topic;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -14,21 +17,24 @@ public class Control {
     private Long id;
 
     @Column(nullable = false)
-    @NotBlank(message="Name must not be empty.")
     private String name;
 
-    @Column
-    @NotBlank(message="Description must not be empty.")
+    @Column(length = 4096)
     private String description;
 
     @ManyToOne
     @JoinColumn(name="topic_id", referencedColumnName = "id", nullable = false)
-    @NotNull(message="Topic must be selected.")
     private Topic topic;
 
     @ElementCollection
     @CollectionTable(name="control_references", joinColumns = @JoinColumn(name="control_id"))
-    private Set<String> references;
+    private List<String> references;
+
+    @OneToMany(mappedBy = "control")
+    private List<DefaultTechniqueCoverage> defaultTechniqueCoverage;
+
+    @Transient
+    private List<TechniqueCoverage> customTechniqueCoverage;
 
     // Getters
     public Long getId() { return this.id; }
@@ -44,13 +50,33 @@ public class Control {
         }
             return "NONE";
     }
+
     public String getDescription() { return this.description; }
     public Topic getTopic() { return this.topic; }
-    public Set<String> getReferences() { return this.references; }
+    public List<String> getReferences() { return this.references; }
+    public List<DefaultTechniqueCoverage> getDefaultTechniqueCoverage() {
+        return this.defaultTechniqueCoverage;
+    }
+
+    /**
+     * Get technique coverage.
+     * Returns default technique coverage if no override is present, otherwise, it returns custom technique coverage.
+     *
+     * @return Custom Technique Coverage, or default if custom is not present.
+     */
+    public List<TechniqueCoverage> getTechniqueCoverage(){
+        if(customTechniqueCoverage.isEmpty()){
+            return new ArrayList<>(defaultTechniqueCoverage);
+        }
+        else
+            return customTechniqueCoverage;
+    }
 
     // Setters
     public void setName(String name) { this.name = name; }
     public void setDescription(String description) { this.description = description; }
     public void setTopic(Topic topic) { this.topic = topic; }
+    public void setReferences(List<String> references) { this.references = references; }
+    public void setDefaultTechniqueCoverage(List<DefaultTechniqueCoverage> coverage) { this.defaultTechniqueCoverage = coverage; }
 }
 
