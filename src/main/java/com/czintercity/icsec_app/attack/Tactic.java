@@ -1,18 +1,25 @@
 package com.czintercity.icsec_app.attack;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 public class Tactic {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
+    @Column(unique = true)
     private String mitreId;
+
+    @Column(unique = true, nullable = false)
+    @NotEmpty
     private String name;
+
+    @Column(length = 8092)
     private String description;
+
+    @Column
     private String mitreLink;
 
     // GETTERS
