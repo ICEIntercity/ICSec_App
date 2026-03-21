@@ -1,10 +1,18 @@
 package com.czintercity.icsec_app.relationships.techniqueCoverage;
 
 public enum CoverageType {
-    DETERRENT,
-    PREVENTATIVE,
-    DETECTIVE,
-    CORRECTIVE,
-    RECOVERY,
-    UNKNOWN
+    DETERRENT("Deterrent"),
+    PREVENTATIVE("Preventative"),
+    DETECTIVE("Detective"),
+    CORRECTIVE("Corrective"),
+    RECOVERY("Recovery"),
+    UNKNOWN("Unknown");
+
+    private final String displayValue;
+    private CoverageType(String displayValue) {
+        this.displayValue = displayValue;
+    }
+    public String getDisplayValue() {
+        return displayValue;
+    }
 }
