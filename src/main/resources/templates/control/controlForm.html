@@ -10,15 +10,7 @@
     <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content" id="modalHolder">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="formModalLabel">Edit Relationship</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
                 Nope.
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
             </div>
         </div>
     </div>
@@ -58,8 +50,10 @@
             >
                 Add Technique Coverage
             </button>
-            <div th:each="coverage, iter : *{defaultTechniqueCoverage}">
-                LMAO TOP KEK
+            <div id="coverageList">
+                <div th:each="coverage, iter : *{defaultTechniqueCoverage}">
+                    LMAO TOP KEK
+                </div>
             </div>
         </div>
         <hr>

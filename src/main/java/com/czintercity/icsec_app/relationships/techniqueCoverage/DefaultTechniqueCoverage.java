@@ -26,7 +26,6 @@ public class DefaultTechniqueCoverage implements TechniqueCoverage{
 
     @Column(nullable = false)
     @NotNull
-    @Min(1)
     @Max(5)
     private Short coverageRating;
 
@@ -44,9 +43,9 @@ public class DefaultTechniqueCoverage implements TechniqueCoverage{
     // SETTERS
     public void setTechnique(Technique technique) { this.technique = technique; }
     public void setControl(Control control) { this.control = control; }
-    public void SetCoverageType(CoverageType coverageType) { this.coverageType = coverageType; }
-    public void SetCoverageRating(Short rating) { this.coverageRating = rating; }
-    public void SetJustification(String justification) { this.justification = justification; }
+    public void setCoverageType(CoverageType coverageType) { this.coverageType = coverageType; }
+    public void setCoverageRating(Short rating) { this.coverageRating = rating; }
+    public void setJustification(String justification) { this.justification = justification; }
 
     public DefaultTechniqueCoverage() {}
 }

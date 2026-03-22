@@ -5,7 +5,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="relationshipModalLabel">Edit relationship</h1>
+                <h1 class="modal-title fs-5" id="relationshipModalLabel">Edit Technique Coverage</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -15,10 +15,73 @@
                         <option th:each="technique : ${techniques}" th:value="${technique.id}" th:text="${technique.mitreId} + '-' +${technique.name}"></option>
                     </select>
                 </div>
+                <div class="mb-3">
+                    <label for="coverageType" class="form-label">Coverage Type</label>
+                    <select id="coverageType" class="form-control" th:field="*{techniqueCoverage.coverageType}">
+                        <option th:each="coverageType :  ${T(com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType).values()}"
+                                th:value="${coverageType}" th:text="${coverageType.displayValue}"/>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="coverageRating" class="form-label">Coverage Rating</label>
+                    <input th:field="*{techniqueCoverage.coverageRating}" type="range" class="form-range" min="0" max="5" step="1" id="coverageRating">
+                    <output for="coverageRating" id="coverageRatingValue" aria-hidden="true"></output>
+                </div>
+                <div class="mb-3">
+                    <label for="coverageJustification" class="form-label">Justification</label>
+                    <textarea id="coverageJustification" class="form-control" th:field="*{techniqueCoverage.justification}">
+                    </textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button"
+                        class="btn btn-primary"
+                        th:hx-post="@{/techniqueCoverage/row}"
+                        th:with="targetId=${index != null ? '#coverage-' + index : '#coverageList'}"
+                        th:attr="hx-target=${targetId}, hx-swap=${index != null ? 'outerHTML' : 'beforeend'}"
+                        hx-include="#targetTechnique, #coverageType, #coverageRating, #coverageJustification"
+                        th:hx-vals="${index != null ? '{&quot;index&quot;: ' + index+1 + '}' : '{&quot;index&quot;: ' + 0 + '}'}"
+                        data-bs-dismiss="modal">
+                    Save changes
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // This is an example script, please modify as needed
+        const rangeInput = document.getElementById('coverageRating');
+        const rangeOutput = document.getElementById('coverageRatingValue');
+
+        // Set initial value
+        rangeOutput.textContent = rangeInput.value;
+
+        rangeInput.addEventListener('input', function() {
+            rangeOutput.textContent = this.value;
+        });
+    </script>
+</div>
+<div th:fragment="techniqueCoverageRow(coverage, index)" class="card my-2" th:id="'coverage-' + ${index}">
+    <div class="card-header bg-danger">
+        <h6 class="card-title text-light" th:text="${coverage.technique.mitreId} + ' - ' + ${coverage.technique.name}"/>
+        <input type="hidden" th:name="|defaultTechniqueCoverage[${index}].mitreId|" th:value="${coverage.technique.mitreId}"/>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-1">
+                <h6>Rating:</h6>
+                <p th:text="${coverage.coverageRating}"/>
+                <input type="hidden" th:name="|defaultTechniqueCoverage[${index}].coverageRating|" th:value="${coverage.coverageRating}"/>
+            </div>
+            <div class="col-2">
+                <h6>Type:</h6>
+                <p th:text="${coverage.coverageType.displayValue}"/>
+                <input type="hidden" th:name="|defaultTechniqueCoverage[${index}].coverageType|" th:value="${coverage.coverageType}"/>
+            </div>
+            <div class="col-9">
+                <h6>Justification:</h6>
+                <p th:text="${coverage.justification}"/>
+                <input type="hidden" th:name="|defaultTechniqueCoverage[${index}].justification|" th:value="coverage.justification"/>
             </div>
         </div>
     </div>

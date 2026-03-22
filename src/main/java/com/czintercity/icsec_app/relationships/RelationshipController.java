@@ -29,16 +29,16 @@ public class RelationshipController {
     }
 
     @GetMapping("/techniqueCoverage/edit")
-    public String updateTechniqueCoverageModal(@RequestParam int index, @ModelAttribute DefaultTechniqueCoverage coverage, Model model){
+    public String updateTechniqueCoverageModal(@RequestParam Integer index, @ModelAttribute DefaultTechniqueCoverage coverage, Model model){
         model.addAttribute("index", index);
         model.addAttribute("techniqueCoverage", coverage);
         return "fragments/techniqueCoverage :: techniqueCoverageModal";
     }
 
-    @PostMapping("/techniqueCoverage/getRow")
-    public String updateTechniqueCoverageRow(@RequestParam(required = false) int index, DefaultTechniqueCoverage coverage, Model model){
+    @PostMapping("/techniqueCoverage/row")
+    public String updateTechniqueCoverageRow(@RequestParam(required = false) Integer index, DefaultTechniqueCoverage coverage, Model model){
         model.addAttribute("index", index);
-        model.addAttribute("techniqueCoverage", coverage);
+        model.addAttribute("coverage", coverage);
         return "fragments/techniqueCoverage :: techniqueCoverageRow";
     }
 }
