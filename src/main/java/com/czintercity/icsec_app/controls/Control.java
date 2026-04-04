@@ -64,12 +64,18 @@ public class Control {
      *
      * @return Custom Technique Coverage, or default if custom is not present.
      */
-    public List<TechniqueCoverage> getTechniqueCoverage(){
-        if(customTechniqueCoverage.isEmpty()){
+    public List<TechniqueCoverage> getTechniqueCoverage() {
+        // Override with custom coverage if present (always transient, though...)
+        if (customTechniqueCoverage != null && !customTechniqueCoverage.isEmpty()) {
+            return new ArrayList<>(customTechniqueCoverage);
+        }
+
+        // Otherwise, return default coverage
+        if (defaultTechniqueCoverage != null) {
             return new ArrayList<>(defaultTechniqueCoverage);
         }
-        else
-            return customTechniqueCoverage;
+
+        return new ArrayList<>(); // Always return a fresh, mutable list
     }
 
     // Setters
