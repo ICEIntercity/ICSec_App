@@ -5,7 +5,7 @@
 </head>
 <body>
 <div th:fragment="content">
-    <img th:src="${error}">
+    <img th:src="'https://httpcats.com/' + ${error} + '.jpg'">
 </div>
 </body>
 </html>

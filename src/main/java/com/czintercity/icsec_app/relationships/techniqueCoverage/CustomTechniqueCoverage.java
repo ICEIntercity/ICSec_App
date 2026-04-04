@@ -37,5 +37,9 @@ public class CustomTechniqueCoverage implements TechniqueCoverage{
     public void SetCoverageType(CoverageType coverageType) { this.coverageType = coverageType; }
     public void SetCoverageRating(Short rating) { this.coverageRating = rating; }
     public void SetJustification(String justification) { this.justification = justification; }
+
+    public boolean isBlank(){
+        return this.control == null && this.technique == null;
+    }
 }
 

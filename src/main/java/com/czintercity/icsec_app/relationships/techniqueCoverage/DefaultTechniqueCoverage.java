@@ -14,10 +14,12 @@ public class DefaultTechniqueCoverage implements TechniqueCoverage{
     private Long id;
 
     @ManyToOne
+    @NotNull
     @JoinColumn(name = "control_id", referencedColumnName = "id", nullable = false)
     private Control control;
 
     @ManyToOne
+    @NotNull
     @JoinColumn(name = "technique_id", referencedColumnName = "id", nullable = false)
     private Technique technique;
 
@@ -48,4 +50,8 @@ public class DefaultTechniqueCoverage implements TechniqueCoverage{
     public void setJustification(String justification) { this.justification = justification; }
 
     public DefaultTechniqueCoverage() {}
+
+    public boolean isBlank(){
+        return this.control == null && this.technique == null;
+    }
 }

@@ -9,4 +9,6 @@ public interface TechniqueCoverage {
     CoverageType getCoverageType();
     Short getCoverageRating();
     String getJustification();
+
+    boolean isBlank();
 }

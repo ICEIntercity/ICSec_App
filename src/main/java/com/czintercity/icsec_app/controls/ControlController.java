@@ -7,13 +7,13 @@ import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqu
 import com.czintercity.icsec_app.topics.TopicRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
 
@@ -44,7 +44,12 @@ public class ControlController {
         return "control/controlList";
     }
 
-
+    /**
+     * Initiates the creation of a new cotnrol.
+     *
+     * @param model Spring Boot Model attribute
+     * @return Rendering of controlForm.html
+     */
     @GetMapping("/control/new")
     public String newControl(Model model) {
         model.addAttribute("controlForm", new EditControlForm());
@@ -53,6 +58,13 @@ public class ControlController {
         return "control/controlForm";
     }
 
+    /**
+     * Displays the details of control in read-only mode.
+     *
+     * @param id ID of control to display
+     * @param model Spring Boot model attribute
+     * @return Rendering of controlView.html (or error 404)
+     */
     @GetMapping("/control/{id}")
     public String showControl(@PathVariable Long id, Model model) {
         Optional<Control> control = controlRepository.findById(id);
@@ -61,8 +73,7 @@ public class ControlController {
             return "control/controlView";
         }
         else {
-            model.addAttribute("error", "http.cat/404");
-            return "error";
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Control with id " + id + " not found");
         }
     }
 
@@ -76,14 +87,11 @@ public class ControlController {
             model.addAttribute("topics", topicRepository.findAll());
             return "control/controlForm";
         }
-        else {
-            model.addAttribute("error", "http.cat/404");
-            return "error";
-        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Control with id " + id + " not found");
     }
 
     @PostMapping("/control/edit")
-    public String saveControl(@Valid @ModelAttribute("controlForm") EditControlForm controlForm, BindingResult result, Model model) {
+    public String saveControl(@Valid @ModelAttribute("controlForm") EditControlForm controlForm, RedirectAttributes redirectAttributes, BindingResult result) {
         if(!result.hasErrors()) {
             Control toSave;
 
@@ -98,8 +106,7 @@ public class ControlController {
                     defaultTechniqueCoverageRepository.deleteAll(defaultTechniqueCoverageRepository.findByControl(toSave));
                 }
                 else {
-                    model.addAttribute("error", "http.cat/404");
-                    return "error";
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Control with id " + controlForm.getControlId() + " does not exist.");
                 }
             }
             else {
@@ -114,23 +121,32 @@ public class ControlController {
 
             List<DefaultTechniqueCoverage> techniqueCoverage = new ArrayList<>();
 
+            // Generate an ID (inefficient, but whatever)
+            toSave = controlRepository.save(toSave);
+
             // Handle controls (We've previously deleted all for this technique)
             for(DefaultTechniqueCoverage coverage : controlForm.getDefaultTechniqueCoverage()) {
+
+                // Skip empty/deleted rows (we don't need them)
+                if(coverage.isBlank()){
+                    continue;
+                }
+
+                coverage.setControl(toSave);
                 coverage = defaultTechniqueCoverageRepository.save(coverage);
                 techniqueCoverage.add(coverage);
             }
             toSave.setDefaultTechniqueCoverage(techniqueCoverage);
-            controlRepository.save(toSave);
+            toSave = controlRepository.save(toSave);
 
             // Display success
-            model.addAttribute("formSuccess", "Control updated successfully.");
+            redirectAttributes.addFlashAttribute("formSuccess", "Control updated successfully");
         }
         else{
-            model.addAttribute("formError", result.getAllErrors());
+            redirectAttributes.addFlashAttribute("formError", result.getAllErrors());
         }
 
-        model.addAttribute("controlForm", controlForm);
-        model.addAttribute("topics", topicRepository.findAll());
-        return "control/controlForm";
+        redirectAttributes.addAttribute("id", controlForm.getControlId());
+        return "redirect:/control/edit/{id}";
     }
 }

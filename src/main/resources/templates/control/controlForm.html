@@ -7,6 +7,28 @@
 
 <!-- Relationship Modal -->
 <div th:fragment="form">
+    <script>
+        function getNextCoverageIndex() {
+            // Select all elements where the ID starts with "coverage-"
+            const inputs = document.querySelectorAll('[id^="coverage-"]');
+            let maxIndex = -1;
+
+            inputs.forEach(input => {
+                // Match the digits following "coverage-"
+                const match = input.id.match(/coverage-(\d+)/);
+
+                if (match) {
+                    const idx = parseInt(match[1], 10);
+                    if (idx > maxIndex) {
+                        maxIndex = idx;
+                    }
+                }
+            });
+
+            // Returns the next available index
+            return maxIndex + 1;
+        }
+    </script>
     <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content" id="modalHolder">
@@ -17,6 +39,7 @@
     <form th:action="@{/control/edit}" th:object="${controlForm}" method="post">
         <legend>Edit Topic</legend>
         <h5>Basic information</h5>
+        <input type="hidden" th:field="*{controlId}"/>
         <div class="mb-3">
             <label for="controlCode" class="form-label">Control Code</label>
             <input type="text" class="form-control" id="controlCode" aria-describedby="controlCodeHelp" th:value="*{controlCode}" disabled/>
@@ -43,16 +66,16 @@
             <button type="button"
                     th:hx-get="@{/techniqueCoverage/add}"
                     hx-target="#modalHolder"
-                    hx-swap="outerHtml"
+                    hx-swap="innerHTML"
+                    hx-vals='js:{arrayLength: getNextCoverageIndex()}'
                     class="btn btn-secondary"
                     data-bs-toggle="modal"
-                    data-bs-target="#formModal"
-            >
-                Add Technique Coverage
+                    data-bs-target="#formModal">
+            Add Technique Coverage
             </button>
             <div id="coverageList">
                 <div th:each="coverage, iter : *{defaultTechniqueCoverage}">
-                    LMAO TOP KEK
+                    <div th:replace="~{fragments/techniqueCoverage :: techniqueCoverageRow(coverage=${coverage}, index=${iter.index})}"></div>
                 </div>
             </div>
         </div>
@@ -62,5 +85,27 @@
         </div>
     </form>
 </div>
+<script>
+    function getNextCoverageIndex() {
+        // Select all elements where the ID starts with "coverage-"
+        const inputs = document.querySelectorAll('[id^="coverage-"]');
+        let maxIndex = -1;
+
+        inputs.forEach(input => {
+            // Match the digits following "coverage-"
+            const match = input.id.match(/coverage-(\d+)/);
+
+            if (match) {
+                const idx = parseInt(match[1], 10);
+                if (idx > maxIndex) {
+                    maxIndex = idx;
+                }
+            }
+        });
+
+        // Returns the next available index
+        return maxIndex + 1;
+    }
+</script>
 </body>
 </html>
