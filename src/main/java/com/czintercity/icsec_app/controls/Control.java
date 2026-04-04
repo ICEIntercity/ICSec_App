@@ -6,9 +6,7 @@ import com.czintercity.icsec_app.topics.Topic;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 public class Control {

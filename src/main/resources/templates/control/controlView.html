@@ -2,15 +2,43 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: html}">
 <head>
   <th:block th:with="pageTitle='Control'"></th:block>
+  <title>Control</title>
 </head>
 <body>
 <div th:fragment="content">
-  <a th:href="@{/control/all}">< Back</a>
-  <h1 th:text="${control.getName()}"> <span class="badge text-bg-secondary"></span></h1>
-  <a th:href="@{/topic/{id}(id = ${control.getTopic().getId()})}" class="btn btn-danger" th:text="${control.getTopic()}"/>
-  <hr>
-  <p th:text="${control.getDescription()}"/>
-  <hr>
+  <div class="my-2 container">
+    <a class="btn btn-dark mg" th:href="@{/control/all}">< Back</a>
+    <a class="btn btn-primary mg" th:href="@{/control/edit/{id}(id = ${control.getId()})}">Edit control</a>
+  </div>
+  <div class="my-2 container">
+      <h3 th:text="${control.getName()}"> <span class="badge text-bg-secondary"></span></h3>
+      <a th:href="@{/topic/{id}(id = ${control.getTopic().getId()})}" class="btn btn-outline-danger" th:text="${control.getTopic().getCode()} + ' - ' + ${control.getTopic().getName()}"/>
+  </div>
+  <div class="container">
+      <p th:text="${control.getDescription()}"/>
+      <hr>
+  </div>
+  <div class="container">
+    <h5>MITRE ATT&CK Coverage</h5>
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4 py-4">
+      <div class="col" th:each="coverage : ${control.getTechniqueCoverage()}">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body d-flex flex-column text-start">
+            <h6 class="card-title fw-bold text-truncate my-1"
+                th:title="${coverage.getTechnique().getDisplayLabel()}"
+                th:text="${coverage.getTechnique().getDisplayLabel()}"/>
+
+            <span class="badge badge-coverage-type font-monospace my-2 w-fit-content"
+                  th:text="${coverage.getCoverageType()} + ': ' + ${coverage.getCoverageRating()}"
+                  th:data-type="${coverage.getCoverageType()}"
+            />
+            <p class="card-text small text-muted text-description"
+               th:text="${coverage.getJustification()}"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 </body>
 </html>

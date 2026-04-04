@@ -49,4 +49,8 @@ public class Technique {
     public void setDescription(String description) { this.description = description; }
     public void setMitreLink(String url) { this.mitreLink = url; }
     public void setTactics(Set<Tactic> tactics) { this.tactics = tactics; }
+
+    public String getDisplayLabel() {
+        return this.mitreId + " - " + this.name;
+    }
 }
