@@ -11,16 +11,26 @@
     <a class="btn btn-primary mg" th:href="@{/control/edit/{id}(id = ${control.getId()})}">Edit control</a>
   </div>
   <div class="my-2 container">
-      <h3 th:text="${control.getName()}"> <span class="badge text-bg-secondary"></span></h3>
-      <a th:href="@{/topic/{id}(id = ${control.getTopic().getId()})}" class="btn btn-outline-danger" th:text="${control.getTopic().getCode()} + ' - ' + ${control.getTopic().getName()}"/>
+    <h3 th:text="${control.getName()}"> <span class="badge text-bg-secondary"></span></h3>
+    <a th:href="@{/topic/{id}(id = ${control.getTopic().getId()})}" class="btn btn-sm btn-outline-danger" th:text="${control.getTopic().getCode()} + ' - ' + ${control.getTopic().getName()}"/>
   </div>
   <div class="container">
-      <p th:text="${control.getDescription()}"/>
-      <hr>
+    <p th:text="${control.getDescription()}"/>
+    <hr>
   </div>
+
+  <div class="container">
+    <h5>References</h5>
+    <p th:if="${#lists.isEmpty(control.getReferences())}" class="text-muted italic">No references.</p>
+    <p th:unless="${#lists.isEmpty(control.getReferences())}" th:each="reference: ${control.getReferences()}">
+      <a th:href="${reference}" th:text="${reference}"/>
+    </p>
+  </div>
+
   <div class="container">
     <h5>MITRE ATT&CK Coverage</h5>
-    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4 py-4">
+    <p th:if="${#lists.isEmpty(control.getTechniqueCoverage())}" class="text-muted italic">No technique coverage.</p>
+    <div th:unless="${#lists.isEmpty(control.getTechniqueCoverage())}" class="row row-cols-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4 py-4">
       <div class="col" th:each="coverage : ${control.getTechniqueCoverage()}">
         <div class="card h-100 shadow-sm">
           <div class="card-body d-flex flex-column text-start">
@@ -32,7 +42,7 @@
                   th:text="${coverage.getCoverageType()} + ': ' + ${coverage.getCoverageRating()}"
                   th:data-type="${coverage.getCoverageType()}"
             />
-            <p class="card-text small text-muted text-description"
+            <p class="card-text small text-description"
                th:text="${coverage.getJustification()}"/>
           </div>
         </div>

@@ -1,21 +1,17 @@
-package com.czintercity.icsec_app.relationships;
+package com.czintercity.icsec_app.form;
 
 import com.czintercity.icsec_app.attack.TechniqueRepository;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.TechniqueCoverage;
-import jakarta.validation.groups.Default;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Controller
-public class RelationshipController {
+public class EditControlFormController {
 
     private final TechniqueRepository techniqueRepository;
 
-    public RelationshipController(TechniqueRepository techniqueRepository) {
+    public EditControlFormController(TechniqueRepository techniqueRepository) {
         this.techniqueRepository = techniqueRepository;
     }
 
@@ -48,5 +44,10 @@ public class RelationshipController {
     @ResponseBody
     public String deleteTechniqueCoverageRow() {
         return "";
+    }
+
+    @GetMapping("/control/fragments/reference-row")
+    public String getReferenceRow() {
+        return "fragments/reference :: referenceRow";
     }
 }

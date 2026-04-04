@@ -61,6 +61,30 @@
             </select>
         </div>
         <hr>
+        <h5>References</h5>
+        <div id="referencesContainer" class="container mb-3">
+            <div th:each="ref : *{references}" class="input-group mb-2 reference-row">
+                <input type="text"
+                       name="references"
+                       class="form-control"
+                       th:value="${ref}"
+                       placeholder="e.g., https://mitre-attack.github.io/...">
+                <button type="button"
+                        class="btn btn-outline-danger"
+                        hx-on:click="this.closest('.reference-row').remove()">
+                    Remove
+                </button>
+            </div>
+        </div>
+
+        <button type="button"
+                class="btn btn-sm btn-secondary"
+                hx-get="/control/fragments/reference-row"
+                hx-target="#referencesContainer"
+                hx-swap="beforeend">
+            Add Reference
+        </button>
+        <hr>
         <h5>Technique Coverage</h5>
         <div id="relationshipListContainer">
             <button type="button"
@@ -68,7 +92,7 @@
                     hx-target="#modalHolder"
                     hx-swap="innerHTML"
                     hx-vals='js:{arrayLength: getNextCoverageIndex()}'
-                    class="btn btn-secondary"
+                    class="btn btn-sm btn-secondary"
                     data-bs-toggle="modal"
                     data-bs-target="#formModal">
             Add Technique Coverage
