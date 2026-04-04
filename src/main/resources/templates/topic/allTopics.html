@@ -6,6 +6,10 @@
 <body>
 <div th:fragment="content">
   <h1>Topics</h1>
+  <div th:if="${param.deleted}" class="alert alert-primary">
+    Topic deleted.
+  </div>
+  <a class="btn btn-success" th:href="@{/topic/new}">Add new topic</a>
   <div class="container-fluid py-4">
     <div th:each="topic : ${topics}" class="card my-3 shadow-sm">
       <div class="card-header">

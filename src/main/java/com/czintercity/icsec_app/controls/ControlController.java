@@ -4,10 +4,15 @@ import com.czintercity.icsec_app.attack.TechniqueRepository;
 import com.czintercity.icsec_app.form.EditControlForm;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverageRepository;
+import com.czintercity.icsec_app.topics.Topic;
 import com.czintercity.icsec_app.topics.TopicRepository;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +24,8 @@ import java.util.*;
 
 @Controller
 public class ControlController {
+    private static final Logger log = LoggerFactory.getLogger(ControlController.class);
+
     @Autowired
     private ControlRepository controlRepository;
 
@@ -39,6 +46,7 @@ public class ControlController {
      */
     @GetMapping("/control/all")
     public String listControls(Model model) {
+        log.trace("listControls called.");
         Iterable<Control> controls = controlRepository.findAll();
         model.addAttribute("controls", controls);
         return "control/allControls";
@@ -52,6 +60,7 @@ public class ControlController {
      */
     @GetMapping("/control/new")
     public String newControl(Model model) {
+        log.trace("newControl called.");
         model.addAttribute("controlForm", new EditControlForm());
         model.addAttribute("topics", topicRepository.findAll());
         model.addAttribute("techniques", techniqueRepository.findAll());
@@ -67,6 +76,7 @@ public class ControlController {
      */
     @GetMapping("/control/{id}")
     public String showControl(@PathVariable Long id, Model model) {
+        log.trace("ShowControl(id={}) called.", id);
         Optional<Control> control = controlRepository.findById(id);
         if(control.isPresent()){
             model.addAttribute("control", control.get());
@@ -79,6 +89,7 @@ public class ControlController {
 
     @GetMapping("/control/edit/{id}")
     public String editControl(@PathVariable Long id, Model model) {
+        log.trace("EditControl called for id: {}", id);
         Optional<Control> control = controlRepository.findById(id);
         if(control.isPresent()){
             EditControlForm editControlForm = new EditControlForm(control.get());
@@ -92,13 +103,19 @@ public class ControlController {
 
     @PostMapping("/control/edit")
     public String saveControl(@Valid @ModelAttribute("controlForm") EditControlForm controlForm, RedirectAttributes redirectAttributes, BindingResult result) {
+
+        // Get control id (will be zero if id is not set)
+        Long controlId = controlForm.getControlId() == null ? 0L : controlForm.getControlId();
+        log.trace("SaveControl called for id: {}.", controlId);
+
         if(!result.hasErrors()) {
             Control toSave;
-
+            log.info("Saving control with id: {}", controlId);
             // Check if we are saving existing or creating new
             if(controlForm.getControlId() != null) {
                 Optional<Control> foundControl = controlRepository.findById(controlForm.getControlId());
                 if(foundControl.isPresent()) {
+                    log.debug("Found control with id: {}, populating", foundControl.get().getId());
                     // Give the existing set
                     toSave = foundControl.get();
 
@@ -139,14 +156,37 @@ public class ControlController {
             toSave.setDefaultTechniqueCoverage(techniqueCoverage);
             toSave = controlRepository.save(toSave);
 
-            // Display success
+            // set id and success message
+            controlId = toSave.getId();
             redirectAttributes.addFlashAttribute("formSuccess", "Control updated successfully");
+            log.info("Control id {} updated successfully.", controlId);
         }
         else{
+            // set error message
             redirectAttributes.addFlashAttribute("formError", result.getAllErrors());
+            log.warn("Control with id {} has not been updated due to form validation error.", controlId);
         }
 
-        redirectAttributes.addAttribute("id", controlForm.getControlId());
+        redirectAttributes.addAttribute("id", controlId);
         return "redirect:/control/edit/{id}";
+    }
+
+    @DeleteMapping("control/delete/{id}")
+    public ResponseEntity<Void> deleteControl(@PathVariable Long id) {
+        Optional<Control> target = controlRepository.findById(id);
+
+        if (target.isPresent()) {
+            Control toDelete = target.get();
+
+            controlRepository.delete(toDelete);
+            log.info("Deleted control ID: {}", toDelete.getId());
+
+            HttpHeaders headers = new HttpHeaders();
+            // Pass a 'status' parameter in the URL
+            headers.add("HX-Redirect", "/control/all?deleted=true");
+            return new ResponseEntity<>(headers, HttpStatus.OK);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Control with id " + id + " not found");
+        }
     }
 }

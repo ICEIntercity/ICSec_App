@@ -6,8 +6,18 @@
 </head>
 <body>
 <div th:fragment="content">
+    <div class="container py-2">
       <a class="btn btn-dark mx-1" th:href="@{/topic/all}">< Back</a>
       <a class="btn btn-primary mx-1" th:href="@{/topic/edit/{id}(id=${topic.getId()})}">Edit topic</a>
+    <button class="btn btn-danger mg"
+            th:attr="hx-delete=@{/topic/delete/{id}(id=${topic.getId()})}"
+            hx-confirm="Are you sure you want to delete this topic?"
+            hx-target="body"
+            hx-push-url="true">
+        Delete topic
+    </button>
+    </div>
+    <div id="message-container"></div>
       <div class="container py-4">
           <h1 th:text="${topic.getName()}"></h1> <span class="badge text-bg-secondary" th:text="${topic.getCode()}"></span>
           <hr>

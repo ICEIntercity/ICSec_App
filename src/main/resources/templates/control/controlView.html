@@ -9,6 +9,13 @@
   <div class="my-2 container">
     <a class="btn btn-dark mg" th:href="@{/control/all}">< Back</a>
     <a class="btn btn-primary mg" th:href="@{/control/edit/{id}(id = ${control.getId()})}">Edit control</a>
+    <button class="btn btn-danger mg"
+            th:attr="hx-delete=@{/control/delete/{id}(id=${control.getId()})}"
+            hx-confirm="Are you sure you want to delete this control?"
+            hx-target="body"
+            hx-push-url="true">
+      Delete control
+    </button>
   </div>
   <div class="my-2 container">
     <h3 th:text="${control.getName()}"> <span class="badge text-bg-secondary"></span></h3>
