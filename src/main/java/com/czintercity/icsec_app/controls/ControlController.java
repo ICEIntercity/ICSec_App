@@ -35,17 +35,17 @@ public class ControlController {
      * Shows an overview of all controls to the user - including MITRE coverage.
      *
      * @param model Spring boot model
-     * @return control/controlList template
+     * @return control/allControls template
      */
     @GetMapping("/control/all")
     public String listControls(Model model) {
         Iterable<Control> controls = controlRepository.findAll();
         model.addAttribute("controls", controls);
-        return "control/controlList";
+        return "control/allControls";
     }
 
     /**
-     * Initiates the creation of a new cotnrol.
+     * Initiates the creation of a new control.
      *
      * @param model Spring Boot Model attribute
      * @return Rendering of controlForm.html
