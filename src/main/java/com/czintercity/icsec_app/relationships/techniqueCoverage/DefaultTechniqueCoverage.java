@@ -4,7 +4,6 @@ import com.czintercity.icsec_app.attack.Technique;
 import com.czintercity.icsec_app.controls.Control;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 @Entity

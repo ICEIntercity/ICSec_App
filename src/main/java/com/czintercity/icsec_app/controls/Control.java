@@ -1,5 +1,6 @@
 package com.czintercity.icsec_app.controls;
 
+import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationship;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.TechniqueCoverage;
 import com.czintercity.icsec_app.topics.Topic;
@@ -41,6 +42,12 @@ public class Control {
 
     @OneToMany(mappedBy = "control")
     private List<DefaultTechniqueCoverage> defaultTechniqueCoverage;
+
+    @OneToMany(mappedBy = "source")
+    private List<ControlRelationship> outgoingRelationships;
+
+    @OneToMany(mappedBy = "target")
+    private List<ControlRelationship> incomingRelationships;
 
     @Transient
     private List<TechniqueCoverage> customTechniqueCoverage;
