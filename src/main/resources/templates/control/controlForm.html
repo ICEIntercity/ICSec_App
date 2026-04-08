@@ -16,7 +16,6 @@
             inputs.forEach(input => {
                 // Match the digits following "coverage-"
                 const match = input.id.match(/coverage-(\d+)/);
-
                 if (match) {
                     const idx = parseInt(match[1], 10);
                     if (idx > maxIndex) {
@@ -28,6 +27,27 @@
             // Returns the next available index
             return maxIndex + 1;
         }
+
+        // Cost definitions (for UI niceties)
+        const costMessages = {
+            0: "Negligible: Minimal resource requirements; zero impact on existing workflows or user productivity.",
+            1: "Low: Minor administrative effort and/or low capital expenditure with negligible operational friction.",
+            2: "Minor: Small-scale investment, manageable impact on team bandwidth and routine operations.",
+            3: "Moderate: Standard project investment, requires dedicated resource allocation and moderate change management to address user friction.",
+            4: "High: Significant capital outlay; high opportunity cost and/or substantial disruption to established business processes.",
+            5: "Critical: Major strategic investment, fundamental operational shifts causing high friction and extensive diversion of specialized personnel."
+        };
+
+        function updateCostIndex(val) {
+            document.getElementById('costIndexValue').innerText = val;
+            document.getElementById('costIndexDescription').innerText = costMessages[val];
+        }
+
+        // Initialize the description helper on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            const slider = document.getElementById('controlCostIndex');
+            updateCostIndex(slider.value);
+        });
     </script>
     <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -53,6 +73,25 @@
             <label for="controlDescription" class="form-label">Control Description</label>
             <textarea id="controlDescription" class="form-control" th:field="*{controlDescription}">
             </textarea>
+        </div>
+        <div class="mb-3">
+            <label for="controlCostIndex" class="form-label">
+                Cost Index: <span id="costIndexValue" class="fw-bold">3</span>
+            </label>
+
+            <input type="range"
+                   class="form-range"
+                   min="0"
+                   max="5"
+                   step="1"
+                   id="controlCostIndex"
+                   th:field="*{controlCostIndex}"
+                   th:value="*{controlCostIndex} ?: 3"
+                   oninput="updateCostIndex(this.value)">
+
+            <div id="costIndexDescription" class="form-text text-muted fw-medium">
+                Medium: Balanced resource and budget requirements.
+            </div>
         </div>
         <div class="mb-3">
             <label for="controlTopic" class="form-label">Topic</label>

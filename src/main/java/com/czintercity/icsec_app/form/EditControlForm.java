@@ -3,6 +3,8 @@ package com.czintercity.icsec_app.form;
 import com.czintercity.icsec_app.controls.Control;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
 import com.czintercity.icsec_app.topics.Topic;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
@@ -20,6 +22,10 @@ public class EditControlForm {
 
     @Length(max=4096, message = "Description must be at most 4096 characters long.")
     private String controlDescription;
+
+    @Min(value = 0, message="Cost index must be no smaller than 0.")
+    @Max(value = 5, message="Cost index must be no greater than 5.")
+    private Long controlCostIndex;
 
     @NotNull(message = "Topic must be set.")
     private Topic topic;
@@ -96,5 +102,13 @@ public class EditControlForm {
 
     public void setDefaultTechniqueCoverage(List<DefaultTechniqueCoverage> defaultTechniqueCoverage) {
         this.defaultTechniqueCoverage = defaultTechniqueCoverage;
+    }
+
+    public Long getControlCostIndex() {
+        return controlCostIndex;
+    }
+
+    public void setControlCostIndex(Long costIndex) {
+        this.controlCostIndex = costIndex;
     }
 }
