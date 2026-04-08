@@ -134,6 +134,7 @@ public class ControlController {
             toSave.setName(controlForm.getControlName());
             toSave.setDescription(controlForm.getControlDescription());
             toSave.setTopic(controlForm.getTopic());
+            toSave.setCostIndex(controlForm.getControlCostIndex());
             toSave.setReferences(controlForm.getReferences());
 
             List<DefaultTechniqueCoverage> techniqueCoverage = new ArrayList<>();

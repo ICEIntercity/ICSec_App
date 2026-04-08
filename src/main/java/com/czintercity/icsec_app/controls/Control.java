@@ -4,6 +4,10 @@ import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqu
 import com.czintercity.icsec_app.relationships.techniqueCoverage.TechniqueCoverage;
 import com.czintercity.icsec_app.topics.Topic;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +19,7 @@ public class Control {
     private Long id;
 
     @Column(nullable = false)
+    @NotBlank
     private String name;
 
     @Column(length = 4096)
@@ -22,7 +27,13 @@ public class Control {
 
     @ManyToOne
     @JoinColumn(name="topic_id", referencedColumnName = "id", nullable = false)
+    @NotNull
     private Topic topic;
+
+    @Column
+    @Min(0)
+    @Max(5)
+    private Long costIndex;
 
     @ElementCollection
     @CollectionTable(name="control_references", joinColumns = @JoinColumn(name="control_id"))
@@ -51,6 +62,7 @@ public class Control {
 
     public String getDescription() { return this.description; }
     public Topic getTopic() { return this.topic; }
+    public Long getCostIndex() { return this.costIndex; }
     public List<String> getReferences() { return this.references; }
     public List<DefaultTechniqueCoverage> getDefaultTechniqueCoverage() {
         return this.defaultTechniqueCoverage;
@@ -80,6 +92,7 @@ public class Control {
     public void setName(String name) { this.name = name; }
     public void setDescription(String description) { this.description = description; }
     public void setTopic(Topic topic) { this.topic = topic; }
+    public void setCostIndex(Long costIndex) { this.costIndex = costIndex; }
     public void setReferences(List<String> references) { this.references = references; }
     public void setDefaultTechniqueCoverage(List<DefaultTechniqueCoverage> coverage) { this.defaultTechniqueCoverage = coverage; }
 }
