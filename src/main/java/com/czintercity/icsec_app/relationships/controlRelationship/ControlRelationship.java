@@ -55,6 +55,8 @@ public abstract class ControlRelationship {
     protected abstract String getInboundName();
     protected abstract String getOutboundName();
 
+    public abstract ControlRelationshipType getType();
+
     public String getDisplayName(Control context) throws IllegalArgumentException {
         if(context == null) {
             throw new IllegalArgumentException("Context cannot be null");

@@ -1,18 +1,76 @@
 package com.czintercity.icsec_app.form;
 
 import com.czintercity.icsec_app.attack.TechniqueRepository;
+import com.czintercity.icsec_app.controls.Control;
+import com.czintercity.icsec_app.controls.ControlRepository;
+import com.czintercity.icsec_app.relationships.controlRelationship.*;
+import com.czintercity.icsec_app.relationships.controlRelationship.dto.ControlRelationshipDTO;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 public class EditControlFormController {
 
     private final TechniqueRepository techniqueRepository;
+    private final ControlRepository controlRepository;
 
-    public EditControlFormController(TechniqueRepository techniqueRepository) {
+    public EditControlFormController(TechniqueRepository techniqueRepository, ControlRepository controlRepository, ControlRelationshipService controlRelationshipService) {
         this.techniqueRepository = techniqueRepository;
+        this.controlRepository = controlRepository;
+    }
+
+    // Add this to EditControlFormController.java
+    @GetMapping("/controlRelationship/add")
+    public String newControlRelationshipModal(@RequestParam Integer arrayLength, Model model){
+        // Default to UNKNOWN or a sensible default like DEPENDENCY
+        model.addAttribute("controlRelationship", new ControlRelationshipDTO(ControlRelationshipType.DEPENDENCY));
+        model.addAttribute("controls", controlRepository.findAll());
+        model.addAttribute("relationshipTypes", ControlRelationshipType.values()); // Add types for the dropdown
+        model.addAttribute("index", null);
+        model.addAttribute("arrayLength", arrayLength);
+        return "fragments/controlRelationship :: controlRelationshipModal";
+    }
+
+    @GetMapping("/controlRelationship/edit")
+    public String updateControlDependencyModal(@RequestParam Integer index, ControlRelationshipDTO dependency, Model model){
+        model.addAttribute("controlRelationship", dependency);
+        model.addAttribute("controls", controlRepository.findAll());
+        model.addAttribute("index", index);
+        return "fragments/controlRelationship :: controlRelationshipModal";
+    }
+
+    // Snippet from EditControlFormController.java
+
+    @PostMapping("/controlRelationship/row")
+    public String updateControlRelationshipRow(@RequestParam Integer index,
+                                               @RequestParam ControlRelationshipType type,
+                                               @RequestParam UUID targetId,
+                                               Model model) {
+
+        Optional<Control> targetControl = controlRepository.findById(targetId);
+        if(!targetControl.isPresent()) {
+            throw new IllegalArgumentException("Target control doesn't exist.");
+        }
+
+        Control targetControlObj = targetControl.get();
+
+        ControlRelationshipDTO dto = new ControlRelationshipDTO();
+        dto.setTargetId(targetId);
+        dto.setType(type);
+        dto.setTargetName(targetControlObj.getName());
+        dto.setTargetCode(targetControlObj.getTopic().getCode() + "-" + targetControlObj.getDisplayId());
+
+        model.addAttribute("controlRelationship", dto);
+        model.addAttribute("index", index);
+        model.addAttribute("listName", "outgoingRelationships");
+
+        return "fragments/controlRelationship :: controlRelationshipRow";
     }
 
     @GetMapping("/techniqueCoverage/add")
@@ -43,6 +101,12 @@ public class EditControlFormController {
     @DeleteMapping("/techniqueCoverage/row")
     @ResponseBody
     public String deleteTechniqueCoverageRow() {
+        return "";
+    }
+
+    @DeleteMapping("/controlRelationship/row")
+    @ResponseBody
+    public String deleteControlRelationshipRow() {
         return "";
     }
 

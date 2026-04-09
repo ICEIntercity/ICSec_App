@@ -1,9 +1,11 @@
 package com.czintercity.icsec_app.relationships.controlRelationship;
 
-import com.czintercity.icsec_app.controls.Control;
 
-import java.util.Objects;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
+@Entity
+@DiscriminatorValue("DEPENDENCY")
 public class Dependency extends ControlRelationship {
 
     private static final String displayName = "dependency";
@@ -24,4 +26,14 @@ public class Dependency extends ControlRelationship {
     protected String getInboundName() {
         return inboundName;
     }
+
+    @Override
+    public ControlRelationshipType getType() {
+        return ControlRelationshipType.DEPENDENCY;
+    }
+
+    public Dependency(){
+        super();
+    }
+
 }

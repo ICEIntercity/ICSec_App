@@ -1,7 +1,10 @@
 package com.czintercity.icsec_app.relationships.controlRelationship;
 
-import com.czintercity.icsec_app.controls.Control;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
+@Entity
+@DiscriminatorValue("SYNERGY")
 public class Synergy extends ControlRelationship {
     private static final String displayName = "Synergy";
     private static final String outboundName = "Strengthens";
@@ -20,5 +23,14 @@ public class Synergy extends ControlRelationship {
     @Override
     protected String getInboundName() {
         return inboundName;
+    }
+
+    @Override
+    public ControlRelationshipType getType() {
+        return ControlRelationshipType.SYNERGY;
+    }
+
+    public Synergy(){
+        super();
     }
 }

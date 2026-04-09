@@ -5,17 +5,19 @@
 </head>
 <body>
 
-<!-- Relationship Modal -->
 <div th:fragment="form">
     <script>
-        function getNextCoverageIndex() {
-            // Select all elements where the ID starts with "coverage-"
-            const inputs = document.querySelectorAll('[id^="coverage-"]');
+        /**
+         * Generalised index finder for dynamic lists
+         * @param prefix The ID prefix to search for (e.g., 'coverage-', 'rel-dependencies-')
+         */
+        function getNextIndex(prefix) {
+            const inputs = document.querySelectorAll(`[id^="${prefix}"]`);
             let maxIndex = -1;
 
             inputs.forEach(input => {
-                // Match the digits following "coverage-"
-                const match = input.id.match(/coverage-(\d+)/);
+                const regex = new RegExp(`${prefix}(\\d+)`);
+                const match = input.id.match(regex);
                 if (match) {
                     const idx = parseInt(match[1], 10);
                     if (idx > maxIndex) {
@@ -23,12 +25,9 @@
                     }
                 }
             });
-
-            // Returns the next available index
             return maxIndex + 1;
         }
 
-        // Cost definitions (for UI niceties)
         const costMessages = {
             0: "Negligible: Minimal resource requirements; zero impact on existing workflows or user productivity.",
             1: "Low: Minor administrative effort and/or low capital expenditure with negligible operational friction.",
@@ -43,98 +42,84 @@
             document.getElementById('costIndexDescription').innerText = costMessages[val];
         }
 
-        // Initialize the description helper on page load
         document.addEventListener("DOMContentLoaded", function() {
             const slider = document.getElementById('controlCostIndex');
             updateCostIndex(slider.value);
         });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const formModal = document.getElementById('formModal');
+            formModal.addEventListener('hidden.bs.modal', function () {
+                document.getElementById('modalHolder').innerHTML = '';
+            });
+        });
     </script>
-    <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content" id="modalHolder">
-                Nope.
-            </div>
+
+    <div class="modal fade" id="formModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" id="modalHolder">
         </div>
     </div>
+
     <form th:action="@{/control/edit}" th:object="${controlForm}" method="post">
-        <legend>Edit Topic</legend>
+        <legend>Edit Control</legend>
+
         <h5>Basic information</h5>
         <input type="hidden" th:field="*{controlId}"/>
+
         <div class="mb-3">
             <label for="controlCode" class="form-label">Control Code</label>
-            <input type="text" class="form-control" id="controlCode" aria-describedby="controlCodeHelp" th:value="*{controlCode}" disabled/>
-            <div id="controlCodeHelp" class="form-text">Control code is generated automatically.</div>
+            <input type="text" class="form-control" id="controlCode" th:value="*{controlCode}" disabled/>
         </div>
+
         <div class="mb-3">
             <label for="controlName" class="form-label">Control Name</label>
             <input type="text" class="form-control" id="controlName" th:field="*{controlName}"/>
         </div>
+
         <div class="mb-3">
             <label for="controlDescription" class="form-label">Control Description</label>
-            <textarea id="controlDescription" class="form-control" th:field="*{controlDescription}">
-            </textarea>
+            <textarea id="controlDescription" class="form-control" th:field="*{controlDescription}"></textarea>
         </div>
+
         <div class="mb-3">
             <label for="controlCostIndex" class="form-label">
                 Cost Index: <span id="costIndexValue" class="fw-bold">3</span>
             </label>
-
-            <input type="range"
-                   class="form-range"
-                   min="0"
-                   max="5"
-                   step="1"
-                   id="controlCostIndex"
-                   th:field="*{controlCostIndex}"
-                   th:value="*{controlCostIndex} ?: 3"
-                   oninput="updateCostIndex(this.value)">
-
-            <div id="costIndexDescription" class="form-text text-muted fw-medium">
-                Medium: Balanced resource and budget requirements.
-            </div>
+            <input type="range" class="form-range" min="0" max="5" step="1" id="controlCostIndex"
+                   th:field="*{controlCostIndex}" oninput="updateCostIndex(this.value)">
+            <div id="costIndexDescription" class="form-text text-muted fw-medium"></div>
         </div>
+
         <div class="mb-3">
             <label for="controlTopic" class="form-label">Topic</label>
             <select id="controlTopic" class="form-control" th:field="*{topic}">
                 <option th:each="topic : ${topics}" th:value="${topic.id}" th:text="${topic.code} + '-' +${topic.name}"></option>
             </select>
         </div>
+
         <hr>
         <h5>References</h5>
         <div id="referencesContainer" class="container mb-3">
             <div th:each="ref : *{references}" class="input-group mb-2 reference-row">
-                <input type="text"
-                       name="references"
-                       class="form-control"
-                       th:value="${ref}"
-                       placeholder="e.g., https://mitre-attack.github.io/...">
-                <button type="button"
-                        class="btn btn-outline-danger"
-                        hx-on:click="this.closest('.reference-row').remove()">
-                    Remove
-                </button>
+                <input type="text" name="references" class="form-control" th:value="${ref}">
+                <button type="button" class="btn btn-outline-danger" hx-on:click="this.closest('.reference-row').remove()">Remove</button>
             </div>
         </div>
-
-        <button type="button"
-                class="btn btn-sm btn-secondary"
-                hx-get="/control/fragments/reference-row"
-                hx-target="#referencesContainer"
-                hx-swap="beforeend">
+        <button type="button" class="btn btn-sm btn-secondary" hx-get="/control/fragments/reference-row" hx-target="#referencesContainer" hx-swap="beforeend">
             Add Reference
         </button>
+
         <hr>
         <h5>Technique Coverage</h5>
-        <div id="relationshipListContainer">
+        <div id="coverageContainer">
             <button type="button"
                     th:hx-get="@{/techniqueCoverage/add}"
                     hx-target="#modalHolder"
-                    hx-swap="innerHTML"
-                    hx-vals='js:{arrayLength: getNextCoverageIndex()}'
-                    class="btn btn-sm btn-secondary"
+                    hx-vals='js:{arrayLength: getNextIndex("coverage-")}'
+                    class="btn btn-sm btn-secondary mb-2"
                     data-bs-toggle="modal"
                     data-bs-target="#formModal">
-            Add Technique Coverage
+                Add Technique Coverage
             </button>
             <div id="coverageList">
                 <div th:each="coverage, iter : *{defaultTechniqueCoverage}">
@@ -143,32 +128,30 @@
             </div>
         </div>
         <hr>
-        <div>
-            <button class="btn btn-primary" type="submit">Submit</button>
+        <h5>Relationships</h5>
+        <div id="relationshipContainer">
+            <button type="button"
+                    th:hx-get="@{/controlRelationship/add}"
+                    hx-target="#modalHolder"
+                    hx-vals='js:{arrayLength: getNextIndex("rel-outgoing-")}'
+                    class="btn btn-sm btn-outline-primary mb-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#formModal">
+                <i class="bi bi-plus-circle"></i> Add Relationship
+            </button>
+
+            <div id="relationshipList">
+                <div th:each="rel, iter : *{outgoingRelationships}">
+                    <div th:replace="~{fragments/controlRelationship :: controlRelationshipRow(controlRelationship=${rel}, index=${iter.index}, listName='outgoingRelationships')}"></div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="mt-4">
+            <button class="btn btn-primary btn-lg" type="submit">Save Control</button>
         </div>
     </form>
 </div>
-<script>
-    function getNextCoverageIndex() {
-        // Select all elements where the ID starts with "coverage-"
-        const inputs = document.querySelectorAll('[id^="coverage-"]');
-        let maxIndex = -1;
 
-        inputs.forEach(input => {
-            // Match the digits following "coverage-"
-            const match = input.id.match(/coverage-(\d+)/);
-
-            if (match) {
-                const idx = parseInt(match[1], 10);
-                if (idx > maxIndex) {
-                    maxIndex = idx;
-                }
-            }
-        });
-
-        // Returns the next available index
-        return maxIndex + 1;
-    }
-</script>
 </body>
 </html>

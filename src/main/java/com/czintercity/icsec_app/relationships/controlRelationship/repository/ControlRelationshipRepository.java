@@ -1,0 +1,11 @@
+package com.czintercity.icsec_app.relationships.controlRelationship.repository;
+
+import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationship;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.UUID;
+
+@Repository
+public interface ControlRelationshipRepository extends CrudRepository<ControlRelationship, UUID> {
+}

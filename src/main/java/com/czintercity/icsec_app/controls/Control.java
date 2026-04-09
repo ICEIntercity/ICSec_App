@@ -55,10 +55,10 @@ public class Control {
     @OneToMany(mappedBy = "control")
     private List<DefaultTechniqueCoverage> defaultTechniqueCoverage;
 
-    @OneToMany(mappedBy = "source")
+    @OneToMany(mappedBy = "source", cascade=CascadeType.REMOVE, orphanRemoval = true)
     private List<ControlRelationship> outgoingRelationships;
 
-    @OneToMany(mappedBy = "target")
+    @OneToMany(mappedBy = "target", cascade=CascadeType.REMOVE, orphanRemoval = true)
     private List<ControlRelationship> incomingRelationships;
 
     @Transient
@@ -119,6 +119,16 @@ public class Control {
     public void setReferences(List<String> references) { this.references = references; }
     public void setDefaultTechniqueCoverage(List<DefaultTechniqueCoverage> coverage) { this.defaultTechniqueCoverage = coverage; }
     public void setCustomTechniqueCoverage(List<TechniqueCoverage> coverage) { this.customTechniqueCoverage = coverage; }
+    public void setOutgoingRelationships(List<ControlRelationship> outgoingRelationships) {
+        if(this.outgoingRelationships != null)
+            this.outgoingRelationships.clear();
+        else
+            this.outgoingRelationships = new ArrayList<>();
+
+        if(outgoingRelationships != null) {
+            this.outgoingRelationships.addAll(outgoingRelationships);
+        }
+    }
 
     // Comparison operators
     @Override
