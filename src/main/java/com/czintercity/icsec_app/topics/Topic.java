@@ -4,15 +4,16 @@ import com.czintercity.icsec_app.controls.Control;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
-
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 public class Topic {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @Column(unique = true, nullable = false, updatable = false)
+    private UUID id = UUID.randomUUID();
 
     @Column(unique = true, nullable = false)
     @NotBlank(message="Code must not be empty.")
@@ -43,24 +44,16 @@ public class Topic {
     }
 
     // GETTERS
-    public Long getId() { return this.id; }
+    public UUID getId() { return this.id; }
     public String getCode() { return this.code; }
     public String getName() { return this.name; }
     public String getDescription() { return this.description; }
     public Iterable<Control> getControls() { return this.controls;}
 
-    public void setName(String name) {
-        this.name = name;
-    }
-    public void setCode(String code) {
-        this.code = code;
-    }
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    public void setControls(Set<Control> controls) {
-        this.controls = controls;
-    }
+    public void setId(UUID id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+    public void setCode(String code) { this.code = code; }
+    public void setDescription(String description) { this.description = description; }
 
     protected Topic(){
         this.name = "";

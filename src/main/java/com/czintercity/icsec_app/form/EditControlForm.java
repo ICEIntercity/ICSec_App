@@ -11,10 +11,12 @@ import org.hibernate.validator.constraints.Length;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class EditControlForm {
 
-    private Long controlId;
+    private UUID controlId;
+    private Long displayId;
 
     @NotBlank(message = "Control name must not be empty.")
     @Length(max=255, message = "Control name must be at most 255 characters long.")
@@ -50,17 +52,17 @@ public class EditControlForm {
     }
 
     public String getControlCode() {
-        if (this.topic != null && this.controlId != null) {
-            return this.topic.getCode() + "-" + this.controlId.toString();
+        if (this.topic != null && this.displayId != null) {
+            return this.topic.getCode() + "-" + this.displayId.toString();
         }
         return "NONE";
     }
 
-    public Long getControlId() {
+    public UUID getControlId() {
         return controlId;
     }
 
-    public void setControlId(Long controlId) {
+    public void setControlId(UUID controlId) {
         this.controlId = controlId;
     }
 
@@ -110,5 +112,13 @@ public class EditControlForm {
 
     public void setControlCostIndex(Long costIndex) {
         this.controlCostIndex = costIndex;
+    }
+
+    public Long getDisplayId() {
+        return displayId;
+    }
+
+    public void setDisplayId(Long displayId) {
+        this.displayId = displayId;
     }
 }

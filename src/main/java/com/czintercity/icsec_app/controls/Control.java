@@ -9,15 +9,27 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 public class Control {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @Column(updatable = false, nullable = false)
+    private UUID id = UUID.randomUUID();
+
+    @Generated(event = EventType.INSERT)
+    @Column(
+            insertable = false,
+            updatable = false,
+            columnDefinition = "bigint auto_increment"
+    )
+    private Long displayId;
 
     @Column(nullable = false)
     @NotBlank
@@ -53,7 +65,8 @@ public class Control {
     private List<TechniqueCoverage> customTechniqueCoverage;
 
     // Getters
-    public Long getId() { return this.id; }
+    public UUID getId() { return this.id; }
+    public Long getDisplayId() { return this.displayId; }
     public String getName() { return this.name; }
 
     /**
@@ -61,8 +74,8 @@ public class Control {
      * @return Generated code, or NONE if code can't be generated (Topic or ID is missing)
      */
     public String getCode() {
-        if (this.topic != null && this.id != null) {
-            return this.topic.getCode() + "-" + this.id.toString();
+        if (this.topic != null && this.displayId != null) {
+            return this.topic.getCode() + "-" + this.displayId.toString();
         }
             return "NONE";
     }
@@ -74,6 +87,9 @@ public class Control {
     public List<DefaultTechniqueCoverage> getDefaultTechniqueCoverage() {
         return this.defaultTechniqueCoverage;
     }
+    public List<TechniqueCoverage> getCustomTechniqueCoverage() { return this.customTechniqueCoverage; }
+    public List<ControlRelationship> getOutgoingRelationships() { return this.outgoingRelationships; }
+    public List<ControlRelationship> getIncomingRelationships() { return this.incomingRelationships; }
 
     /**
      * Get technique coverage.
@@ -102,5 +118,18 @@ public class Control {
     public void setCostIndex(Long costIndex) { this.costIndex = costIndex; }
     public void setReferences(List<String> references) { this.references = references; }
     public void setDefaultTechniqueCoverage(List<DefaultTechniqueCoverage> coverage) { this.defaultTechniqueCoverage = coverage; }
+    public void setCustomTechniqueCoverage(List<TechniqueCoverage> coverage) { this.customTechniqueCoverage = coverage; }
+
+    // Comparison operators
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Control)) return false;
+        return this.id.equals(((Control) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
 }
 

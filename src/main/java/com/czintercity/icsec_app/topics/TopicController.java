@@ -12,9 +12,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 public class TopicController {
@@ -40,7 +39,7 @@ public class TopicController {
     }
 
     @GetMapping("/topic/{id}")
-    public String showTopic(@PathVariable Long id, Model model) {
+    public String showTopic(@PathVariable UUID id, Model model) {
         log.trace("Received request to show topic with id {}", id);
         Optional<Topic> topic = topicRepository.findById(id);
         if(topic.isPresent()){
@@ -54,7 +53,7 @@ public class TopicController {
     }
 
     @GetMapping("/topic/edit/{id}")
-    public String editTopic(@PathVariable Long id, Model model) {
+    public String editTopic(@PathVariable UUID id, Model model) {
         log.trace("Received request to edit topic with id {}", id);
         Optional<Topic> topic = topicRepository.findById(id);
         if(topic.isPresent()){
@@ -68,11 +67,18 @@ public class TopicController {
     }
 
     @PostMapping("/topic/edit")
-    public String saveTopic(@Valid @ModelAttribute("topic") Topic topic, BindingResult result, Model model) {
-        log.trace("Saving topic {}", topic);
+    public String saveTopic(@Valid @ModelAttribute("topic") Topic received, BindingResult result, Model model) {
+        log.trace("Saving topic {}", received);
+
         if (!result.hasErrors()) {
-            topicRepository.save(topic);
-            model.addAttribute("formSuccess", "Topic updated successfully.");
+            try {
+                topicRepository.save(received);
+                model.addAttribute("formSuccess", "Topic updated successfully.");
+            }
+            catch (Exception e) {
+                // TODO: Add proper validation
+                model.addAttribute("formError", "Failed to update topic.");
+            }
         } else {
             model.addAttribute("formError", result.getAllErrors());
         }
@@ -80,7 +86,7 @@ public class TopicController {
     }
 
     @DeleteMapping("/topic/delete/{id}")
-    public ResponseEntity<String> deleteTopic(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTopic(@PathVariable UUID id) {
         Optional<Topic> target = topicRepository.findById(id);
 
         if (target.isPresent()) {
@@ -88,12 +94,10 @@ public class TopicController {
 
             Topic toDelete = target.get();
             if (toDelete.getControls() != null && toDelete.getControls().iterator().hasNext()) {
+
+                // Handle the constraint violation
                 log.warn("Attempted to delete Topic ID {} which has assigned controls.", id);
-
-                // 1. Tell HTMX to swap into the alert div instead of the body
                 headers.add("HX-Retarget", "#message-container");
-
-                // 2. Return the error message (as a Bootstrap alert fragment)
                 String errorHtml = "<div class='alert alert-warning'>Cannot delete topic '" +
                         toDelete.getName() + "' because it has assigned controls.</div>";
 

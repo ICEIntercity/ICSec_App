@@ -75,7 +75,7 @@ public class ControlController {
      * @return Rendering of controlView.html (or error 404)
      */
     @GetMapping("/control/{id}")
-    public String showControl(@PathVariable Long id, Model model) {
+    public String showControl(@PathVariable UUID id, Model model) {
         log.trace("ShowControl(id={}) called.", id);
         Optional<Control> control = controlRepository.findById(id);
         if(control.isPresent()){
@@ -88,7 +88,7 @@ public class ControlController {
     }
 
     @GetMapping("/control/edit/{id}")
-    public String editControl(@PathVariable Long id, Model model) {
+    public String editControl(@PathVariable UUID id, Model model) {
         log.trace("EditControl called for id: {}", id);
         Optional<Control> control = controlRepository.findById(id);
         if(control.isPresent()){
@@ -105,7 +105,7 @@ public class ControlController {
     public String saveControl(@Valid @ModelAttribute("controlForm") EditControlForm controlForm, RedirectAttributes redirectAttributes, BindingResult result) {
 
         // Get control id (will be zero if id is not set)
-        Long controlId = controlForm.getControlId() == null ? 0L : controlForm.getControlId();
+        UUID controlId = controlForm.getControlId() == null ? null : controlForm.getControlId();
         log.trace("SaveControl called for id: {}.", controlId);
 
         if(!result.hasErrors()) {
@@ -168,12 +168,17 @@ public class ControlController {
             log.warn("Control with id {} has not been updated due to form validation error.", controlId);
         }
 
-        redirectAttributes.addAttribute("id", controlId);
-        return "redirect:/control/edit/{id}";
+        if(controlId != null) {
+            redirectAttributes.addAttribute("id", controlId);
+            return "redirect:/control/edit/{id}";
+        }
+        else {
+            return "redirect:/control/new";
+        }
     }
 
     @DeleteMapping("control/delete/{id}")
-    public ResponseEntity<Void> deleteControl(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteControl(@PathVariable UUID id) {
         Optional<Control> target = controlRepository.findById(id);
 
         if (target.isPresent()) {
