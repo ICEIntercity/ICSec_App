@@ -1,10 +1,12 @@
 package com.czintercity.icsec_app.relationships.controlRelationship;
 
 import com.czintercity.icsec_app.controls.Control;
+import com.czintercity.icsec_app.relationships.controlRelationship.record.ControlRelationshipVisuals;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.aspectj.asm.internal.Relationship;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -56,6 +58,7 @@ public abstract class ControlRelationship {
     protected abstract String getOutboundName();
 
     public abstract ControlRelationshipType getType();
+    public abstract ControlRelationshipVisuals getVisuals();
 
     public String getDisplayName(Control context) throws IllegalArgumentException {
         if(context == null) {
@@ -76,5 +79,19 @@ public abstract class ControlRelationship {
                         getSource() != null ? getSource().getId() : "null",
                         getTarget() != null ? getTarget().getId() : "null")
         );
+    }
+
+    public Map<String, Object> getGraphProperties(Control context) throws IllegalArgumentException {
+        if(context == null) { throw new IllegalArgumentException("Context cannot be null"); }
+
+        HashMap<String, Object> out = new HashMap<>();
+        ControlRelationshipVisuals visuals = getVisuals();
+
+        out.put("label", getDisplayName(context));
+        out.put("color", visuals.color());
+        out.put("dashed", visuals.dashed());
+        out.put("arrowType", visuals.arrowType());
+
+        return out;
     }
 }

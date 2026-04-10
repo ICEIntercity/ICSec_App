@@ -1,7 +1,9 @@
 package com.czintercity.icsec_app.relationships.controlRelationship;
 
+import com.czintercity.icsec_app.relationships.controlRelationship.record.ControlRelationshipVisuals;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 
 @Entity
 @DiscriminatorValue("SYNERGY")
@@ -25,9 +27,16 @@ public class Synergy extends ControlRelationship {
         return inboundName;
     }
 
+    @Transient
     @Override
     public ControlRelationshipType getType() {
         return ControlRelationshipType.SYNERGY;
+    }
+
+    @Transient
+    @Override
+    public ControlRelationshipVisuals getVisuals() {
+        return new ControlRelationshipVisuals("#198754", true, "to"); // Dashed Green
     }
 
     public Synergy(){
