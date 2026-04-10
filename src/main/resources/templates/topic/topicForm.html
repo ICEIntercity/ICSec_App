@@ -21,6 +21,7 @@
             <textarea id="topicDescription" class="form-control" th:field="*{description}">
             </textarea>
         </div>
+        <input type="hidden" th:field="${topic.id}">
         <button class="btn btn-primary" type="submit">Submit</button>
     </form>
 </div>

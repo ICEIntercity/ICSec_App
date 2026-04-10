@@ -35,8 +35,8 @@ public class AttackController {
         log.info("Reloading MITRE ATT&CK Tactics from hardcoded file...");
         log.debug("Clearing DB...");
 
-        tacticRepository.deleteAll();
         techniqueRepository.deleteAll();
+        tacticRepository.deleteAll();
 
         log.warn("MITRE database cleared.");
         log.info("Loading tactics...");

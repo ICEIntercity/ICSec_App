@@ -2,8 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<div th:fragment="techniqueCoverageModal" class="modal-body" id="relationshipModal" tabindex="-1">
-    <div class="modal-dialog">
+<div th:fragment="techniqueCoverageModal" class="modal-body" id="techniqueCoverageModalContent">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" th:text="${index != null ? 'Edit Technique Coverage' : 'Add Technique Coverage'}"></h1>
@@ -49,7 +48,6 @@
                 </button>
             </div>
         </div>
-    </div>
     <script>
         (function() {
             const rangeInput = document.getElementById('coverageRating');

@@ -1,6 +1,8 @@
 package com.czintercity.icsec_app.form;
 
 import com.czintercity.icsec_app.controls.Control;
+import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationship;
+import com.czintercity.icsec_app.relationships.controlRelationship.dto.ControlRelationshipDTO;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
 import com.czintercity.icsec_app.topics.Topic;
 import jakarta.validation.constraints.Max;
@@ -11,10 +13,12 @@ import org.hibernate.validator.constraints.Length;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class EditControlForm {
 
-    private Long controlId;
+    private UUID controlId;
+    private Long displayId;
 
     @NotBlank(message = "Control name must not be empty.")
     @Length(max=255, message = "Control name must be at most 255 characters long.")
@@ -31,6 +35,7 @@ public class EditControlForm {
     private Topic topic;
     private List<String> references;
     private List<DefaultTechniqueCoverage> defaultTechniqueCoverage;
+    private List<ControlRelationshipDTO> outgoingRelationships;
 
     public EditControlForm() {
         this.controlId = null;
@@ -39,6 +44,7 @@ public class EditControlForm {
         this.topic = null;
         this.references = null;
         this.defaultTechniqueCoverage = new ArrayList<>();
+        this.outgoingRelationships = new ArrayList<>();
     }
     public EditControlForm(Control control){
         this.controlId = control.getId();
@@ -47,68 +53,51 @@ public class EditControlForm {
         this.topic = control.getTopic();
         this.references = new ArrayList<>(control.getReferences());
         this.defaultTechniqueCoverage = new ArrayList<>(control.getDefaultTechniqueCoverage());
+        this.outgoingRelationships = new ArrayList<>();
+
+        for(ControlRelationship rel : control.getOutgoingRelationships()){
+            this.outgoingRelationships.add(new ControlRelationshipDTO(rel));
+        }
     }
 
+    /**
+     * Calculates a control code to display. Analogous to the same method in Control
+     * @return Control code if applicable, or "NONE".
+     */
     public String getControlCode() {
-        if (this.topic != null && this.controlId != null) {
-            return this.topic.getCode() + "-" + this.controlId.toString();
+        if (this.topic != null && this.displayId != null) {
+            return this.topic.getCode() + "-" + this.displayId.toString();
         }
         return "NONE";
     }
 
-    public Long getControlId() {
+    // GETTERS
+    public UUID getControlId() {
         return controlId;
     }
-
-    public void setControlId(Long controlId) {
-        this.controlId = controlId;
-    }
-
     public String getControlName() {
         return controlName;
     }
-
-    public void setControlName(String controlName) {
-        this.controlName = controlName;
-    }
-
     public String getControlDescription() {
         return controlDescription;
     }
-
-    public void setControlDescription(String controlDescription) {
-        this.controlDescription = controlDescription;
-    }
-
-    public Topic getTopic() {
-        return topic;
-    }
-
-    public void setTopic(Topic topic) {
-        this.topic = topic;
-    }
-
-    public List<String> getReferences() {
-        return references;
-    }
-
-    public void setReferences(List<String> references) {
-        this.references = references;
-    }
-
-    public List<DefaultTechniqueCoverage> getDefaultTechniqueCoverage() {
-        return defaultTechniqueCoverage;
-    }
-
-    public void setDefaultTechniqueCoverage(List<DefaultTechniqueCoverage> defaultTechniqueCoverage) {
-        this.defaultTechniqueCoverage = defaultTechniqueCoverage;
-    }
-
     public Long getControlCostIndex() {
         return controlCostIndex;
     }
+    public Long getDisplayId() { return displayId; }
+    public List<DefaultTechniqueCoverage> getDefaultTechniqueCoverage() { return defaultTechniqueCoverage; }
+    public Topic getTopic() { return topic;}
+    public List<String> getReferences() {return references;}
+    public List<ControlRelationshipDTO> getOutgoingRelationships() { return outgoingRelationships; }
 
-    public void setControlCostIndex(Long costIndex) {
-        this.controlCostIndex = costIndex;
-    }
+    // SETTERS
+    public void setControlName(String controlName) { this.controlName = controlName;}
+    public void setReferences(List<String> references) { this.references = references; }
+    public void setTopic(Topic topic) { this.topic = topic; }
+    public void setDefaultTechniqueCoverage(List<DefaultTechniqueCoverage> defaultTechniqueCoverage) { this.defaultTechniqueCoverage = defaultTechniqueCoverage; }
+    public void setControlCostIndex(Long costIndex) { this.controlCostIndex = costIndex; }
+    public void setControlId(UUID controlId) { this.controlId = controlId; }
+    public void setControlDescription(String controlDescription) { this.controlDescription = controlDescription; }
+    public void setDisplayId(Long displayId) { this.displayId = displayId; }
+    public void setOutgoingRelationships(List<ControlRelationshipDTO> relationships) { this.outgoingRelationships = relationships; }
 }

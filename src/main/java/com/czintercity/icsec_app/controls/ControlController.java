@@ -2,14 +2,13 @@ package com.czintercity.icsec_app.controls;
 
 import com.czintercity.icsec_app.attack.TechniqueRepository;
 import com.czintercity.icsec_app.form.EditControlForm;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
+import com.czintercity.icsec_app.relationships.controlRelationship.repository.ControlRelationshipRepository;
+import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipService;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverageRepository;
-import com.czintercity.icsec_app.topics.Topic;
 import com.czintercity.icsec_app.topics.TopicRepository;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,17 +25,17 @@ import java.util.*;
 public class ControlController {
     private static final Logger log = LoggerFactory.getLogger(ControlController.class);
 
-    @Autowired
-    private ControlRepository controlRepository;
+    private final ControlRepository controlRepository;
+    private final TopicRepository topicRepository;
+    private final TechniqueRepository techniqueRepository;
+    private final ControlService controlService;
 
-    @Autowired
-    private TopicRepository topicRepository;
-
-    @Autowired
-    private DefaultTechniqueCoverageRepository defaultTechniqueCoverageRepository;
-
-    @Autowired
-    private TechniqueRepository techniqueRepository;
+    public ControlController(ControlRepository controlRepository, TopicRepository topicRepository, DefaultTechniqueCoverageRepository defaultTechniqueCoverageRepository, TechniqueRepository techniqueRepository, ControlRelationshipRepository controlRelationshipRepository, ControlRelationshipService controlRelationshipService, ControlService controlService) {
+        this.controlRepository = controlRepository;
+        this.topicRepository = topicRepository;
+        this.techniqueRepository = techniqueRepository;
+        this.controlService = controlService;
+    }
 
     /**
      * Shows an overview of all controls to the user - including MITRE coverage.
@@ -75,7 +74,7 @@ public class ControlController {
      * @return Rendering of controlView.html (or error 404)
      */
     @GetMapping("/control/{id}")
-    public String showControl(@PathVariable Long id, Model model) {
+    public String showControl(@PathVariable UUID id, Model model) {
         log.trace("ShowControl(id={}) called.", id);
         Optional<Control> control = controlRepository.findById(id);
         if(control.isPresent()){
@@ -88,7 +87,7 @@ public class ControlController {
     }
 
     @GetMapping("/control/edit/{id}")
-    public String editControl(@PathVariable Long id, Model model) {
+    public String editControl(@PathVariable UUID id, Model model) {
         log.trace("EditControl called for id: {}", id);
         Optional<Control> control = controlRepository.findById(id);
         if(control.isPresent()){
@@ -105,60 +104,17 @@ public class ControlController {
     public String saveControl(@Valid @ModelAttribute("controlForm") EditControlForm controlForm, RedirectAttributes redirectAttributes, BindingResult result) {
 
         // Get control id (will be zero if id is not set)
-        Long controlId = controlForm.getControlId() == null ? 0L : controlForm.getControlId();
+        UUID controlId = controlForm.getControlId();
         log.trace("SaveControl called for id: {}.", controlId);
 
         if(!result.hasErrors()) {
-            Control toSave;
-            log.info("Saving control with id: {}", controlId);
-            // Check if we are saving existing or creating new
-            if(controlForm.getControlId() != null) {
-                Optional<Control> foundControl = controlRepository.findById(controlForm.getControlId());
-                if(foundControl.isPresent()) {
-                    log.debug("Found control with id: {}, populating", foundControl.get().getId());
-                    // Give the existing set
-                    toSave = foundControl.get();
-
-                    // Clear existing coverage (preparing to overwrite)
-                    defaultTechniqueCoverageRepository.deleteAll(defaultTechniqueCoverageRepository.findByControl(toSave));
-                }
-                else {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Control with id " + controlForm.getControlId() + " does not exist.");
-                }
+            try {
+                controlId = controlService.createOrUpdateFromForm(controlForm).getId();
             }
-            else {
-                toSave = new Control();
+            catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", "Unexpected error while saving control.");
+                log.error(e.getMessage(), e);
             }
-
-            // Handle simple params
-            toSave.setName(controlForm.getControlName());
-            toSave.setDescription(controlForm.getControlDescription());
-            toSave.setTopic(controlForm.getTopic());
-            toSave.setCostIndex(controlForm.getControlCostIndex());
-            toSave.setReferences(controlForm.getReferences());
-
-            List<DefaultTechniqueCoverage> techniqueCoverage = new ArrayList<>();
-
-            // Generate an ID (inefficient, but whatever)
-            toSave = controlRepository.save(toSave);
-
-            // Handle controls (We've previously deleted all for this technique)
-            for(DefaultTechniqueCoverage coverage : controlForm.getDefaultTechniqueCoverage()) {
-
-                // Skip empty/deleted rows (we don't need them)
-                if(coverage.isBlank()){
-                    continue;
-                }
-
-                coverage.setControl(toSave);
-                coverage = defaultTechniqueCoverageRepository.save(coverage);
-                techniqueCoverage.add(coverage);
-            }
-            toSave.setDefaultTechniqueCoverage(techniqueCoverage);
-            toSave = controlRepository.save(toSave);
-
-            // set id and success message
-            controlId = toSave.getId();
             redirectAttributes.addFlashAttribute("formSuccess", "Control updated successfully");
             log.info("Control id {} updated successfully.", controlId);
         }
@@ -168,12 +124,17 @@ public class ControlController {
             log.warn("Control with id {} has not been updated due to form validation error.", controlId);
         }
 
-        redirectAttributes.addAttribute("id", controlId);
-        return "redirect:/control/edit/{id}";
+        if(controlId != null) {
+            redirectAttributes.addAttribute("id", controlId);
+            return "redirect:/control/edit/{id}";
+        }
+        else {
+            return "redirect:/control/new";
+        }
     }
 
     @DeleteMapping("control/delete/{id}")
-    public ResponseEntity<Void> deleteControl(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteControl(@PathVariable UUID id) {
         Optional<Control> target = controlRepository.findById(id);
 
         if (target.isPresent()) {

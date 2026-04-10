@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="controlRelationshipModal" id="controlRelationshipModalContent" tabindex="-1">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" th:text="${index != null ? 'Edit Relationship' : 'Add Relationship'}"></h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="relType" class="form-label">Relationship Type</label>
+                <select id="relType" name="type" class="form-control">
+                    <option th:each="type : ${T(com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipType).values()}"
+                            th:if="${type != T(com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipType).UNKNOWN}"
+                            th:value="${type}"
+                            th:text="${type.displayValue}"
+                            th:selected="${type == controlRelationship.type}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="targetControl" class="form-label">Target Control</label>
+                <select id="targetControl" name="targetId" class="form-control">
+                    <option th:each="ctrl : ${controls}"
+                            th:value="${ctrl.id}"
+                            th:text="${ctrl.topic.code} + '-' + ${ctrl.displayId} + ' : ' + ${ctrl.name}"
+                            th:selected="${controlRelationship.targetId != null && ctrl.id == controlRelationship.targetId}">
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button"
+                    class="btn btn-primary"
+                    th:hx-post="@{/controlRelationship/row}"
+                    th:attr="hx-target=${index != null ? '#rel-outgoing-' + index : '#relationshipList'},
+                             hx-swap=${index != null ? 'outerHTML' : 'beforeend'}"
+                    hx-include="#targetControl, #relType"
+                    th:hx-vals="|{&quot;index&quot;: ${index != null ? index : arrayLength}}|"
+                    data-bs-dismiss="modal">
+                Save Relationship
+            </button>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="controlRelationshipRow(controlRelationship, index, listName)"
+     class="card my-2"
+     th:id="'rel-outgoing-' + ${index}"
+     th:attr="data-rel-type=${controlRelationship.type.name()}"> <div class="card-body">
+    <div class="row align-items-center">
+        <div class="col-md-10">
+            <span class="rel-badge me-2" th:text="${controlRelationship.type.displayValue}"></span>
+
+            <strong th:text="${controlRelationship.targetCode}"></strong>
+            <span th:text="' - ' + ${controlRelationship.targetName}"></span>
+
+            <input type="hidden" th:name="|${listName}[${index}].targetId|" th:value="${controlRelationship.targetId}"/>
+            <input type="hidden" th:name="|${listName}[${index}].type|" th:value="${controlRelationship.type}"/>
+        </div>
+
+        <div class="col-md-2 text-end">
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    th:hx-delete="@{/controlRelationship/row}"
+                    th:hx-target="'#rel-outgoing-' + ${index}"
+                    hx-swap="delete"
+                    hx-confirm="Are you sure you want to remove this relationship?">
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+<div th:fragment="network(control)">
+    <div id="relationship-network" style="width: 100%; height: 500px; border: 1px solid #dee2e6; border-radius: 0.375rem; cursor: pointer; background-color: #f8f9fa;"></div>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentId = [[${control.id.toString()}]];
+            const bootstrapFonts = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+
+            function formatLabel(code, name) {
+                return `<b>${code}</b>\n${name}`;
+            }
+
+            const nodes = new vis.DataSet([{
+                id: currentId,
+                label: formatLabel([[${control.topic.code + '-' + control.displayId}]], [[${control.name}]]),
+                shape: 'box',
+                margin: { top: 10, bottom: 10, left: 15, right: 15 },
+                shapeProperties: { borderRadius: 6 },
+                color: {
+                    background: '#0d6efd',
+                    border: '#0a58ca',
+                    highlight: { background: '#0b5ed7', border: '#0a58ca' }
+                },
+                font: {
+                    multi: 'html',
+                    face: bootstrapFonts,
+                    size: 13,
+                    color: '#ffffff',
+                    bold: { color: '#ffffff', size: 15 }
+                },
+                level: 1
+            }]);
+
+            const edges = new vis.DataSet();
+            const relations = [
+                /*[# th:each="rel : ${control.outgoingRelationships}"]*/
+                {
+                    from: currentId,
+                    to: [[${rel.target.id.toString()}]],
+                    targetId: [[${rel.target.id.toString()}]],
+                    targetName: [[${rel.target.name}]],
+                    targetCode: [[${rel.target.topic.code + '-' + rel.target.displayId}]],
+                    props: [[${rel.getGraphProperties(control)}]],
+                    level: 2
+                },
+                /*[/]*/
+                /*[# th:each="rel : ${control.incomingRelationships}"]*/
+                {
+                    from: [[${rel.source.id.toString()}]],
+                    to: currentId,
+                    targetId: [[${rel.source.id.toString()}]],
+                    targetName: [[${rel.source.name}]],
+                    targetCode: [[${rel.source.topic.code + '-' + rel.source.displayId}]],
+                    props: [[${rel.getGraphProperties(control)}]],
+                    level: 0
+                }
+                /*[/]*/
+            ];
+
+            relations.forEach(r => {
+                if (!nodes.get(r.targetId)) {
+                    nodes.add({
+                        id: r.targetId,
+                        label: formatLabel(r.targetCode, r.targetName),
+                        shape: 'box',
+                        margin: { top: 10, bottom: 10, left: 15, right: 15 },
+                        shapeProperties: { borderRadius: 6 },
+                        color: { background: '#ffffff', border: '#dee2e6' },
+                        font: {
+                            multi: 'html',
+                            face: bootstrapFonts,
+                            size: 12,
+                            color: '#212529',
+                            bold: { color: '#0d6efd', size: 14 }
+                        },
+                        level: r.level
+                    });
+                }
+
+                edges.add({
+                    from: r.from,
+                    to: r.to,
+                    label: r.props.label,
+                    color: { color: r.props.color || '#adb5bd', highlight: '#0d6efd' },
+                    arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+                    font: {
+                        face: bootstrapFonts,
+                        size: 11,
+                        color: '#495057',
+                        align: 'horizontal', // Forces labels to stay upright
+                        background: '#f8f9fa', // Matches container background
+                        strokeWidth: 0 // Removes the default text outline for a cleaner look
+                    },
+                    smooth: {
+                        enabled: true,
+                        type: 'cubicBezier',
+                        forceDirection: 'horizontal',
+                        roundness: 0.6
+                    }
+                });
+            });
+
+            const options = {
+                layout: {
+                    hierarchical: {
+                        enabled: true,
+                        direction: 'LR',
+                        sortMethod: 'directed',
+                        levelSeparation: 400, // Slightly more space for horizontal labels
+                        nodeSpacing: 180
+                    }
+                },
+                physics: false,
+                interaction: { hover: true, dragNodes: false }
+            };
+
+            const network = new vis.Network(document.getElementById('relationship-network'), { nodes, edges }, options);
+
+            network.once("stabilized", () => network.fit({ animation: { duration: 800 } }));
+            network.on("click", (p) => p.nodes.length && (window.location.href = `/control/${p.nodes[0]}`));
+            network.on("hoverNode", () => document.getElementById('relationship-network').style.cursor = 'pointer');
+            network.on("blurNode", () => document.getElementById('relationship-network').style.cursor = 'default');
+        });
+    </script>
+</div>
+</body>
+</html>
