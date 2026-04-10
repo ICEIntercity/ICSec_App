@@ -86,7 +86,7 @@
                         th:hx-get="@{/techniqueCoverage/edit}"
                         hx-target="#modalHolder"
                         th:hx-vals="'{&quot;index&quot;: ' + ${index} +
-                                   ', &quot;technique&quot;: ' + ${coverage.technique.id} +
+                                   ', &quot;technique&quot;: &quot;' + ${coverage.technique.id} + '&quot;' +
                                    ', &quot;coverageType&quot;: &quot;' + ${coverage.coverageType} + '&quot;' +
                                    ', &quot;coverageRating&quot;: ' + ${coverage.coverageRating} +
                                    ', &quot;justification&quot;: &quot;' + ${coverage.justification} + '&quot;}'"

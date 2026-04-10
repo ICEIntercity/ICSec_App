@@ -4,8 +4,8 @@ public enum CoverageType {
     DETERRENT("Deterrent"),
     PREVENTATIVE("Preventative"),
     DETECTIVE("Detective"),
-    CORRECTIVE("Corrective"),
     RECOVERY("Recovery"),
+    CONTAINMENT("Containment"),
     UNKNOWN("Unknown");
 
     private final String displayValue;
