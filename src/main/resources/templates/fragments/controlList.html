@@ -8,14 +8,14 @@
                     <h6 class="card-title fw-bold text-truncate my-1" th:text="${control.getName()}"></h6>
                     <p class="card-text small text-muted text-description" th:text="${control.getDescription()}"></p>
                     <div class="my-1">
-                        <span th:each="coverage : ${control.getTechniqueCoverage()}"
-                              class="badge bg-danger font-monospace mx-1"
-                              th:text="${coverage.getTechnique().getMitreId()}"></span>
-                    </div>
-                    <div class="mt-auto">
-                        <hr>
-                        <a th:href="@{/control/{id}(id = ${control.getId()})}"
-                           class="btn btn-sm btn-outline-primary w-100">View Details</a>
+                        <span th:each="coverage, iterStat : ${control.getTechniqueCoverage()}"
+                              th:if="${iterStat.index < 6}" class="badge bg-danger font-monospace mx-1"
+                              th:text="${coverage.getTechnique().getMitreId()}">
+                        </span>
+                        <span th:if="${control.getTechniqueCoverage().size() > 6}"
+                              class="badge bg-dark font-monospace mx-1"
+                              th:text="|+${control.getTechniqueCoverage().size() - 6} more|">
+                        </span>
                     </div>
                 </div>
             </div>

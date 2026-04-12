@@ -31,9 +31,8 @@
   </div>
   <div class="container">
     <p th:text="${control.getDescription()}"/>
-    <hr>
   </div>
-
+  <hr>
   <div class="container">
     <h5>References</h5>
     <p th:if="${#lists.isEmpty(control.getReferences())}" class="text-muted italic">No references.</p>
@@ -41,7 +40,7 @@
       <a th:href="${reference}" th:text="${reference}"/>
     </p>
   </div>
-
+  <hr>
   <div class="container">
     <h5>MITRE ATT&CK Coverage</h5>
     <p th:if="${#lists.isEmpty(control.getTechniqueCoverage())}" class="text-muted italic">No technique coverage.</p>
@@ -64,10 +63,9 @@
       </div>
     </div>
   </div>
-
+  <hr>
   <div class="container mt-5">
     <h5>Control Relationships</h5>
-    <hr>
     <div th:replace="~{fragments/controlRelationship :: network(control=${control})}"></div>
   </div>
 </div>
