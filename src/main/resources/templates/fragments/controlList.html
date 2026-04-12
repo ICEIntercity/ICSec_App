@@ -7,6 +7,7 @@
                     <span class="badge bg-secondary font-monospace my-1" th:text="${control.getCode()}"></span>
                     <h6 class="card-title fw-bold text-truncate my-1" th:text="${control.getName()}"></h6>
                     <p class="card-text small text-muted text-description" th:text="${control.getDescription()}"></p>
+
                     <div class="my-1">
                         <span th:each="coverage, iterStat : ${control.getTechniqueCoverage()}"
                               th:if="${iterStat.index < 6}" class="badge bg-danger font-monospace mx-1"
@@ -16,6 +17,13 @@
                               class="badge bg-dark font-monospace mx-1"
                               th:text="|+${control.getTechniqueCoverage().size() - 6} more|">
                         </span>
+                    </div>
+
+                    <div class="mt-auto pt-3">
+                        <a th:href="@{/control/{id}(id=${control.getId()})}"
+                           class="btn btn-sm btn-outline-primary w-100">
+                            View control
+                        </a>
                     </div>
                 </div>
             </div>
