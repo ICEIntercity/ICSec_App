@@ -100,17 +100,23 @@
                 <button type="button"
                         th:hx-get="@{/techniqueCoverage/edit}"
                         hx-target="#modalHolder"
-                        th:hx-vals="'{&quot;index&quot;: ' + ${index} +
-                                   ', &quot;technique&quot;: &quot;' + ${coverage.technique.id} + '&quot;' +
-                                   ', &quot;coverageType&quot;: &quot;' + ${coverage.coverageType} + '&quot;' +
-                                   ', &quot;coverageRating&quot;: ' + ${coverage.coverageRating} +
-                                   ', &quot;justification&quot;: &quot;' + ${coverage.justification} + '&quot;}'"
+                        th:data-index="${index}"
+                        th:data-technique="${coverage.technique.id}"
+                        th:data-type="${coverage.coverageType}"
+                        th:data-rating="${coverage.coverageRating}"
+                        th:data-justification="${coverage.justification}"
+                        hx-vals='js:{
+                            "index": this.dataset.index,
+                            "technique": this.dataset.technique,
+                            "coverageType": this.dataset.type,
+                            "coverageRating": this.dataset.rating,
+                            "justification": this.dataset.justification
+                        }'
                         class="btn btn-outline-secondary btn-sm"
                         data-bs-toggle="modal"
                         data-bs-target="#formModal">
                     Edit
                 </button>
-
                 <button type="button"
                         th:hx-delete="@{/techniqueCoverage/row}"
                         th:hx-target="'#coverage-' + ${index}"
