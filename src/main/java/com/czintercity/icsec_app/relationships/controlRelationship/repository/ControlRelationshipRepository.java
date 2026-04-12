@@ -1,6 +1,6 @@
 package com.czintercity.icsec_app.relationships.controlRelationship.repository;
 
-import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationship;
+import com.czintercity.icsec_app.relationships.controlRelationship.entity.ControlRelationship;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

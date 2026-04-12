@@ -1,10 +1,12 @@
 package com.czintercity.icsec_app.controls;
 
+import com.czintercity.icsec_app.controls.entity.Control;
+import com.czintercity.icsec_app.controls.repository.ControlRepository;
 import com.czintercity.icsec_app.form.EditControlForm;
 import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipService;
 import com.czintercity.icsec_app.relationships.controlRelationship.repository.ControlRelationshipRepository;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverageRepository;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.repository.DefaultTechniqueCoverageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

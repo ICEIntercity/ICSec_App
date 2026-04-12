@@ -1,11 +1,14 @@
-package com.czintercity.icsec_app.controls;
+package com.czintercity.icsec_app.controls.controller;
 
-import com.czintercity.icsec_app.attack.TechniqueRepository;
+import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
+import com.czintercity.icsec_app.controls.repository.ControlRepository;
+import com.czintercity.icsec_app.controls.ControlService;
+import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.form.EditControlForm;
 import com.czintercity.icsec_app.relationships.controlRelationship.repository.ControlRelationshipRepository;
 import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipService;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverageRepository;
-import com.czintercity.icsec_app.topics.TopicRepository;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.repository.DefaultTechniqueCoverageRepository;
+import com.czintercity.icsec_app.topics.repository.TopicRepository;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

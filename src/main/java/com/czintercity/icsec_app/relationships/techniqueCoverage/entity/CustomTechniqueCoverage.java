@@ -1,12 +1,13 @@
-package com.czintercity.icsec_app.relationships.techniqueCoverage;
+package com.czintercity.icsec_app.relationships.techniqueCoverage.entity;
 
-import com.czintercity.icsec_app.attack.Technique;
-import com.czintercity.icsec_app.controls.Control;
+import com.czintercity.icsec_app.attack.entity.Technique;
+import com.czintercity.icsec_app.controls.entity.Control;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType;
 
 /**
  * A non-persistent version of technique coverage (for custom coverage settings)
  */
-public class CustomTechniqueCoverage implements TechniqueCoverage{
+public class CustomTechniqueCoverage implements TechniqueCoverage {
 
     private Control control;
     private Technique technique;

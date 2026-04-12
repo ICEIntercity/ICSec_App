@@ -1,12 +1,11 @@
 package com.czintercity.icsec_app.form;
 
-import com.czintercity.icsec_app.attack.TechniqueRepository;
-import com.czintercity.icsec_app.controls.Control;
-import com.czintercity.icsec_app.controls.ControlRepository;
+import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
+import com.czintercity.icsec_app.controls.entity.Control;
+import com.czintercity.icsec_app.controls.repository.ControlRepository;
 import com.czintercity.icsec_app.relationships.controlRelationship.*;
 import com.czintercity.icsec_app.relationships.controlRelationship.dto.ControlRelationshipDTO;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,10 +27,9 @@ public class EditControlFormController {
     // Add this to EditControlFormController.java
     @GetMapping("/controlRelationship/add")
     public String newControlRelationshipModal(@RequestParam Integer arrayLength, Model model){
-        // Default to UNKNOWN or a sensible default like DEPENDENCY
         model.addAttribute("controlRelationship", new ControlRelationshipDTO(ControlRelationshipType.DEPENDENCY));
         model.addAttribute("controls", controlRepository.findAll());
-        model.addAttribute("relationshipTypes", ControlRelationshipType.values()); // Add types for the dropdown
+        model.addAttribute("relationshipTypes", ControlRelationshipType.values());
         model.addAttribute("index", null);
         model.addAttribute("arrayLength", arrayLength);
         return "fragments/controlRelationship :: controlRelationshipModal";

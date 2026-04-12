@@ -1,5 +1,7 @@
-package com.czintercity.icsec_app.topics;
+package com.czintercity.icsec_app.topics.controller;
 
+import com.czintercity.icsec_app.topics.repository.TopicRepository;
+import com.czintercity.icsec_app.topics.entity.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

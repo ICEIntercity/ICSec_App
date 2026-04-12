@@ -1,15 +1,14 @@
-package com.czintercity.icsec_app.controls;
+package com.czintercity.icsec_app.controls.entity;
 
-import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationship;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.TechniqueCoverage;
-import com.czintercity.icsec_app.topics.Topic;
+import com.czintercity.icsec_app.relationships.controlRelationship.entity.ControlRelationship;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
+import com.czintercity.icsec_app.topics.entity.Topic;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 

@@ -1,5 +1,9 @@
-package com.czintercity.icsec_app.attack;
+package com.czintercity.icsec_app.attack.controller;
 
+import com.czintercity.icsec_app.attack.entity.Tactic;
+import com.czintercity.icsec_app.attack.entity.Technique;
+import com.czintercity.icsec_app.attack.repository.TacticRepository;
+import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;

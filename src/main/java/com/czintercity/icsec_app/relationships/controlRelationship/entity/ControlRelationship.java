@@ -1,6 +1,7 @@
-package com.czintercity.icsec_app.relationships.controlRelationship;
+package com.czintercity.icsec_app.relationships.controlRelationship.entity;
 
-import com.czintercity.icsec_app.controls.Control;
+import com.czintercity.icsec_app.controls.entity.Control;
+import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipType;
 import com.czintercity.icsec_app.relationships.controlRelationship.record.ControlRelationshipVisuals;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -58,7 +59,11 @@ public abstract class ControlRelationship {
     protected abstract String getOutboundName();
 
     public abstract ControlRelationshipType getType();
-    public abstract ControlRelationshipVisuals getVisuals();
+
+    @Transient
+    public ControlRelationshipVisuals getVisuals() {
+        return new ControlRelationshipVisuals(this.getType().getColor(), false, "to");
+    }
 
     public String getDisplayName(Control context) throws IllegalArgumentException {
         if(context == null) {

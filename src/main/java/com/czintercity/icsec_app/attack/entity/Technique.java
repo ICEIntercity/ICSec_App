@@ -1,4 +1,4 @@
-package com.czintercity.icsec_app.attack;
+package com.czintercity.icsec_app.attack.entity;
 
 import jakarta.persistence.*;
 

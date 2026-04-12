@@ -54,8 +54,10 @@
      th:attr="data-rel-type=${controlRelationship.type.name()}"> <div class="card-body">
     <div class="row align-items-center">
         <div class="col-md-10">
-            <span class="rel-badge me-2" th:text="${controlRelationship.type.displayValue}"></span>
-
+            <span class="rel-badge me-2"
+                  th:text="${controlRelationship.type.displayValue}"
+                  th:style="'background-color: ' + ${controlRelationship.type.color} + '; color: white; padding: 0.25em 0.6em; border-radius: 0.375rem; font-size: 0.75em; font-weight: 700;'">
+            </span>
             <strong th:text="${controlRelationship.targetCode}"></strong>
             <span th:text="' - ' + ${controlRelationship.targetName}"></span>
 
@@ -110,7 +112,7 @@
             }]);
 
             const edges = new vis.DataSet();
-            const relations = [
+            const rawRelations = [
                 /*[# th:each="rel : ${control.outgoingRelationships}"]*/
                 {
                     from: currentId,
@@ -118,7 +120,8 @@
                     targetId: [[${rel.target.id.toString()}]],
                     targetName: [[${rel.target.name}]],
                     targetCode: [[${rel.target.topic.code + '-' + rel.target.displayId}]],
-                    props: [[${rel.getGraphProperties(control)}]],
+                    label: [[${rel.getGraphProperties(control).label}]],
+                    color: [[${rel.getGraphProperties(control).color}]],
                     level: 2
                 },
                 /*[/]*/
@@ -129,51 +132,66 @@
                     targetId: [[${rel.source.id.toString()}]],
                     targetName: [[${rel.source.name}]],
                     targetCode: [[${rel.source.topic.code + '-' + rel.source.displayId}]],
-                    props: [[${rel.getGraphProperties(control)}]],
+                    label: [[${rel.getGraphProperties(control).label}]],
+                    color: [[${rel.getGraphProperties(control).color}]],
                     level: 0
-                }
+                },
                 /*[/]*/
             ];
 
-            relations.forEach(r => {
+            // Group relations by unique FROM-TO pairs to prevent overlap
+            const edgeGroups = {};
+
+            rawRelations.forEach(r => {
+                // Add node if it doesn't exist
                 if (!nodes.get(r.targetId)) {
                     nodes.add({
                         id: r.targetId,
                         label: formatLabel(r.targetCode, r.targetName),
                         shape: 'box',
-                        margin: { top: 10, bottom: 10, left: 15, right: 15 },
+                        margin: 10,
                         shapeProperties: { borderRadius: 6 },
                         color: { background: '#ffffff', border: '#dee2e6' },
-                        font: {
-                            multi: 'html',
-                            face: bootstrapFonts,
-                            size: 12,
-                            color: '#212529',
-                            bold: { color: '#0d6efd', size: 14 }
-                        },
+                        font: { multi: 'html', face: bootstrapFonts, size: 12, color: '#212529', bold: { color: '#0d6efd', size: 14 } },
                         level: r.level
                     });
                 }
 
+                // Create a unique key for the edge
+                const key = `${r.from}-${r.to}`;
+                if (!edgeGroups[key]) {
+                    edgeGroups[key] = {
+                        from: r.from,
+                        to: r.to,
+                        labels: [r.label],
+                        color: r.color || '#adb5bd'
+                    };
+                } else {
+                    // If a relationship already exists between these two, just append the label
+                    edgeGroups[key].labels.push(r.label);
+                }
+            });
+
+            // Add the grouped edges to the dataset
+            Object.values(edgeGroups).forEach(group => {
                 edges.add({
-                    from: r.from,
-                    to: r.to,
-                    label: r.props.label,
-                    color: { color: r.props.color || '#adb5bd', highlight: '#0d6efd' },
+                    from: group.from,
+                    to: group.to,
+                    label: group.labels.join('\n'), // Multi-line label for multiple relationships
+                    color: { color: group.color, highlight: '#0d6efd' },
                     arrows: { to: { enabled: true, scaleFactor: 0.5 } },
                     font: {
                         face: bootstrapFonts,
                         size: 11,
                         color: '#495057',
-                        align: 'horizontal', // Forces labels to stay upright
-                        background: '#f8f9fa', // Matches container background
-                        strokeWidth: 0 // Removes the default text outline for a cleaner look
+                        background: '#f8f9fa',
+                        align: 'horizontal'
                     },
                     smooth: {
                         enabled: true,
                         type: 'cubicBezier',
                         forceDirection: 'horizontal',
-                        roundness: 0.6
+                        roundness: 0.5
                     }
                 });
             });
@@ -184,8 +202,8 @@
                         enabled: true,
                         direction: 'LR',
                         sortMethod: 'directed',
-                        levelSeparation: 400, // Slightly more space for horizontal labels
-                        nodeSpacing: 180
+                        levelSeparation: 500,
+                        nodeSpacing: 250
                     }
                 },
                 physics: false,
@@ -193,11 +211,8 @@
             };
 
             const network = new vis.Network(document.getElementById('relationship-network'), { nodes, edges }, options);
-
             network.once("stabilized", () => network.fit({ animation: { duration: 800 } }));
             network.on("click", (p) => p.nodes.length && (window.location.href = `/control/${p.nodes[0]}`));
-            network.on("hoverNode", () => document.getElementById('relationship-network').style.cursor = 'pointer');
-            network.on("blurNode", () => document.getElementById('relationship-network').style.cursor = 'default');
         });
     </script>
 </div>

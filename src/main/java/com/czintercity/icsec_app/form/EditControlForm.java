@@ -1,10 +1,10 @@
 package com.czintercity.icsec_app.form;
 
-import com.czintercity.icsec_app.controls.Control;
-import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationship;
+import com.czintercity.icsec_app.controls.entity.Control;
+import com.czintercity.icsec_app.relationships.controlRelationship.entity.ControlRelationship;
 import com.czintercity.icsec_app.relationships.controlRelationship.dto.ControlRelationshipDTO;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.DefaultTechniqueCoverage;
-import com.czintercity.icsec_app.topics.Topic;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
+import com.czintercity.icsec_app.topics.entity.Topic;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

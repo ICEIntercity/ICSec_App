@@ -1,11 +1,10 @@
 package com.czintercity.icsec_app.relationships.controlRelationship;
 
-import com.czintercity.icsec_app.controls.Control;
-import com.czintercity.icsec_app.controls.ControlRepository;
+import com.czintercity.icsec_app.controls.entity.Control;
+import com.czintercity.icsec_app.controls.repository.ControlRepository;
 import com.czintercity.icsec_app.relationships.controlRelationship.dto.ControlRelationshipDTO;
-import com.czintercity.icsec_app.relationships.controlRelationship.repository.ControlRelationshipRepository;
-import com.czintercity.icsec_app.relationships.controlRelationship.repository.DependencyRepository;
-import com.czintercity.icsec_app.relationships.controlRelationship.repository.SynergyRepository;
+import com.czintercity.icsec_app.relationships.controlRelationship.entity.*;
+import com.czintercity.icsec_app.relationships.controlRelationship.repository.*;
 import com.czintercity.icsec_app.runtime.exception.DuplicateRelationshipException;
 import com.czintercity.icsec_app.runtime.exception.RecordNotFoundException;
 import org.springframework.stereotype.Service;
@@ -23,12 +22,22 @@ public class ControlRelationshipService {
     private final ControlRelationshipRepository controlRelationshipRepository;
     private final DependencyRepository dependencyRepository;
     private final SynergyRepository synergyRepository;
+    private final SupportRepository supportRepository;
+    private final VerificationRepository verificationRepository;
+    private final EnforcementRepository enforcementRepository;
+    private final CompensationRepository compensationRepository;
+    private final ConflictRepository conflictRepository;
 
-    public ControlRelationshipService(ControlRepository controlRepository, ControlRelationshipRepository controlRelationshipRepository, DependencyRepository dependencyRepository, SynergyRepository synergyRepository) {
+    public ControlRelationshipService(ControlRepository controlRepository, ControlRelationshipRepository controlRelationshipRepository, DependencyRepository dependencyRepository, SynergyRepository synergyRepository, SupportRepository supportRepository, VerificationRepository verificationRepository, EnforcementRepository enforcementRepository, CompensationRepository compensationRepository, ConflictRepository conflictRepository) {
         this.controlRepository = controlRepository;
         this.controlRelationshipRepository = controlRelationshipRepository;
         this.dependencyRepository = dependencyRepository;
         this.synergyRepository = synergyRepository;
+        this.supportRepository = supportRepository;
+        this.verificationRepository = verificationRepository;
+        this.enforcementRepository = enforcementRepository;
+        this.compensationRepository = compensationRepository;
+        this.conflictRepository = conflictRepository;
     }
 
     @Deprecated
@@ -103,6 +112,36 @@ public class ControlRelationshipService {
                         throw new DuplicateRelationshipException("Failed to save relationship: duplicate synergy found.");
                     }
                     toSave = new Synergy();
+                    break;
+                case SUPPORT:
+                    if(supportRepository.existsBySource_IdAndTarget_Id(relationship.getSourceId(), relationship.getTargetId())) {
+                        throw new DuplicateRelationshipException("Failed to save relationship: duplicate support found.");
+                    }
+                    toSave = new Support();
+                    break;
+                case VERIFICATION:
+                    if(verificationRepository.existsBySource_IdAndTarget_Id(relationship.getSourceId(), relationship.getTargetId())){
+                        throw new DuplicateRelationshipException("Failed to save relationship: duplicate verification found.");
+                    }
+                    toSave = new Verification();
+                    break;
+                case ENFORCEMENT:
+                    if(enforcementRepository.existsBySource_IdAndTarget_Id(relationship.getSourceId(), relationship.getTargetId())){
+                        throw new DuplicateRelationshipException("Failed to save relationship: duplicate enforcement found.");
+                    }
+                    toSave = new Enforcement();
+                    break;
+                case COMPENSATION:
+                    if(compensationRepository.existsBySource_IdAndTarget_Id(relationship.getSourceId(), relationship.getTargetId())){
+                        throw new DuplicateRelationshipException("Failed to save relationship: duplicate compensation found.");
+                    }
+                    toSave = new Compensation();
+                    break;
+                case CONFLICT:
+                    if(conflictRepository.existsBySource_IdAndTarget_Id(relationship.getSourceId(), relationship.getTargetId())){
+                        throw new DuplicateRelationshipException("Failed to save relationship: duplicate conflict found.");
+                    }
+                    toSave = new Conflict();
                     break;
                 case UNKNOWN:
                     continue; // Skip blanks

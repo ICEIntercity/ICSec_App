@@ -1,5 +1,6 @@
-package com.czintercity.icsec_app.relationships.controlRelationship;
+package com.czintercity.icsec_app.relationships.controlRelationship.entity;
 
+import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipType;
 import com.czintercity.icsec_app.relationships.controlRelationship.record.ControlRelationshipVisuals;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -31,12 +32,6 @@ public class Synergy extends ControlRelationship {
     @Override
     public ControlRelationshipType getType() {
         return ControlRelationshipType.SYNERGY;
-    }
-
-    @Transient
-    @Override
-    public ControlRelationshipVisuals getVisuals() {
-        return new ControlRelationshipVisuals("#198754", true, "to"); // Dashed Green
     }
 
     public Synergy(){

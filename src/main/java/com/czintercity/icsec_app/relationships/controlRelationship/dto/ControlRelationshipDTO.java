@@ -1,9 +1,7 @@
 package com.czintercity.icsec_app.relationships.controlRelationship.dto;
 
-import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationship;
+import com.czintercity.icsec_app.relationships.controlRelationship.entity.ControlRelationship;
 import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipType;
-import com.czintercity.icsec_app.relationships.controlRelationship.Dependency;
-import com.czintercity.icsec_app.relationships.controlRelationship.Synergy;
 
 import java.util.UUID;
 
@@ -15,6 +13,7 @@ public class ControlRelationshipDTO {
 
     private String targetName;
     private String targetCode;
+
 
     public void setSourceId(UUID sourceId) { this.sourceId = sourceId; }
     public void setTargetId(UUID targetId) { this.targetId = targetId; }
@@ -42,21 +41,11 @@ public class ControlRelationshipDTO {
         this.type = type;
     }
 
-    public ControlRelationshipDTO(ControlRelationship relationship){
+    public ControlRelationshipDTO(ControlRelationship relationship) {
         this.sourceId = relationship.getSource().getId();
         this.targetId = relationship.getTarget().getId();
         this.targetName = relationship.getTarget().getName();
         this.targetCode = relationship.getTarget().getCode();
-
-        switch(relationship.getType()){
-            case SYNERGY:
-                this.type = ControlRelationshipType.SYNERGY;
-                break;
-            case DEPENDENCY:
-                this.type = ControlRelationshipType.DEPENDENCY;
-                break;
-            default:
-                this.type = ControlRelationshipType.UNKNOWN;
-        }
+        this.type = relationship.getType();
     }
 }

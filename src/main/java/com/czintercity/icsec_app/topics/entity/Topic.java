@@ -1,6 +1,6 @@
-package com.czintercity.icsec_app.topics;
+package com.czintercity.icsec_app.topics.entity;
 
-import com.czintercity.icsec_app.controls.Control;
+import com.czintercity.icsec_app.controls.entity.Control;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
@@ -55,7 +55,7 @@ public class Topic {
     public void setCode(String code) { this.code = code; }
     public void setDescription(String description) { this.description = description; }
 
-    protected Topic(){
+    public Topic(){
         this.name = "";
         this.description = "";
         this.code = "";

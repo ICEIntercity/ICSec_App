@@ -1,13 +1,14 @@
-package com.czintercity.icsec_app.relationships.techniqueCoverage;
+package com.czintercity.icsec_app.relationships.techniqueCoverage.entity;
 
-import com.czintercity.icsec_app.attack.Technique;
-import com.czintercity.icsec_app.controls.Control;
+import com.czintercity.icsec_app.attack.entity.Technique;
+import com.czintercity.icsec_app.controls.entity.Control;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-public class DefaultTechniqueCoverage implements TechniqueCoverage{
+public class DefaultTechniqueCoverage implements TechniqueCoverage {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

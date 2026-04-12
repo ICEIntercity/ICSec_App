@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface SynergyRepository extends CrudRepository<Synergy, UUID> {
+public interface EnforcementRepository extends CrudRepository<Synergy, UUID> {
     boolean existsBySource_IdAndTarget_Id(UUID sourceId, UUID targetId);
 }

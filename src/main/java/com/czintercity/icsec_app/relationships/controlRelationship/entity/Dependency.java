@@ -1,6 +1,7 @@
-package com.czintercity.icsec_app.relationships.controlRelationship;
+package com.czintercity.icsec_app.relationships.controlRelationship.entity;
 
 
+import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipType;
 import com.czintercity.icsec_app.relationships.controlRelationship.record.ControlRelationshipVisuals;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -10,9 +11,9 @@ import jakarta.persistence.Transient;
 @DiscriminatorValue("DEPENDENCY")
 public class Dependency extends ControlRelationship {
 
-    private static final String displayName = "dependency";
-    private static final String outboundName = "requires";
-    private static final String inboundName = "required by";
+    private static final String displayName = "Dependency";
+    private static final String outboundName = "Requires";
+    private static final String inboundName = "Required by";
 
     @Override
     public String getDisplayName() {
@@ -33,12 +34,6 @@ public class Dependency extends ControlRelationship {
     @Override
     public ControlRelationshipType getType() {
         return ControlRelationshipType.DEPENDENCY;
-    }
-
-    @Transient
-    @Override
-    public ControlRelationshipVisuals getVisuals() {
-        return new ControlRelationshipVisuals("#dc3545", false, "to");
     }
 
     public Dependency(){

@@ -1,5 +1,6 @@
-package com.czintercity.icsec_app.controls;
+package com.czintercity.icsec_app.controls.repository;
 
+import com.czintercity.icsec_app.controls.entity.Control;
 import org.springframework.data.repository.CrudRepository;
 import java.util.UUID;
 

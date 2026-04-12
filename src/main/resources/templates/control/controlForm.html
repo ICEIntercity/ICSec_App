@@ -141,9 +141,9 @@
             </button>
 
             <div id="relationshipList">
-                <div th:each="rel, iter : *{outgoingRelationships}">
+                <th:block th:each="rel, iter : *{outgoingRelationships}">
                     <div th:replace="~{fragments/controlRelationship :: controlRelationshipRow(controlRelationship=${rel}, index=${iter.index}, listName='outgoingRelationships')}"></div>
-                </div>
+                </th:block>
             </div>
         </div>
         <hr>
