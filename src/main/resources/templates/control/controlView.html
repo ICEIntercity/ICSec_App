@@ -44,8 +44,10 @@
   <div class="container">
     <h5>MITRE ATT&CK Coverage</h5>
     <p th:if="${#lists.isEmpty(control.getTechniqueCoverage())}" class="text-muted italic">No technique coverage.</p>
-    <div th:unless="${#lists.isEmpty(control.getTechniqueCoverage())}" class="row row-cols-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4 py-4">
-      <div class="col" th:each="coverage : ${control.getTechniqueCoverage()}">
+    <div th:unless="${#lists.isEmpty(control.getTechniqueCoverage())}"
+         class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 py-4">
+
+      <div class="col" th:each="coverage, iterStat : ${control.getTechniqueCoverage()}">
         <div class="card h-100 shadow-sm">
           <div class="card-body d-flex flex-column text-start">
             <h6 class="card-title fw-bold text-truncate my-1"
@@ -56,8 +58,22 @@
                   th:text="${coverage.getCoverageType()} + ': ' + ${coverage.getCoverageRating()}"
                   th:data-type="${coverage.getCoverageType()}"
             />
-            <p class="card-text small text-description"
-               th:text="${coverage.getJustification()}"/>
+
+            <div class="mt-2">
+              <button class="btn btn-link btn-sm p-0 text-decoration-none"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      th:attr="data-bs-target='#justification-' + ${iterStat.index}"
+                      aria-expanded="false">
+                View Justification ↓
+              </button>
+            </div>
+
+            <div class="collapse mt-2" th:id="'justification-' + ${iterStat.index}">
+              <div class="card-text small border-top pt-2 text-dark">
+                <p th:text="${coverage.getJustification()}" class="mb-0" style="white-space: pre-wrap;"></p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

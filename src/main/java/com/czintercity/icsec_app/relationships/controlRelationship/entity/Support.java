@@ -36,7 +36,6 @@ public class Support extends ControlRelationship {
     public ControlRelationshipType getType() {
         return ControlRelationshipType.SUPPORT;
     }
-
     public Support(){
         super();
     }

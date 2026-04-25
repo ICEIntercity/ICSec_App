@@ -1,6 +1,5 @@
 .card-text {
     display: -webkit-box;
-    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -11,4 +10,8 @@
 }
 .card:hover {
     transform: translateY(-5px);
+}
+
+.card-overview .card-text {
+    -webkit-line-clamp: 3;
 }
