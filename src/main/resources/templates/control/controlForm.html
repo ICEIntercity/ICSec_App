@@ -59,6 +59,10 @@
         <div class="modal-dialog" id="modalHolder">
         </div>
     </div>
+    <div class="modal fade" id="aiModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-80" id="aiModalHolder">
+        </div>
+    </div>
 
     <form th:action="@{/control/edit}" th:object="${controlForm}" method="post">
         <legend>Edit Control</legend>
@@ -121,11 +125,26 @@
                     data-bs-target="#formModal">
                 Add Technique Coverage
             </button>
+
+            <!-- AI button -->
+            <button type="button"
+                    class="btn btn-sm btn-outline-info mb-2"
+                    th:hx-post="@{/ai/test-render}"
+                    hx-ext="json-enc"
+                    hx-vals='js:{name: document.getElementById("controlName").value, description: document.getElementById("controlDescription").value}'
+                    hx-target="#aiModalHolder"
+                    data-bs-toggle="modal"
+                    data-bs-target="#aiModal"
+                    hx-on::before-request="document.getElementById('aiModalHolder').innerHTML = document.getElementById('aiLoadingTemplate').innerHTML">
+                <i class="bi bi-robot"></i> Generate coverage using AI
+            </button>
+
             <div id="coverageList">
                 <div th:each="coverage, iter : *{defaultTechniqueCoverage}">
                     <div th:replace="~{fragments/techniqueCoverage :: techniqueCoverageRow(coverage=${coverage}, index=${iter.index})}"></div>
                 </div>
             </div>
+            <div th:replace="~{fragments/ai :: aiLoadingTemplate}"></div>
         </div>
         <hr>
         <h5>Relationships</h5>

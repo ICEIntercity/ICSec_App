@@ -1,0 +1,258 @@
+[
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Firewalls cannot detect AiTM attacks because they operate at points after the attacker has already positioned themselves on-path. AiTM requires privileged network access that allows traffic interception before/after firewall inspection, and firewalls lack visibility into mid-stream traffic modification by positioned attackers.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Firewalls cannot prevent AiTM attacks because attackers who already have privileged network access can position themselves on the network path regardless of firewall rules. Only encryption with certificate pinning and mutual authentication can prevent AiTM, not firewall filtering.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0803",
+    "technique_name": "Block Command Message",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Firewalls can detect command message blocking from unauthorized sources through traffic filtering and may identify anomalous command patterns with protocol-aware implementations. However, they cannot detect sophisticated internal blocking attacks that appear legitimate to the firewall.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0803",
+    "technique_name": "Block Command Message",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Firewalls effectively prevent command message blocking through strict allowlist-based access control, ICS-specific protocol validation, and network segmentation that restricts which sources can inject blocking traffic. However, they cannot stop attackers with legitimate credentials or access to whitelisted sources.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0803",
+    "technique_name": "Block Command Message",
+    "coverage_type": "containment",
+    "coverage_score": 4,
+    "reasoning": "Firewalls contain command message blocking impact through allowlist enforcement and network segmentation that isolates critical control paths. However, attacks from compromised whitelisted sources or those exploiting legitimate operational traffic patterns may still succeed.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0804",
+    "technique_name": "Block Reporting Message",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Firewalls provide minimal detection of reporting message blocking because sophisticated attackers can selectively suppress messages while maintaining connection state through allowed protocols. Detection primarily occurs only if attackers use obvious patterns or block all traffic.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0804",
+    "technique_name": "Block Reporting Message",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Firewalls cannot effectively prevent reporting message blocking by attackers who have achieved internal network access. They lack application-layer inspection capabilities to identify selective message suppression within allowed traffic flows.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0804",
+    "technique_name": "Block Reporting Message",
+    "coverage_type": "containment",
+    "coverage_score": 2,
+    "reasoning": "Firewalls provide limited containment against reporting message blocking, reducing impact primarily through network segmentation. However, once an attacker is positioned within a firewall zone, the control offers minimal protection against selective telemetry suppression.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0814",
+    "technique_name": "Denial of Service",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Firewalls can detect volumetric DoS attacks through rate limiting and traffic volume analysis, particularly with stateful and protocol-aware implementations. However, they miss sophisticated application-level DoS attacks and low-and-slow attacks that conform to allowed traffic patterns.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0814",
+    "technique_name": "Denial of Service",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Firewalls provide limited DoS prevention because they cannot prevent legitimate-looking but excessive traffic from internal sources or application-level attacks using valid protocol syntax. Most ICS DoS vectors fall outside basic firewall rate-limiting capabilities.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Firewalls cannot detect the Commonly Used Port technique because it deliberately exploits normally allowlisted ports. By definition, traffic over these ports (80, 443, 53) appears legitimate and blends with normal activity, making detection impossible without deeper protocol inspection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Firewalls struggle to prevent the Commonly Used Port technique because the control points (common ports) are intentionally allowlisted for legitimate business purposes. Without very restrictive allowlists of specific destinations, firewalls cannot distinguish malicious from legitimate traffic on these ports.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0884",
+    "technique_name": "Connection Proxy",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Firewalls can detect connection proxies through analysis of unusual traffic patterns involving intermediary systems and unexpected outbound connections. However, sophisticated attackers can tunnel proxy traffic through legitimate protocols and ports, making detection difficult.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0884",
+    "technique_name": "Connection Proxy",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Firewalls provide moderate prevention of proxy attacks through strict allowlist-based rules and network segmentation, but cannot prevent proxies established over legitimately-allowed protocols or through intentionally-permitted peer-to-peer connections.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0866",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Firewalls provide limited detection of remote service exploitation because they cannot identify zero-day vulnerabilities or detect exploitation occurring within allowed traffic channels. They effectively block only direct connection attempts to obviously vulnerable services.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0866",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Firewalls provide moderate prevention through network segmentation and access controls that restrict which systems can reach vulnerable services. However, they cannot prevent exploitation of vulnerabilities in legitimately-allowed services or lateral movement within segmented zones.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0822",
+    "technique_name": "External Remote Services",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Firewalls effectively detect unauthorized external access attempts to remote services through access control enforcement. However, they cannot detect credential misuse or lateral movement once remote access is established through legitimate channels.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0822",
+    "technique_name": "External Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Firewalls can prevent external unauthorized access to remote services through strict allowlisting of external sources. However, they cannot prevent the technique if remote services are intentionally exposed for legitimate business purposes or if attackers possess valid credentials.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0819",
+    "technique_name": "Exploit Public-Facing Application",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Firewalls provide minimal detection of public-facing application exploits because they lack application-layer vulnerability detection. Zero-day exploits using legitimate protocols and ports bypass firewall inspection capabilities.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0819",
+    "technique_name": "Exploit Public-Facing Application",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Firewalls provide limited prevention of public-facing application exploitation. They can restrict access through network segmentation but cannot prevent exploitation of zero-day or known vulnerabilities within applications using legitimate protocols and ports.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "detective",
+    "coverage_score": 4,
+    "reasoning": "Firewalls effectively detect and block unauthorized internet access to industrial devices through restrictive allowlist-based rules and network segmentation. However, devices intentionally exposed for remote access or those using encrypted communications may be harder to distinguish.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Firewalls strongly prevent internet device exposure through network segmentation, blocking inbound connections from untrusted sources, and explicit allowlist policies. However, misconfiguration, legacy access policies, or zero-day firewall vulnerabilities may leave some devices exposed.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Firewalls cannot detect network sniffing because it is a passive reconnaissance technique where attackers already on a network segment use packet capture tools. Firewalls only control traffic crossing boundaries, not local segment sniffing.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Firewalls cannot prevent network sniffing because attackers already on a network segment can place their interface in promiscuous mode regardless of firewall rules. Only network segmentation marginallycomplicates the attack by limiting which segments an attacker can access.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Firewalls cannot reliably detect C2 over standard application layer protocols because malicious traffic appears identical to legitimate traffic on allowed ports. Attackers can tunnel commands within HTTP, HTTPS, or OPC to evade detection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Firewalls provide moderate prevention through allowlist enforcement of ports and protocols, but cannot prevent C2 over legitimately-allowed standard protocols. Attackers can tunnel malicious commands within approved application layer traffic.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Firewalls provide moderate detection of remote service exploitation through access control enforcement and segmentation between network zones. However, they cannot detect lateral movement or credential misuse once remote sessions are established through allowed channels.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Firewalls strongly prevent remote service-based lateral movement through strict access controls and network segmentation that restricts which systems can reach remote service ports. However, misconfigurations or exploitation of legitimately-allowed services may still succeed.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0855",
+    "technique_name": "Unauthorized Command Message",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Firewalls provide limited detection of unauthorized command messages because they operate at network layers and cannot deeply inspect ICS command content. Attackers with legitimate network access can send unauthorized commands through allowed traffic flows.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0855",
+    "technique_name": "Unauthorized Command Message",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Firewalls cannot effectively prevent unauthorized command messages because they cannot validate command semantic correctness or logical appropriateness. Once traffic is allowed through the firewall, any commands using allowed protocols can pass regardless of authorization.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Spoof Reporting Message",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Firewalls cannot detect spoofed reporting messages because they operate at network and transport layers and lack application-layer message authentication capabilities. Spoofed messages from authorized sources or segments appear legitimate to firewalls.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Spoof Reporting Message",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Firewalls cannot prevent spoofed reporting messages because they cannot validate message authenticity or integrity at the application layer. Attackers with network access can generate fake telemetry data that conforms to firewall rules.",
+    "overridden": false
+  }
+]

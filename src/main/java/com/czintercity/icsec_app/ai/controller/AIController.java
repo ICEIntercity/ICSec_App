@@ -1,43 +1,89 @@
 package com.czintercity.icsec_app.ai.controller;
 
 import com.czintercity.icsec_app.ai.CoverageAssessmentAgent;
-import com.czintercity.icsec_app.ai.JsonArrayExtractorAgent;
+import com.czintercity.icsec_app.ai.service.AIService;
 import com.czintercity.icsec_app.ai.utils.AIUtils;
-import com.czintercity.icsec_app.attack.entity.Technique;
-import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
 import com.czintercity.icsec_app.controls.entity.Control;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Controller
 public class AIController {
 
     private final CoverageAssessmentAgent coverageAssessmentAgent;
-    private final JsonArrayExtractorAgent jsonArrayExtractorAgent;
-    private final TechniqueRepository techniqueRepository;
-    private final ObjectMapper objectMapper;
+    private final AIService aiService;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public AIController(CoverageAssessmentAgent coverageAssessmentAgent,
-                        JsonArrayExtractorAgent jsonArrayExtractorAgent,
-                        TechniqueRepository techniqueRepository,
-                        ObjectMapper objectMapper) {
+                        AIService aiService) {
         this.coverageAssessmentAgent = coverageAssessmentAgent;
-        this.jsonArrayExtractorAgent = jsonArrayExtractorAgent;
-        this.techniqueRepository = techniqueRepository;
-        this.objectMapper = objectMapper;
+        this.aiService = aiService;
+    }
+
+    /**
+     * Asynchronous endpoint to assess a control's coverage via Ajax.
+     * Takes a Control object, processes it through the AI agent, and returns
+     * a template fragment containing the resulting coverage list.
+     */
+    @PostMapping("/ai/assess-coverage")
+    public String assessControlCoverage(@RequestBody java.util.Map<String, String> payload, Model model) {
+        String name = payload.get("name");
+        String description = payload.get("description");
+
+        // Create a transient control object to pass to existing logic
+        Control control = new Control();
+        control.setName(name);
+        control.setDescription(description);
+
+        log.info("Starting AI assessment from ephemeral control object `{}`", name);
+
+        String agentJson = coverageAssessmentAgent.clank(control);
+        List<DefaultTechniqueCoverage> coverages = extractAndParse(agentJson, control);
+
+        model.addAttribute("coverageList", coverages);
+        model.addAttribute("controlName", name);
+
+        return "fragments/ai :: coverageTable";
+    }
+
+    /**
+     * Test endpoint that loads pre-computed assessment output from
+     * {@code resources/test/assessment_out.json} and renders the coverage
+     * fragment without making any AI calls.
+     */
+    @PostMapping("/ai/test-render")
+    public String testRender(@RequestBody java.util.Map<String, String> payload, Model model) throws IOException {
+        String name = payload.get("name");
+        String description = payload.get("description");
+
+        // Create a transient control object for the parser
+        Control control = new Control();
+        control.setName(name);
+        control.setDescription(description);
+
+        ClassPathResource resource = new ClassPathResource("test/assessment_out.json");
+        String json = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        log.info("Loaded test assessment JSON ({} chars)", json.length());
+
+        List<DefaultTechniqueCoverage> coverages = extractAndParse(json, control);
+
+        model.addAttribute("coverageList", coverages);
+        model.addAttribute("controlName", name);
+
+        return "fragments/ai :: coverageTable";
     }
 
     @GetMapping("/ai/test")
@@ -62,23 +108,7 @@ public class AIController {
         String agentJson = coverageAssessmentAgent.clank(control);
         log.info("Agent raw output: {}", agentJson);
 
-        List<DefaultTechniqueCoverage> coverages;
-
-        // Stage 1: regex extraction
-        Optional<String> regexExtracted = AIUtils.extractJson(agentJson);
-        if (regexExtracted.isPresent()) {
-            log.info("Regex extracted JSON ({} chars)", regexExtracted.get().length());
-            try {
-                coverages = parseAgentOutput(regexExtracted.get(), control);
-            } catch (Exception regexParseEx) {
-                log.warn("Regex-extracted JSON failed to parse, falling back to AI extractor: {}", regexParseEx.getMessage());
-                coverages = aiExtractorFallback(agentJson, control);
-            }
-        } else {
-            log.warn("Regex extraction found no JSON structure, falling back to AI extractor");
-            coverages = aiExtractorFallback(agentJson, control);
-        }
-
+        List<DefaultTechniqueCoverage> coverages = extractAndParse(agentJson, control);
         log.info("Parsed {} coverage entries", coverages.size());
 
         StringBuilder sb = new StringBuilder();
@@ -93,55 +123,18 @@ public class AIController {
         return ResponseEntity.ok(sb.isEmpty() ? agentJson : sb.toString());
     }
 
-    private List<DefaultTechniqueCoverage> aiExtractorFallback(String agentJson, Control control) {
-        String extractedJson = jsonArrayExtractorAgent.clank(agentJson);
-        extractedJson = AIUtils.stripCodeFences(extractedJson); // Get rid of code fences (Claude insists on them for some stupid reason)
-        log.info("AI extractor output: {}", extractedJson);
-        try {
-            return parseAgentOutput(extractedJson, control);
-        } catch (Exception fallbackEx) {
-            log.error("AI extractor fallback also failed. Raw agent output:\n{}", agentJson);
-            throw new IllegalStateException(
-                    "Failed to parse agent output after all extraction attempts. Raw output:\n" + agentJson,
-                    fallbackEx);
-        }
-    }
-
-    private List<DefaultTechniqueCoverage> parseAgentOutput(String json, Control control) throws Exception {
-        List<Map<String, Object>> items = objectMapper.readValue(json, new TypeReference<>() {});
-        List<DefaultTechniqueCoverage> result = new ArrayList<>();
-
-        for (Map<String, Object> item : items) {
-            String mitreId = (String) item.get("technique_id");
-            String coverageTypeStr = (String) item.get("coverage_type");
-            int score = ((Number) item.get("coverage_score")).intValue();
-            String reasoning = (String) item.get("reasoning");
-
-            Technique technique = techniqueRepository.findByMitreId(mitreId).orElse(null);
-            if (technique == null) {
-                log.warn("Technique not found in DB, skipping: {}", mitreId);
-                continue;
-            }
-
-            CoverageType coverageType;
+    private List<DefaultTechniqueCoverage> extractAndParse(String rawJson, Control control) {
+        Optional<String> regexExtracted = AIUtils.extractJson(rawJson);
+        if (regexExtracted.isPresent()) {
             try {
-                coverageType = CoverageType.valueOf(coverageTypeStr.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                log.warn("Unknown coverage type '{}', defaulting to UNKNOWN", coverageTypeStr);
-                coverageType = CoverageType.UNKNOWN;
+                return aiService.parseAssessmentOutput(regexExtracted.get(), control);
+            } catch (Exception e) {
+                log.warn("Regex-extracted JSON failed to parse, falling back to AI extractor: {}", e.getMessage());
+                return aiService.invokeExtractorAgent(rawJson, control);
             }
-
-            DefaultTechniqueCoverage coverage = new DefaultTechniqueCoverage();
-            coverage.setControl(control);
-            coverage.setTechnique(technique);
-            coverage.setCoverageType(coverageType);
-            coverage.setCoverageRating((short) score);
-            coverage.setJustification(reasoning);
-
-            result.add(coverage);
+        } else {
+            log.warn("No JSON found by regex, falling back to AI extractor");
+            return aiService.invokeExtractorAgent(rawJson, control);
         }
-
-        return result;
     }
-
 }
