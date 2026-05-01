@@ -3,7 +3,7 @@ package com.czintercity.icsec_app.ai;
 import com.anthropic.client.AnthropicClient;
 import com.anthropic.models.messages.*;
 import com.czintercity.icsec_app.ai.tools.AgentTool;
-import com.czintercity.icsec_app.ai.tools.PreventativeCoverageTool;
+import com.czintercity.icsec_app.controls.entity.Control;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -15,90 +15,63 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An agent that assesses coverage
+ * An agent that assesses the MITRE ATT&CK for ICS coverage of a security control.
  *
- * <p>Entry point: {@link #run(String)}.
+ * <p>Entry point: {@link #clank(Control)}.
  */
 @Component
 public class CoverageAssessmentAgent {
 
     private static final Logger log = LoggerFactory.getLogger(CoverageAssessmentAgent.class);
 
-    /** Maximum number of agentic turns before we bail out (safety net). */
+    /** Maximum number of agentic turns before termination. */
     private static final int MAX_TURNS = 10;
 
     private static final String SYSTEM_PROMPT =
-            "You are a cybersecurity analyst specialising in ICS/OT security. "
-                    + "You have access to the evaluate_preventative_coverage tool. "
-                    + "When asked to evaluate controls, you MUST call that tool for each evaluation — "
-                    + "do not attempt to answer from memory.";
+            "You are a cybersecurity analyst agent specialising in evaluating the security coverage of controls in a threat-driven fashion, using MITRE ATT&CK for ICS as the reference framework.\n\n"
+                    + "The user will provide a control title and description. Your task is to produce a structured evaluation of how well the control performs against relevant MITRE ATT&CK for ICS techniques, using the tools provided.\n\n"
+                    + "Follow the steps below exactly and in order. Do not skip steps or reorder them.\n\n"
+                    + "---\n\n"
+                    + "## Step 1 — Technique Discovery\n\n"
+                    + "Call `map_control_to_ics_techniques` with `control_title` and `control_description` as provided by the user.\n\n"
+                    + "The tool returns an object with a `candidate_techniques` array. Each element has:\n"
+                    + "- `technique_id`, `technique_title`, `technique_description`\n"
+                    + "- `mapped_categories` — a list of one or more of: \"Detective\", \"Preventative\", \"Deterrent\", \"Containment\", \"Recovery\"\n\n"
+                    + "If `candidate_techniques` is empty, emit `[]` and stop. "
+                    + "Process only the techniques returned by this tool. Do not add, infer, or substitute techniques from your own knowledge.\n\n"
+                    + "---\n\n"
+                    + "## Step 2 — Coverage Evaluation\n\n"
+                    + "For each (technique, category) pair from Step 1, call the corresponding tool by lowercasing the category value and wrapping it as `evaluate_<category>_coverage` (e.g. \"Detective\" → `evaluate_detective_coverage`). Pass `technique_title` as `technique_name`. You may call tools in parallel. Do NOT call a tool for any category not listed for that technique.\n\n"
+                    + "If a tool call fails, treat it as `coverage_rating: 0` (discarded in Step 3).\n\n"
+                    + "---\n\n"
+                    + "## Step 3 — Coverage Verification\n\n"
+                    + "Each coverage tool returns `coverage_rating` (0–5) and `coverage_justification`. For each response, assess whether the rating and justification are accurate given the control and the technique's mechanics in an OT/ICS environment.\n\n"
+                    + "If your assessed score differs by more than 1 point from `coverage_rating`, OR the justification is factually or logically flawed:\n"
+                    + "  → Override `coverage_rating` with your assessed value, replace `coverage_justification` with your own (1–3 sentences, specific to this technique and category), and set `overridden: true`.\n\n"
+                    + "Discard any entry whose final `coverage_rating` is 0.\n\n"
+                    + "---\n\n"
+                    + "## Step 4 — Output\n\n"
+                    + "Emit a single JSON array. Each element:\n\n"
+                    + "{\n"
+                    + "  \"technique_id\": \"string\",    // e.g. \"T0859\"\n"
+                    + "  \"technique_name\": \"string\",  // technique_title from Step 1\n"
+                    + "  \"coverage_type\": \"string\",   // lowercase mapped_categories value\n"
+                    + "  \"coverage_score\": integer,     // final coverage_rating (1–5)\n"
+                    + "  \"reasoning\": \"string\",        // final coverage_justification\n"
+                    + "  \"overridden\": boolean\n"
+                    + "}\n\n"
+                    + "Return ONLY the JSON array. No prose, no markdown fences, no commentary before or after.";
 
-    // -----------------------------------------------------------------------
-    // Placeholder user prompt
-    // -----------------------------------------------------------------------
-
-    /**
-     * Placeholder prompt that provides three complete, valid tool inputs and
-     * forces the agent to invoke the tool for at least the first one.
-     *
-     * <p>Replace or parameterise this at call-sites as needed.
-     */
-    public static final String PLACEHOLDER_PROMPT =
-            "I need you to evaluate the following control–technique pairs using the "
-                    + "evaluate_preventative_coverage tool. "
-                    + "Start by calling the tool immediately for the FIRST pair, then handle the "
-                    + "remaining two pairs.\n\n"
-
-                    + "--- Pair 1 ---\n"
-                    + "Technique ID   : T0859\n"
-                    + "Technique Name : Valid Accounts\n"
-                    + "Technique Desc : Adversaries may obtain and abuse credentials of existing accounts as "
-                    +                   "a means of gaining initial access, persistence, privilege escalation, "
-                    +                   "or defense evasion. Compromised credentials may be used to bypass "
-                    +                   "access controls placed on various resources on systems within the "
-                    +                   "network and may even be used for persistent access to remote systems.\n"
-                    + "Control Name   : Multi-Factor Authentication (MFA)\n"
-                    + "Control Desc   : Require all remote and privileged local access to OT systems to use "
-                    +                   "a second authentication factor (e.g. TOTP, hardware token) in "
-                    +                   "addition to a password.\n\n"
-
-                    + "--- Pair 2 ---\n"
-                    + "Technique ID   : T0814\n"
-                    + "Technique Name : Denial of Service\n"
-                    + "Technique Desc : Adversaries may perform Denial-of-Service (DoS) attacks to degrade "
-                    +                   "or block the availability of targeted resources to users. DoS can "
-                    +                   "target OT networks or devices to disrupt operations in the "
-                    +                   "physical environment.\n"
-                    + "Control Name   : Network Segmentation\n"
-                    + "Control Desc   : Enforce strict Layer-2 and Layer-3 segmentation between IT and OT "
-                    +                   "networks using unidirectional gateways or industrial firewalls with "
-                    +                   "default-deny rule sets. Limit cross-zone traffic to the minimum "
-                    +                   "required for operations.\n\n"
-
-                    + "--- Pair 3 ---\n"
-                    + "Technique ID   : T0862\n"
-                    + "Technique Name : Supply Chain Compromise\n"
-                    + "Technique Desc : Adversaries may perform supply chain compromise to gain access to "
-                    +                   "target systems prior to delivery. Targeting may involve "
-                    +                   "manipulation of hardware, software, or firmware at any step in the "
-                    +                   "supply chain from development through normal distribution "
-                    +                   "channels to the end consumer.\n"
-                    + "Control Name   : Software Bill of Materials (SBOM) and Integrity Verification\n"
-                    + "Control Desc   : Maintain a complete SBOM for all OT software and firmware. Verify "
-                    +                   "cryptographic signatures of updates before deployment and audit "
-                    +                   "third-party components against known-vulnerability databases on a "
-                    +                   "regular schedule.\n\n"
-
-                    + "After all three evaluations, summarise the results in a table.";
+    private static final String USER_PROMPT_TEMPLATE =
+            "Control Title: %s\nControl Description: %s";
 
     // -----------------------------------------------------------------------
     // Fields
     // -----------------------------------------------------------------------
 
     private final AnthropicClient client;
-    private final PreventativeCoverageTool coverageTool;
+    private final List<AgentTool> tools;
     private final ObjectMapper mapper;
-
     private final List<ToolUnion> registeredTools;
 
     // -----------------------------------------------------------------------
@@ -106,11 +79,11 @@ public class CoverageAssessmentAgent {
     // -----------------------------------------------------------------------
 
     public CoverageAssessmentAgent(AnthropicClient client,
-                                   PreventativeCoverageTool coverageTool,
+                                   List<AgentTool> tools,
                                    ObjectMapper mapper) {
-        this.client       = client;
-        this.coverageTool = coverageTool;
-        this.mapper       = mapper;
+        this.client = client;
+        this.tools = tools;
+        this.mapper = mapper;
         this.registeredTools = buildToolList();
     }
 
@@ -119,17 +92,10 @@ public class CoverageAssessmentAgent {
     // -----------------------------------------------------------------------
 
     /**
-     * Runs the agent with {@link #PLACEHOLDER_PROMPT} and prints the final
-     * response to stdout.  Useful for quick smoke-testing.
-     */
-    public String runWithPlaceholder() {
-        return run(PLACEHOLDER_PROMPT);
-    }
-
-    /**
-     * Drives the agentic loop for the supplied {@code userMessage}.
+     * Drives the agentic coverage-assessment loop for the supplied {@link Control}.
      *
      * <ol>
+     *   <li>Builds a user message from the control's name and description.</li>
      *   <li>Sends the message to Claude.</li>
      *   <li>If Claude replies with one or more {@code tool_use} blocks, each
      *       tool is dispatched to the matching {@link AgentTool} and the
@@ -138,14 +104,16 @@ public class CoverageAssessmentAgent {
      *       {@link #MAX_TURNS} is reached.</li>
      * </ol>
      *
-     * @param userMessage the initial user message
-     * @return the final text response from the model
+     * @param control the security control to evaluate
+     * @return the final JSON array response from the model
      */
-    public String run(String userMessage) {
-        log.info("Agent starting. User message length={}", userMessage.length());
+    public String clank(Control control) {
+        String userMessage = String.format(USER_PROMPT_TEMPLATE, control.getName(), control.getDescription());
+        log.info("Agent starting. Control='{}' (id={})", control.getName(), control.getId());
 
-        // Build a mutable conversation history.
         List<MessageParam> history = new ArrayList<>();
+
+        // Add the parameters for the call
         history.add(MessageParam.builder()
                 .role(MessageParam.Role.USER)
                 .content(userMessage)
@@ -161,17 +129,14 @@ public class CoverageAssessmentAgent {
             Message response = callClaude(history);
             log.debug("Stop reason: {}", response.stopReason());
 
-            // Append the assistant turn to history.
             history.add(assistantMessageParam(response));
 
-            // Collect any tool_use blocks in this response.
             List<ToolUseBlock> toolUseBlocks = response.content().stream()
                     .filter(ContentBlock::isToolUse)
                     .map(ContentBlock::asToolUse)
                     .toList();
 
             if (toolUseBlocks.isEmpty()) {
-                // No more tool calls – gather all text blocks and return.
                 finalResponse = response.content().stream()
                         .filter(ContentBlock::isText)
                         .map(b -> b.asText().text())
@@ -180,7 +145,6 @@ public class CoverageAssessmentAgent {
                 break;
             }
 
-            // Dispatch each tool call and collect results.
             List<ToolResultBlockParam> toolResults = new ArrayList<>();
             for (ToolUseBlock toolUse : toolUseBlocks) {
                 log.info("Tool called: {} (id={})", toolUse.name(), toolUse.id());
@@ -194,7 +158,6 @@ public class CoverageAssessmentAgent {
                         .build());
             }
 
-            // Feed all results back as a single user turn.
             history.add(toolResultMessageParam(toolResults));
         }
 
@@ -210,11 +173,10 @@ public class CoverageAssessmentAgent {
     // Private helpers
     // -----------------------------------------------------------------------
 
-    /** Sends the current conversation history to Claude and returns the reply. */
     private Message callClaude(List<MessageParam> history) {
         MessageCreateParams params = MessageCreateParams.builder()
-                .model(Model.CLAUDE_SONNET_4_6)
-                .maxTokens(4096)
+                .model(Model.CLAUDE_HAIKU_4_5)
+                .maxTokens(8192)
                 .system(SYSTEM_PROMPT)
                 .messages(history)
                 .tools(registeredTools)
@@ -223,12 +185,7 @@ public class CoverageAssessmentAgent {
         return client.messages().create(params);
     }
 
-    /**
-     * Converts a {@link Message} to a {@link MessageParam} so it can be
-     * appended to the conversation history.
-     */
     private static MessageParam assistantMessageParam(Message message) {
-        // Serialize each content block back to the param shape Claude expects.
         List<ContentBlockParam> params = message.content().stream()
                 .map(CoverageAssessmentAgent::toContentBlockParam)
                 .toList();
@@ -239,7 +196,6 @@ public class CoverageAssessmentAgent {
                 .build();
     }
 
-    /** Converts a raw {@link ContentBlock} to its {@link ContentBlockParam} equivalent. */
     private static ContentBlockParam toContentBlockParam(ContentBlock block) {
         if (block.isText()) {
             return ContentBlockParam.ofText(
@@ -259,10 +215,9 @@ public class CoverageAssessmentAgent {
         throw new IllegalArgumentException("Unsupported content block type: " + block.getClass());
     }
 
-    /** Wraps a list of tool results into a single user-role {@link MessageParam}. */
     private static MessageParam toolResultMessageParam(List<ToolResultBlockParam> results) {
         List<ContentBlockParam> content = results.stream()
-                .map(r -> ContentBlockParam.ofToolResult(r))
+                .map(ContentBlockParam::ofToolResult)
                 .toList();
 
         return MessageParam.builder()
@@ -271,40 +226,35 @@ public class CoverageAssessmentAgent {
                 .build();
     }
 
-    /**
-     * Routes a {@link ToolUseBlock} to the correct {@link AgentTool} and
-     * executes it.  Currently only {@link PreventativeCoverageTool} is
-     * registered; extend this method when additional tools are added.
-     */
     private AgentTool.ToolResult dispatchTool(ToolUseBlock toolUse) {
         String name = toolUse.name();
+        log.info("Dispatching tool: {} (id={})", name, toolUse.id());
 
-        if (coverageTool.getName().equals(name)) {
-            Map<String, Object> inputMap = toStringObjectMap(toolUse._input());
-            return coverageTool.clank(inputMap);
-        }
-
-        log.warn("Unknown tool requested: {}", name);
-        return AgentTool.ToolResult.error("Unknown tool: " + name);
+        return tools.stream()
+                .filter(t -> t.getName().equals(name))
+                .findFirst()
+                .map(t -> t.clank(toStringObjectMap(toolUse._input())))
+                .orElseGet(() -> {
+                    log.warn("Unknown tool requested: {}", name);
+                    return AgentTool.ToolResult.error("Unknown tool: " + name);
+                });
     }
 
-    /**
-     * Converts the raw tool input (which the SDK exposes as an opaque object)
-     * to a {@code Map<String, Object>} so it can be passed to
-     * {@link AgentTool#clank(Map)}.
-     */
     @SuppressWarnings("unchecked")
     private Map<String, Object> toStringObjectMap(Object rawInput) {
         return mapper.convertValue(rawInput, new TypeReference<Map<String, Object>>() {});
     }
 
-    /** Builds the tool list **/
     private List<ToolUnion> buildToolList() {
-        Tool tool = Tool.builder()
-                .name(coverageTool.getName())
-                .description(coverageTool.getDescription())
-                .inputSchema(coverageTool.getInputSchema())
-                .build();
-        return List.of(ToolUnion.ofTool(tool));
+        List<ToolUnion> toolUnions = new ArrayList<>();
+        for (AgentTool tool : tools) {
+            Tool toolDefinition = Tool.builder()
+                    .name(tool.getName())
+                    .description(tool.getDescription())
+                    .inputSchema(tool.getInputSchema())
+                    .build();
+            toolUnions.add(ToolUnion.ofTool(toolDefinition));
+        }
+        return toolUnions;
     }
 }

@@ -130,18 +130,4 @@ public abstract class AgentTool {
 
     }
 
-    /**
-     * Fixes Claude mistakenly adding code fences.
-     *
-     * @param raw Raw claude response
-     * @return Claude response without code fences.
-     */
-    protected static String stripCodeFences(String raw) {
-        String stripped = raw.strip();
-        // Remove opening fence: ```json or ```
-        stripped = stripped.replaceAll("^```[a-zA-Z]*\\s*", "");
-        // Remove closing fence
-        stripped = stripped.replaceAll("```\\s*$", "");
-        return stripped.strip();
-    }
 }

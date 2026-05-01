@@ -1,8 +1,10 @@
-package com.czintercity.icsec_app.ai.tools;
+package com.czintercity.icsec_app.ai.tools.coverage;
 
 import com.anthropic.client.AnthropicClient;
 import com.anthropic.core.JsonValue;
 import com.anthropic.models.messages.*;
+import com.czintercity.icsec_app.ai.tools.AgentTool;
+import com.czintercity.icsec_app.ai.utils.AIUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -19,26 +21,30 @@ import java.util.Map;
  * {@link #getName()}.
  */
 @Component
-public class PreventativeCoverageTool extends AgentTool {
+public class RecoveryCoverageTool extends AgentTool {
 
-    private static final String TOOL_NAME = "evaluate_preventative_coverage";
+    private static final Model CLAUDE_MODEL = Model.CLAUDE_HAIKU_4_5;
+    private static final String TOOL_NAME = "evaluate_recovery_coverage";
 
     private static final String TOOL_DESCRIPTION =
-            "Evaluates how well a given security control covers prevents the success of a provided MITRE ATT&CK for ICS technique."
+            "Evaluates how well a given security control helps recovering from the impact of a MITRE ATT&CK for ICS technique. "
                     + "Returns a numeric coverage rating (0-5) and a plain-language justification.";
 
 
     private static final String SYSTEM_PROMPT =
             "You are a cybersecurity analyst. "
-                    + "Your task is to evaluate how well a security control prevents the success of a MITRE ATT&CK for ICS technique. "
-                    + "Your evaluation will comprise of a coverage rating and a human-readable text justification for your rating. "
+                    + "Your task is to evaluate how well a security control facilitates the eradication of a threat and the recovery of operations following a MITRE ATT&CK for ICS technique. "
+                    + "Eradication and recovery are to be considered primarily in terms of the speed and completeness of returning to a 'known good' operational state, and secondarily by the removal of attacker persistence. "
+                    + "Your evaluation will assume best-in-class coverage across the ICS environment and comprise of a coverage rating and a human-readable text justification for your rating. "
                     + "The coverage rating can be one of the following:\n"
-                    + "0: The control does not meaningfully prevent the success of the given technique.\n"
-                    + "1: The control may prevent the success of the given technique under specific unlikely circumstances, or make the execution marginally more complicated to an attacker.\n"
-                    + "2: The control is sufficient to prevent the success of the given technique for 25 to 50% of available vectors in a typical OT environment, and is likely to stop an unskilled attacker.\n"
-                    + "3: The control is sufficient to prevent the success of the given technique for 50 to 75% of available vectors in a typical OT environment, and is likely to stop a moderately skilled attacker and/or the majority of automated exploitation..\n"
-                    + "4: The control is sufficient to prevent the success of the given technique for 75 to 90% of available vectors in a typical OT environment, and is likely to stop a skilled and determined attacker.\n"
-                    + "5: The control fully prevents the success of the given technique except in edge cases and/or under unforeseen circumstances.\n"
+                    + "0: The control provides no meaningful assistance in eradicating the threat or recovering operational functions.\n"
+                    + "1: The control offers minimal assistance in recovery under unlikely circumstances, or slightly simplifies the manual eradication process for an analyst.\n"
+                    + "2: The control is sufficient to reduce the time to recovery or effort of eradication by 25 to 50% in a typical OT environment.\n"
+                    + "3: The control is sufficient to reduce the time to recovery or effort of eradication by 50 to 75% in a typical OT environment.\n"
+                    + "4: The control is sufficient to reduce the time to recovery or effort of eradication by 75 to 90% in a typical OT environment.\n"
+                    + "5: The control enables near-instantaneous restoration of operations and automated removal of the threat, except in extreme edge cases.\n"
+                    + "If the control does not address this technique in any meaningful way, assign a rating of 0.\n"
+                    + "The coverage_justification must explain your reasoning: describe which specific aspects of the control do or do not address the technique, and why you assigned the given rating.\n"
                     + "Respond ONLY with a JSON object matching this schema: "
                     + "{ \"coverage_rating\": <integer 0-5>, \"coverage_justification\": <string> }. "
                     + "Do not include any other text.";
@@ -51,7 +57,7 @@ public class PreventativeCoverageTool extends AgentTool {
                     + "Control Name   : %s\n"
                     + "Control Desc   : %s";
 
-    public PreventativeCoverageTool(AnthropicClient anthropicClient, ObjectMapper mapper) {
+    public RecoveryCoverageTool(AnthropicClient anthropicClient, ObjectMapper mapper) {
         this.anthropicClient = anthropicClient;
         this.mapper = mapper;
     }
@@ -191,8 +197,8 @@ public class PreventativeCoverageTool extends AgentTool {
         );
 
         MessageCreateParams params = MessageCreateParams.builder()
-                .model(Model.CLAUDE_SONNET_4_6)
-                .maxTokens(4096)
+                .model(CLAUDE_MODEL)
+                .maxTokens(1024)
                 .system(SYSTEM_PROMPT)
                 .addUserMessage(userMessage)
                 .build();
@@ -213,6 +219,6 @@ public class PreventativeCoverageTool extends AgentTool {
             throw new IllegalStateException("No text content in Claude response");
         }
 
-        return mapper.readValue(stripCodeFences(rawJson), CoverageOutput.class);
+        return mapper.readValue(AIUtils.stripCodeFences(rawJson), CoverageOutput.class);
     }
 }
