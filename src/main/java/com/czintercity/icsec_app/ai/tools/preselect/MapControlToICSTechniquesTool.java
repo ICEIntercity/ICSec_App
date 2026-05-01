@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -46,6 +47,7 @@ public class MapControlToICSTechniquesTool extends AgentTool {
 
     private final TechniqueRepository techniqueRepository;
     private static final Logger log = LoggerFactory.getLogger(MapControlToICSTechniquesTool.class);
+    private static final Logger llmLog = LoggerFactory.getLogger("llm");
 
     private static final String TOOL_NAME = "map_control_to_ics_techniques";
 
@@ -158,17 +160,24 @@ public class MapControlToICSTechniquesTool extends AgentTool {
      */
     @Override
     public ToolResult clank(Map<String, Object> input) {
+        MDC.put("llm_component", TOOL_NAME);
         try {
             MappingInput mappingInput = new MappingInput();
             mappingInput.controlTitle = requireString(input, "control_title");
             mappingInput.controlDescription = requireString(input, "control_description");
 
             log.info("Mapping Control Title: " + mappingInput.controlTitle);
+            llmLog.info("INPUT  control_title={}", mappingInput.controlTitle);
 
             MappingResponse output = callClaude(mappingInput);
-            return ToolResult.ok(mapper.writeValueAsString(output));
+            ToolResult result = ToolResult.ok(mapper.writeValueAsString(output));
+            llmLog.info("OUTPUT {}", result.getContent());
+            return result;
         } catch (Exception e) {
+            llmLog.warn("ERROR  {}", e.getMessage());
             return ToolResult.error("Mapping failed: " + e.getMessage());
+        } finally {
+            MDC.remove("llm_component");
         }
     }
 

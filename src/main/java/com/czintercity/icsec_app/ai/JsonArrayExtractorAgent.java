@@ -4,6 +4,7 @@ import com.anthropic.client.AnthropicClient;
 import com.anthropic.models.messages.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Component;
 public class JsonArrayExtractorAgent {
 
     private static final Logger log = LoggerFactory.getLogger(JsonArrayExtractorAgent.class);
+    private static final Logger llmLog = LoggerFactory.getLogger("llm");
+    private static final String LOG_COMPONENT = "json_array_extractor_agent";
 
     private static final String SYSTEM_PROMPT =
             "You will receive text that contains a JSON array somewhere within it. "
@@ -37,23 +40,30 @@ public class JsonArrayExtractorAgent {
      * @return the bare JSON array string, or {@code []} if none was found
      */
     public String clank(String rawInput) {
-        log.debug("Extracting JSON array from input ({} chars)", rawInput.length());
+        MDC.put("llm_component", LOG_COMPONENT);
+        try {
+            llmLog.info("INPUT  {}", rawInput);
+            log.debug("Extracting JSON array from input ({} chars)", rawInput.length());
 
-        MessageCreateParams params = MessageCreateParams.builder()
-                .model(Model.CLAUDE_HAIKU_4_5)
-                .maxTokens(8192)
-                .system(SYSTEM_PROMPT)
-                .addUserMessage(rawInput)
-                .build();
+            MessageCreateParams params = MessageCreateParams.builder()
+                    .model(Model.CLAUDE_HAIKU_4_5)
+                    .maxTokens(8192)
+                    .system(SYSTEM_PROMPT)
+                    .addUserMessage(rawInput)
+                    .build();
 
-        Message response = client.messages().create(params);
+            Message response = client.messages().create(params);
 
-        String result = response.content().stream()
-                .filter(ContentBlock::isText)
-                .map(b -> b.asText().text())
-                .reduce("", String::concat);
+            String result = response.content().stream()
+                    .filter(ContentBlock::isText)
+                    .map(b -> b.asText().text())
+                    .reduce("", String::concat);
 
-        log.debug("Extraction complete ({} chars)", result.length());
-        return result;
+            log.debug("Extraction complete ({} chars)", result.length());
+            llmLog.info("OUTPUT {}", result);
+            return result;
+        } finally {
+            MDC.remove("llm_component");
+        }
     }
 }

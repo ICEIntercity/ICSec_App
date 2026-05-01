@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ import java.util.Map;
 public class CoverageAssessmentAgent {
 
     private static final Logger log = LoggerFactory.getLogger(CoverageAssessmentAgent.class);
+    private static final Logger llmLog = LoggerFactory.getLogger("llm");
+    private static final String LOG_COMPONENT = "coverage_assessment_agent";
 
     /** Maximum number of agentic turns before termination. */
     private static final int MAX_TURNS = 10;
@@ -108,6 +111,9 @@ public class CoverageAssessmentAgent {
      * @return the final JSON array response from the model
      */
     public String clank(Control control) {
+        MDC.put("llm_component", LOG_COMPONENT);
+        llmLog.info("INPUT  control='{}' (id={})", control.getName(), control.getId());
+        try {
         String userMessage = String.format(USER_PROMPT_TEMPLATE, control.getName(), control.getDescription());
         log.info("Agent starting. Control='{}' (id={})", control.getName(), control.getId());
 
@@ -166,7 +172,11 @@ public class CoverageAssessmentAgent {
             finalResponse = "[Agent reached maximum turn limit without completing]";
         }
 
+        llmLog.info("OUTPUT {}", finalResponse);
         return finalResponse;
+        } finally {
+            MDC.remove("llm_component");
+        }
     }
 
     // -----------------------------------------------------------------------

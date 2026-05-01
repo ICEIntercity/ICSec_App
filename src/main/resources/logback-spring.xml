@@ -1,26 +1,28 @@
 <configuration>
 
-    <!-- Keep the default console appender behaviour -->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
-    <!-- Dedicated file appender for LLM tool output -->
-    <appender name="LLM_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/llm-output.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/llm-output.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
+    <!-- Creates one log file per LLM component, discriminated by MDC key 'llm_component' -->
+    <appender name="LLM_SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>llm_component</key>
+            <defaultValue>unknown</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="LLM_FILE_${llm_component}" class="ch.qos.logback.core.FileAppender">
+                <file>log/llm/${llm_component}.log</file>
+                <append>true</append>
+                <encoder>
+                    <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level - %msg%n</pattern>
+                </encoder>
+            </appender>
+        </sift>
     </appender>
 
-    <!-- Route this specific class to the dedicated file only -->
-    <logger name="com.czintercity.icsec_app.ai.tools"
-            level="INFO"
-            additivity="true">
-        <appender-ref ref="LLM_FILE"/>
+    <!-- llm.* loggers go exclusively to their per-component file -->
+    <logger name="llm" level="INFO" additivity="false">
+        <appender-ref ref="LLM_SIFT"/>
     </logger>
 
     <!-- Root logger keeps logging everything else to console as normal -->

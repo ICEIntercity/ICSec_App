@@ -7,6 +7,9 @@ import com.czintercity.icsec_app.ai.tools.AgentTool;
 import com.czintercity.icsec_app.ai.utils.AIUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -81,6 +84,7 @@ public class ContainmentCoverageTool extends AgentTool {
     // Fields
     // -----------------------------------------------------------------------
 
+    private static final Logger llmLog = LoggerFactory.getLogger("llm");
     private final AnthropicClient anthropicClient;
     private final ObjectMapper mapper;
 
@@ -151,14 +155,22 @@ public class ContainmentCoverageTool extends AgentTool {
      */
     @Override
     public ToolResult clank(Map<String, Object> input) {
+        MDC.put("llm_component", TOOL_NAME);
         try {
+            llmLog.info("INPUT  {}", input);
             CoverageInput coverageInput = parseInput(input);
             CoverageOutput output = callClaude(coverageInput);
-            return ToolResult.ok(mapper.writeValueAsString(output));
+            ToolResult result = ToolResult.ok(mapper.writeValueAsString(output));
+            llmLog.info("OUTPUT {}", result.getContent());
+            return result;
         } catch (IllegalArgumentException e) {
+            llmLog.warn("ERROR  invalid input: {}", e.getMessage());
             return ToolResult.error("Invalid input: " + e.getMessage());
         } catch (Exception e) {
+            llmLog.warn("ERROR  tool execution failed: {}", e.getMessage());
             return ToolResult.error("Tool execution failed: " + e.getMessage());
+        } finally {
+            MDC.remove("llm_component");
         }
     }
 
