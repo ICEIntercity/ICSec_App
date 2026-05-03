@@ -129,7 +129,7 @@
             <!-- AI button -->
             <button type="button"
                     class="btn btn-sm btn-outline-info mb-2"
-                    th:hx-post="@{/ai/test-render}"
+                    th:hx-post="@{/ai/assess-coverage}"
                     hx-ext="json-enc"
                     hx-vals='js:{name: document.getElementById("controlName").value, description: document.getElementById("controlDescription").value}'
                     hx-target="#aiModalHolder"
