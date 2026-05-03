@@ -4,7 +4,7 @@ import com.czintercity.icsec_app.ai.CoverageAssessmentAgent;
 import com.czintercity.icsec_app.ai.service.AIService;
 import com.czintercity.icsec_app.ai.utils.AIUtils;
 import com.czintercity.icsec_app.controls.entity.Control;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -51,7 +51,7 @@ public class AIController {
         log.info("Starting AI assessment from ephemeral control object `{}`", name);
 
         String agentJson = coverageAssessmentAgent.clank(control);
-        List<DefaultTechniqueCoverage> coverages = extractAndParse(agentJson, control);
+        List<TechniqueCoverage> coverages = extractAndParse(agentJson, control);
 
         model.addAttribute("coverageList", coverages);
         model.addAttribute("controlName", name);
@@ -78,7 +78,7 @@ public class AIController {
         String json = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         log.info("Loaded test assessment JSON ({} chars)", json.length());
 
-        List<DefaultTechniqueCoverage> coverages = extractAndParse(json, control);
+        List<TechniqueCoverage> coverages = extractAndParse(json, control);
 
         model.addAttribute("coverageList", coverages);
         model.addAttribute("controlName", name);
@@ -108,11 +108,11 @@ public class AIController {
         String agentJson = coverageAssessmentAgent.clank(control);
         log.info("Agent raw output: {}", agentJson);
 
-        List<DefaultTechniqueCoverage> coverages = extractAndParse(agentJson, control);
+        List<TechniqueCoverage> coverages = extractAndParse(agentJson, control);
         log.info("Parsed {} coverage entries", coverages.size());
 
         StringBuilder sb = new StringBuilder();
-        for (DefaultTechniqueCoverage c : coverages) {
+        for (TechniqueCoverage c : coverages) {
             sb.append(c.getTechnique().getMitreId())
               .append(" | ").append(c.getCoverageType())
               .append(" | score=").append(c.getCoverageRating())
@@ -123,7 +123,7 @@ public class AIController {
         return ResponseEntity.ok(sb.isEmpty() ? agentJson : sb.toString());
     }
 
-    private List<DefaultTechniqueCoverage> extractAndParse(String rawJson, Control control) {
+    private List<TechniqueCoverage> extractAndParse(String rawJson, Control control) {
         Optional<String> regexExtracted = AIUtils.extractJson(rawJson);
         if (regexExtracted.isPresent()) {
             try {

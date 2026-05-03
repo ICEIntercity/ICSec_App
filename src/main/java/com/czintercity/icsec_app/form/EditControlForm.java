@@ -3,7 +3,7 @@ package com.czintercity.icsec_app.form;
 import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.relationships.controlRelationship.entity.ControlRelationship;
 import com.czintercity.icsec_app.relationships.controlRelationship.dto.ControlRelationshipDTO;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
 import com.czintercity.icsec_app.topics.entity.Topic;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -34,7 +34,7 @@ public class EditControlForm {
     @NotNull(message = "Topic must be set.")
     private Topic topic;
     private List<String> references;
-    private List<DefaultTechniqueCoverage> defaultTechniqueCoverage;
+    private List<TechniqueCoverage> techniqueCoverage;
     private List<ControlRelationshipDTO> outgoingRelationships;
 
     public EditControlForm() {
@@ -44,7 +44,7 @@ public class EditControlForm {
         this.controlCostIndex = 3L;
         this.topic = null;
         this.references = null;
-        this.defaultTechniqueCoverage = new ArrayList<>();
+        this.techniqueCoverage = new ArrayList<>();
         this.outgoingRelationships = new ArrayList<>();
     }
     public EditControlForm(Control control){
@@ -54,7 +54,7 @@ public class EditControlForm {
         this.controlCostIndex = control.getCostIndex();
         this.topic = control.getTopic();
         this.references = new ArrayList<>(control.getReferences());
-        this.defaultTechniqueCoverage = new ArrayList<>(control.getDefaultTechniqueCoverage());
+        this.techniqueCoverage = new ArrayList<>(control.getTechniqueCoverage());
         this.outgoingRelationships = new ArrayList<>();
 
         for(ControlRelationship rel : control.getOutgoingRelationships()){
@@ -87,7 +87,7 @@ public class EditControlForm {
         return controlCostIndex;
     }
     public Long getDisplayId() { return displayId; }
-    public List<DefaultTechniqueCoverage> getDefaultTechniqueCoverage() { return defaultTechniqueCoverage; }
+    public List<TechniqueCoverage> getTechniqueCoverage() { return techniqueCoverage; }
     public Topic getTopic() { return topic;}
     public List<String> getReferences() {return references;}
     public List<ControlRelationshipDTO> getOutgoingRelationships() { return outgoingRelationships; }
@@ -96,7 +96,7 @@ public class EditControlForm {
     public void setControlName(String controlName) { this.controlName = controlName;}
     public void setReferences(List<String> references) { this.references = references; }
     public void setTopic(Topic topic) { this.topic = topic; }
-    public void setDefaultTechniqueCoverage(List<DefaultTechniqueCoverage> defaultTechniqueCoverage) { this.defaultTechniqueCoverage = defaultTechniqueCoverage; }
+    public void setTechniqueCoverage(List<TechniqueCoverage> techniqueCoverage) { this.techniqueCoverage = techniqueCoverage; }
     public void setControlCostIndex(Long costIndex) { this.controlCostIndex = costIndex; }
     public void setControlId(UUID controlId) { this.controlId = controlId; }
     public void setControlDescription(String controlDescription) { this.controlDescription = controlDescription; }

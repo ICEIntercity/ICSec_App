@@ -5,8 +5,8 @@ import com.czintercity.icsec_app.controls.repository.ControlRepository;
 import com.czintercity.icsec_app.form.EditControlForm;
 import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipService;
 import com.czintercity.icsec_app.relationships.controlRelationship.repository.ControlRelationshipRepository;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.repository.DefaultTechniqueCoverageRepository;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.repository.TechniqueCoverageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,17 +20,15 @@ import java.util.Optional;
 public class ControlService {
     private static final Logger logger = LoggerFactory.getLogger(ControlService.class);
     private final ControlRepository controlRepository;
-    private final DefaultTechniqueCoverageRepository techniqueCoverageRepository;
+    private final TechniqueCoverageRepository techniqueCoverageRepository;
     private final ControlRelationshipService controlRelationshipService;
     private final ControlRelationshipRepository controlRelationshipRepository;
-    private final DefaultTechniqueCoverageRepository defaultTechniqueCoverageRepository;
 
-    public ControlService(ControlRepository controlRepository, DefaultTechniqueCoverageRepository techniqueCoverageRepository, ControlRelationshipService controlRelationshipService, ControlRelationshipRepository controlRelationshipRepository, DefaultTechniqueCoverageRepository defaultTechniqueCoverageRepository) {
+    public ControlService(ControlRepository controlRepository, TechniqueCoverageRepository techniqueCoverageRepository, ControlRelationshipService controlRelationshipService, ControlRelationshipRepository controlRelationshipRepository) {
         this.controlRepository = controlRepository;
         this.techniqueCoverageRepository = techniqueCoverageRepository;
         this.controlRelationshipService = controlRelationshipService;
         this.controlRelationshipRepository = controlRelationshipRepository;
-        this.defaultTechniqueCoverageRepository = defaultTechniqueCoverageRepository;
     }
 
     @Transactional
@@ -44,9 +42,9 @@ public class ControlService {
                 control = existing.get();
 
                 // Clear existing MITRE mapping
-                if(control.getDefaultTechniqueCoverage() != null){
-                    defaultTechniqueCoverageRepository.deleteAll(control.getDefaultTechniqueCoverage());
-                    control.setDefaultTechniqueCoverage(null);
+                if(control.getTechniqueCoverage() != null){
+                    techniqueCoverageRepository.deleteAll(control.getTechniqueCoverage());
+                    control.setTechniqueCoverage(null);
                 }
 
                 // Clear existing outgoing relationships
@@ -75,15 +73,15 @@ public class ControlService {
         control = controlRepository.save(control);
 
         // Handle technique coverage
-        List<DefaultTechniqueCoverage> techniqueCoverage = new ArrayList<>();
-        for(DefaultTechniqueCoverage coverage : form.getDefaultTechniqueCoverage()){
+        List<TechniqueCoverage> techniqueCoverage = new ArrayList<>();
+        for(TechniqueCoverage coverage : form.getTechniqueCoverage()){
             if(coverage.isBlank()) continue; // Skip null entries
 
             coverage.setControl(control);
             coverage = techniqueCoverageRepository.save(coverage);
             techniqueCoverage.add(coverage);
         }
-        control.setDefaultTechniqueCoverage(techniqueCoverage);
+        control.setTechniqueCoverage(techniqueCoverage);
 
         control.setOutgoingRelationships(
                 controlRelationshipService.createOutgoingRelationships(form.getOutgoingRelationships(), control.getId())
