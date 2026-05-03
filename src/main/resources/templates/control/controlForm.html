@@ -87,7 +87,7 @@
 
         <div class="mb-3">
             <label for="controlCostIndex" class="form-label">
-                Cost Index: <span id="costIndexValue" class="fw-bold">3</span>
+                Cost Index: <span id="costIndexValue" class="fw-bold" th:text="*{controlCostIndex}">3</span>
             </label>
             <input type="range" class="form-range" min="0" max="5" step="1" id="controlCostIndex"
                    th:field="*{controlCostIndex}" oninput="updateCostIndex(this.value)">
@@ -104,15 +104,13 @@
         <hr>
         <h5>References</h5>
         <div id="referencesContainer" class="container mb-3">
-            <div th:each="ref : *{references}" class="input-group mb-2 reference-row">
-                <input type="text" name="references" class="form-control" th:value="${ref}">
-                <button type="button" class="btn btn-outline-danger" hx-on:click="this.closest('.reference-row').remove()">Remove</button>
-            </div>
+            <th:block th:each="ref : *{references}">
+                <div th:replace="~{fragments/reference :: referenceRow(refValue=${ref})}"></div>
+            </th:block>
         </div>
-        <button type="button" class="btn btn-sm btn-secondary" hx-get="/control/fragments/reference-row" hx-target="#referencesContainer" hx-swap="beforeend">
+        <button type="button" class="btn btn-sm btn-outline-primary" hx-get="/control/fragments/reference-row" hx-target="#referencesContainer" hx-swap="beforeend">
             Add Reference
         </button>
-
         <hr>
         <h5>Technique Coverage</h5>
         <div id="coverageContainer">
@@ -120,13 +118,12 @@
                     th:hx-get="@{/techniqueCoverage/add}"
                     hx-target="#modalHolder"
                     hx-vals='js:{arrayLength: getNextIndex("coverage-")}'
-                    class="btn btn-sm btn-secondary mb-2"
+                    class="btn btn-sm btn-outline-primary mb-2"
                     data-bs-toggle="modal"
                     data-bs-target="#formModal">
-                Add Technique Coverage
+                <i class="bi bi-plus-circle"></i> Add Technique Coverage
             </button>
 
-            <!-- AI button -->
             <button type="button"
                     class="btn btn-sm btn-outline-info mb-2"
                     th:hx-post="@{/ai/assess-coverage}"
@@ -166,8 +163,18 @@
             </div>
         </div>
         <hr>
-        <div class="mt-4">
+        <div class="mt-4 d-flex gap-2">
             <button class="btn btn-primary btn-lg" type="submit">Save Control</button>
+            <button type="button"
+                    class="btn btn-danger btn-lg"
+                    hx-confirm="This will permanently discard all changes. Do you wish to proceed?"
+                    th:hx-get="@{/control/edit/{id}(id=*{controlId})}"
+                    hx-select="form"
+                    hx-target="closest form"
+                    hx-swap="outerHTML"
+                    hx-on::after-swap="updateCostIndex(document.getElementById('controlCostIndex').value)">
+                Discard Changes
+            </button>
         </div>
     </form>
 </div>

@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-<div th:fragment="referenceRow" class="input-group mb-2 reference-row">
+<div th:fragment="referenceRow(refValue)" class="input-group mb-2 reference-row">
     <input type="text"
            name="references"
            class="form-control"
+           th:value="${refValue}"
            placeholder="Enter reference URL or ID">
     <button type="button"
             class="btn btn-outline-danger"
             hx-on:click="this.closest('.reference-row').remove()">
-        Remove
+        <i class="bi bi-trash"></i> Remove
     </button>
 </div>
 </html>

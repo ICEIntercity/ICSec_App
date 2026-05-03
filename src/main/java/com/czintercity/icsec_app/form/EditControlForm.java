@@ -41,6 +41,7 @@ public class EditControlForm {
         this.controlId = null;
         this.controlName = null;
         this.controlDescription = null;
+        this.controlCostIndex = 3L;
         this.topic = null;
         this.references = null;
         this.defaultTechniqueCoverage = new ArrayList<>();
@@ -50,6 +51,7 @@ public class EditControlForm {
         this.controlId = control.getId();
         this.controlName = control.getName();
         this.controlDescription = control.getDescription();
+        this.controlCostIndex = control.getCostIndex();
         this.topic = control.getTopic();
         this.references = new ArrayList<>(control.getReferences());
         this.defaultTechniqueCoverage = new ArrayList<>(control.getDefaultTechniqueCoverage());
