@@ -5,7 +5,7 @@ import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.controls.repository.ControlRepository;
 import com.czintercity.icsec_app.relationships.controlRelationship.*;
 import com.czintercity.icsec_app.relationships.controlRelationship.dto.ControlRelationshipDTO;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -73,7 +73,7 @@ public class EditControlFormController {
 
     @GetMapping("/techniqueCoverage/add")
     public String newTechniqueCoverageModal(@RequestParam Integer arrayLength, Model model){
-        model.addAttribute("techniqueCoverage", new DefaultTechniqueCoverage());
+        model.addAttribute("techniqueCoverage", new TechniqueCoverage());
         model.addAttribute("techniques", techniqueRepository.findAll());
         model.addAttribute("index", null);
         model.addAttribute("arrayLength", arrayLength);
@@ -81,7 +81,7 @@ public class EditControlFormController {
     }
 
     @GetMapping("/techniqueCoverage/edit")
-    public String updateTechniqueCoverageModal(@RequestParam Integer index, DefaultTechniqueCoverage coverage, Model model){
+    public String updateTechniqueCoverageModal(@RequestParam Integer index, TechniqueCoverage coverage, Model model){
         model.addAttribute("index", index);
         model.addAttribute("techniqueCoverage", coverage);
         model.addAttribute("techniques", techniqueRepository.findAll());
@@ -89,7 +89,7 @@ public class EditControlFormController {
     }
 
     @PostMapping("/techniqueCoverage/row")
-    public String updateTechniqueCoverageRow(@RequestParam(required = false) Integer index, DefaultTechniqueCoverage coverage, Model model){
+    public String updateTechniqueCoverageRow(@RequestParam(required = false) Integer index, TechniqueCoverage coverage, Model model){
         model.addAttribute("index", index);
         model.addAttribute("coverage", coverage);
         return "fragments/techniqueCoverage :: techniqueCoverageRow";

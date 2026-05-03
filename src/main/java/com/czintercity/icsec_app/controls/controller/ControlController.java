@@ -7,7 +7,7 @@ import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.form.EditControlForm;
 import com.czintercity.icsec_app.relationships.controlRelationship.repository.ControlRelationshipRepository;
 import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipService;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.repository.DefaultTechniqueCoverageRepository;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.repository.TechniqueCoverageRepository;
 import com.czintercity.icsec_app.topics.repository.TopicRepository;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class ControlController {
     private final TechniqueRepository techniqueRepository;
     private final ControlService controlService;
 
-    public ControlController(ControlRepository controlRepository, TopicRepository topicRepository, DefaultTechniqueCoverageRepository defaultTechniqueCoverageRepository, TechniqueRepository techniqueRepository, ControlRelationshipRepository controlRelationshipRepository, ControlRelationshipService controlRelationshipService, ControlService controlService) {
+    public ControlController(ControlRepository controlRepository, TopicRepository topicRepository, TechniqueCoverageRepository techniqueCoverageRepository, TechniqueRepository techniqueRepository, ControlRelationshipRepository controlRelationshipRepository, ControlRelationshipService controlRelationshipService, ControlService controlService) {
         this.controlRepository = controlRepository;
         this.topicRepository = topicRepository;
         this.techniqueRepository = techniqueRepository;

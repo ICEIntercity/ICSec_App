@@ -1,7 +1,6 @@
 package com.czintercity.icsec_app.controls.entity;
 
 import com.czintercity.icsec_app.relationships.controlRelationship.entity.ControlRelationship;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
 import com.czintercity.icsec_app.topics.entity.Topic;
 import jakarta.persistence.*;
@@ -52,16 +51,13 @@ public class Control {
     private List<String> references;
 
     @OneToMany(mappedBy = "control")
-    private List<DefaultTechniqueCoverage> defaultTechniqueCoverage;
+    private List<TechniqueCoverage> techniqueCoverage;
 
     @OneToMany(mappedBy = "source", cascade=CascadeType.REMOVE, orphanRemoval = true)
     private List<ControlRelationship> outgoingRelationships;
 
     @OneToMany(mappedBy = "target", cascade=CascadeType.REMOVE, orphanRemoval = true)
     private List<ControlRelationship> incomingRelationships;
-
-    @Transient
-    private List<TechniqueCoverage> customTechniqueCoverage;
 
     // Getters
     public UUID getId() { return this.id; }
@@ -83,32 +79,11 @@ public class Control {
     public Topic getTopic() { return this.topic; }
     public Long getCostIndex() { return this.costIndex; }
     public List<String> getReferences() { return this.references; }
-    public List<DefaultTechniqueCoverage> getDefaultTechniqueCoverage() {
-        return this.defaultTechniqueCoverage;
+    public List<TechniqueCoverage> getTechniqueCoverage() {
+        return this.techniqueCoverage != null ? new ArrayList<>(this.techniqueCoverage) : new ArrayList<>();
     }
-    public List<TechniqueCoverage> getCustomTechniqueCoverage() { return this.customTechniqueCoverage; }
     public List<ControlRelationship> getOutgoingRelationships() { return this.outgoingRelationships; }
     public List<ControlRelationship> getIncomingRelationships() { return this.incomingRelationships; }
-
-    /**
-     * Get technique coverage.
-     * Returns default technique coverage if no override is present, otherwise, it returns custom technique coverage.
-     *
-     * @return Custom Technique Coverage, or default if custom is not present.
-     */
-    public List<TechniqueCoverage> getTechniqueCoverage() {
-        // Override with custom coverage if present (always transient, though...)
-        if (customTechniqueCoverage != null && !customTechniqueCoverage.isEmpty()) {
-            return new ArrayList<>(customTechniqueCoverage);
-        }
-
-        // Otherwise, return default coverage
-        if (defaultTechniqueCoverage != null) {
-            return new ArrayList<>(defaultTechniqueCoverage);
-        }
-
-        return new ArrayList<>(); // Always return a fresh, mutable list
-    }
 
     // Setters
     public void setName(String name) { this.name = name; }
@@ -116,8 +91,7 @@ public class Control {
     public void setTopic(Topic topic) { this.topic = topic; }
     public void setCostIndex(Long costIndex) { this.costIndex = costIndex; }
     public void setReferences(List<String> references) { this.references = references; }
-    public void setDefaultTechniqueCoverage(List<DefaultTechniqueCoverage> coverage) { this.defaultTechniqueCoverage = coverage; }
-    public void setCustomTechniqueCoverage(List<TechniqueCoverage> coverage) { this.customTechniqueCoverage = coverage; }
+    public void setTechniqueCoverage(List<TechniqueCoverage> coverage) { this.techniqueCoverage = coverage; }
     public void setOutgoingRelationships(List<ControlRelationship> outgoingRelationships) {
         if(this.outgoingRelationships != null)
             this.outgoingRelationships.clear();
@@ -141,4 +115,3 @@ public class Control {
         return this.id.hashCode();
     }
 }
-

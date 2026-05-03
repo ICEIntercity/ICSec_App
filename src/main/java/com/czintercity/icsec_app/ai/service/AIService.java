@@ -6,7 +6,7 @@ import com.czintercity.icsec_app.attack.entity.Technique;
 import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
 import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.DefaultTechniqueCoverage;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import java.util.Map;
  * Service layer for AI-driven coverage assessment operations.
  *
  * <p>Provides the logic for converting the raw JSON output produced by
- * {@code CoverageAssessmentAgent} into {@link DefaultTechniqueCoverage} entities,
+ * {@code CoverageAssessmentAgent} into {@link TechniqueCoverage} entities,
  * using a two-stage extraction pipeline:
  *
  * <ol>
@@ -67,11 +67,11 @@ public class AIService {
      *
      * @param agentJson the original raw string returned by the coverage assessment agent
      * @param control   the control being evaluated, used to populate returned entities
-     * @return the parsed list of {@link DefaultTechniqueCoverage} entries
+     * @return the parsed list of {@link TechniqueCoverage} entries
      * @throws IllegalStateException if the AI extractor's output also fails to parse,
      *                               with the original {@code agentJson} included in the message
      */
-    public List<DefaultTechniqueCoverage> invokeExtractorAgent(String agentJson, Control control) {
+    public List<TechniqueCoverage> invokeExtractorAgent(String agentJson, Control control) {
         String extractedJson = jsonArrayExtractorAgent.clank(agentJson);
         extractedJson = AIUtils.stripCodeFences(extractedJson);
         log.info("AI extractor output: {}", extractedJson);
@@ -87,7 +87,7 @@ public class AIService {
 
     /**
      * Deserialises a JSON array string produced by the coverage assessment agent into
-     * a list of {@link DefaultTechniqueCoverage} entities.
+     * a list of {@link TechniqueCoverage} entities.
      *
      * <p>Each element of the array is expected to contain the following fields:
      * <ul>
@@ -103,12 +103,12 @@ public class AIService {
      *
      * @param json    the JSON array string to parse
      * @param control the control to associate with each resulting coverage entity
-     * @return a mutable list of populated {@link DefaultTechniqueCoverage} entities
+     * @return a mutable list of populated {@link TechniqueCoverage} entities
      * @throws Exception if {@code json} cannot be deserialised as a JSON array
      */
-    public List<DefaultTechniqueCoverage> parseAssessmentOutput(String json, Control control) throws Exception {
+    public List<TechniqueCoverage> parseAssessmentOutput(String json, Control control) throws Exception {
         List<Map<String, Object>> items = objectMapper.readValue(json, new TypeReference<>() {});
-        List<DefaultTechniqueCoverage> result = new ArrayList<>();
+        List<TechniqueCoverage> result = new ArrayList<>();
 
         for (Map<String, Object> item : items) {
             String mitreId = (String) item.get("technique_id");
@@ -130,7 +130,7 @@ public class AIService {
                 coverageType = CoverageType.UNKNOWN;
             }
 
-            DefaultTechniqueCoverage coverage = new DefaultTechniqueCoverage();
+            TechniqueCoverage coverage = new TechniqueCoverage();
             coverage.setControl(control);
             coverage.setTechnique(technique);
             coverage.setCoverageType(coverageType);
