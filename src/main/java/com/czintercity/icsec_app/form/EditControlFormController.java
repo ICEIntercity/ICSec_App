@@ -95,19 +95,6 @@ public class EditControlFormController {
         return "fragments/techniqueCoverage :: techniqueCoverageRow";
     }
 
-    // New Delete Endpoint
-    @DeleteMapping("/techniqueCoverage/row")
-    @ResponseBody
-    public String deleteTechniqueCoverageRow() {
-        return "";
-    }
-
-    @DeleteMapping("/controlRelationship/row")
-    @ResponseBody
-    public String deleteControlRelationshipRow() {
-        return "";
-    }
-
     @GetMapping("/control/fragments/reference-row")
     public String getReferenceRow() {
         return "fragments/reference :: referenceRow";
