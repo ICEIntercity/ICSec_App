@@ -49,7 +49,7 @@
 
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3">
                 <div class="col" th:each="controlEntry : ${topicEntry.value}">
-                    <div data-control-card>
+                    <div data-control-card class="h-100">
                         <input type="hidden" data-field="controlId"
                                th:value="${controlEntry.key.getId()}"/>
 
