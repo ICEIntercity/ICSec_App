@@ -5,4 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.UUID;
 
 public interface ControlRepository extends CrudRepository<Control, UUID> {
+    Control getReferenceById(UUID id);
 }

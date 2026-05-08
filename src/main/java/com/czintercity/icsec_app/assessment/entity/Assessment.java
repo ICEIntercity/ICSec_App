@@ -1,13 +1,12 @@
 package com.czintercity.icsec_app.assessment.entity;
 
-import com.czintercity.icsec_app.controls.entity.Control;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.security.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -27,25 +26,29 @@ public class Assessment {
 
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
-    private Timestamp created;
+    private LocalDateTime created;
 
     @UpdateTimestamp
     @Column(nullable = false)
-    private Timestamp updated;
+    private LocalDateTime updated;
 
-    @OneToMany(mappedBy="id", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy="assessment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ControlStatus> controlStatusMapping;
 
     public Assessment() {
         this.id = UUID.randomUUID();
     }
 
+    public Assessment(UUID id) {
+        this.id = id;
+    }
+
     // GETTERS
     public UUID getId() { return this.id; }
     public String getName() { return this.name; }
     public String getDescription() { return this.description; }
-    public Timestamp getCreated() { return this.created; }
-    public Timestamp getUpdated() { return this.updated; }
+    public LocalDateTime getCreated() { return this.created; }
+    public LocalDateTime getUpdated() { return this.updated; }
     public List<ControlStatus> getControlStatusMapping() { return this.controlStatusMapping; }
 
     // SETTERS

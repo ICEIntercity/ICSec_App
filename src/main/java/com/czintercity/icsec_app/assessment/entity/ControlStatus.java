@@ -19,7 +19,8 @@ public class ControlStatus {
     /**
      * The {@link Control} pertaining to this status object
      */
-    @OneToOne(cascade=CascadeType.REMOVE, orphanRemoval = true)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(referencedColumnName = "id", nullable = false)
     private Control control;
 
     /**
@@ -44,15 +45,20 @@ public class ControlStatus {
     @Column(nullable = true)
     private String note;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="assessment", referencedColumnName = "id", nullable = false)
+    private Assessment assessment;
+
     public ControlStatus() {
         this.id = UUID.randomUUID();
     }
 
-    public ControlStatus(Control control, Short coverageMaturity, Short coverageScope) {
+    public ControlStatus(Assessment assessment, Control control, Short coverageMaturity, Short coverageScope) {
         this.id = UUID.randomUUID();
         this.control = control;
         this.coverageMaturity = coverageMaturity;
         this.coverageScope = coverageScope;
+        this.assessment = assessment;
     }
 
     // GETTERS
@@ -61,12 +67,14 @@ public class ControlStatus {
     public Short getCoverageMaturity() { return this.coverageMaturity; }
     public Short getCoverageScope() { return this.coverageScope; }
     public String getNote() { return this.note; }
+    public Assessment getAssessment() { return this.assessment; }
 
     // SETTERS
     public void setControl(Control control) { this.control = control; }
     public void setCoverageMaturity(Short maturity) { this.coverageMaturity = maturity; }
     public void setCoverageScope(Short scale) { this.coverageScope = scale; }
     public void setNote(String note) { this.note = note; }
+    public void setAssessment(Assessment assessment) { this.assessment = assessment; }
 
     public boolean isBlank() {
         return this.coverageMaturity == 0 && this.coverageScope == 0 && (this.note == null || this.note.isEmpty());
