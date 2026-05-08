@@ -1,4 +1,4 @@
-package com.czintercity.icsec_app.form;
+package com.czintercity.icsec_app.controls.form;
 
 import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.relationships.controlRelationship.entity.ControlRelationship;

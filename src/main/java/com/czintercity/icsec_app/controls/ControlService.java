@@ -2,7 +2,7 @@ package com.czintercity.icsec_app.controls;
 
 import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.controls.repository.ControlRepository;
-import com.czintercity.icsec_app.form.EditControlForm;
+import com.czintercity.icsec_app.controls.form.EditControlForm;
 import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipService;
 import com.czintercity.icsec_app.relationships.controlRelationship.repository.ControlRelationshipRepository;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;

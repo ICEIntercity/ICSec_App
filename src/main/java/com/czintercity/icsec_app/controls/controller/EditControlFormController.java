@@ -1,4 +1,4 @@
-package com.czintercity.icsec_app.form;
+package com.czintercity.icsec_app.controls.controller;
 
 import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
 import com.czintercity.icsec_app.controls.entity.Control;

@@ -106,8 +106,7 @@ public class Control {
     // Comparison operators
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Control)) return false;
-        return this.id.equals(((Control) o).getId());
+        return o instanceof Control && id.equals(((Control) o).id);
     }
 
     @Override

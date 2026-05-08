@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="editModal" class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">Edit Assessment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <form id="editAssessmentForm">
+            <div class="mb-3">
+                <label for="assessmentName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="assessmentName"
+                       th:value="${assessment.getName()}" placeholder="Assessment name">
+            </div>
+            <div class="mb-3">
+                <label for="assessmentDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="assessmentDescription"
+                          rows="4" placeholder="Assessment description"
+                          th:text="${assessment.getDescription()}"></textarea>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" form="editAssessmentForm" class="btn btn-primary">Save</button>
+    </div>
+</div>
+</html>
