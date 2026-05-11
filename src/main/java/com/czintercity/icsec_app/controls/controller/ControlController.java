@@ -89,6 +89,17 @@ public class ControlController {
         }
     }
 
+    @GetMapping("/control/{id}/fragment")
+    public String showControlFragment(@PathVariable UUID id, Model model) {
+        log.trace("showControlFragment(id={}) called.", id);
+        Optional<Control> control = controlRepository.findById(id);
+        if (control.isPresent()) {
+            model.addAttribute("control", control.get());
+            return "control/controlView :: controlDetails";
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Control with id " + id + " not found");
+    }
+
     @GetMapping("/control/edit/{id}")
     public String editControl(@PathVariable UUID id, Model model) {
         log.trace("EditControl called for id: {}", id);

@@ -56,4 +56,9 @@ public class AssessmentController {
         Assessment assessment = assessmentService.saveAssessment(dto);
         return "redirect:/assessment/" + assessment.getId();
     }
+
+    @GetMapping({"/assessment/{assessmentId}/prioritize", "/assessment/new/prioritize"})
+    public String prioritizeMitre(@ModelAttribute AssessmentDTO dto) {
+        return "index";
+    }
 }

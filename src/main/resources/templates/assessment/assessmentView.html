@@ -14,12 +14,73 @@
                 card.querySelector("[data-field='coverageMaturity']").name = `controlStatusMapping[${index}].coverageMaturity`;
                 card.querySelector("[data-field='coverageScope']").name = `controlStatusMapping[${index}].coverageScope`;
             });
+
+            const maturityHints = [
+                'Not implemented — no controls in place.',
+                'Initial — ad hoc or informal implementation.',
+                'Developing — exists but inconsistently applied.',
+                'Defined — documented and consistently followed.',
+                'Managed — monitored with measurable outcomes.',
+                'Optimised — continuously improved and fully embedded.'
+            ];
+            const scopeHints = [
+                'No coverage — control applies to no assets.',
+                'Minimal — fewer than 20% of relevant assets.',
+                'Partial — 20–40% of relevant assets.',
+                'Moderate — 40–60% of relevant assets.',
+                'Broad — 60–80% of relevant assets.',
+                'Full — more than 80% of relevant assets.'
+            ];
+
+            const assessmentModal = document.getElementById('assessmentModal');
+            const controlDetailPanel = document.getElementById('controlDetailPanel');
+            const editPanel = assessmentModal.querySelector('.modal-content:not(#controlDetailPanel)');
+            let activeCard = null;
+
+            function updateHints() {
+                document.getElementById('modalMaturityHint').textContent = maturityHints[document.getElementById('modalMaturity').value];
+                document.getElementById('modalScopeHint').textContent = scopeHints[document.getElementById('modalScope').value];
+            }
+
+            assessmentModal.addEventListener('show.bs.modal', function (event) {
+                const trigger = event.relatedTarget;
+                if (trigger && trigger.hasAttribute('data-control-title')) {
+                    editPanel.classList.add('d-none');
+                    controlDetailPanel.classList.remove('d-none');
+                    activeCard = trigger.closest('[data-control-card]');
+                    populateControlModal(activeCard);
+                } else {
+                    controlDetailPanel.classList.add('d-none');
+                    editPanel.classList.remove('d-none');
+                    activeCard = null;
+                }
+            });
+
+document.getElementById('modalMaturity').addEventListener('change', function () {
+                if (activeCard) activeCard.querySelector('[data-field="coverageMaturity"]').value = this.value;
+                updateHints();
+            });
+
+            document.getElementById('modalScope').addEventListener('change', function () {
+                if (activeCard) activeCard.querySelector('[data-field="coverageScope"]').value = this.value;
+                updateHints();
+            });
+
+            function populateControlModal(card) {
+                document.getElementById('modalControlCode').textContent = card.dataset.controlCode;
+                document.getElementById('modalControlName').textContent = card.dataset.controlName;
+                document.getElementById('modalMaturity').value = card.querySelector('[data-field="coverageMaturity"]').value;
+                document.getElementById('modalScope').value = card.querySelector('[data-field="coverageScope"]').value;
+                updateHints();
+                document.getElementById('controlDetailContent').innerHTML = '';
+            }
         });
     </script>
 
     <div class="modal fade" id="assessmentModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" id="assessmentModalHolder">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable" id="assessmentModalHolder">
             <div th:replace="~{fragments/assessment :: editModal}"></div>
+            <div th:replace="~{fragments/assessment :: controlDetailModal}"></div>
         </div>
     </div>
 
@@ -49,7 +110,9 @@
 
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3">
                 <div class="col" th:each="controlEntry : ${topicEntry.value}">
-                    <div data-control-card class="h-100">
+                    <div data-control-card class="h-100"
+                         th:data-control-name="${controlEntry.key.getName()}"
+                         th:data-control-code="${controlEntry.key.getCode()}">
                         <input type="hidden" data-field="controlId"
                                th:value="${controlEntry.key.getId()}"/>
 
@@ -57,8 +120,16 @@
                             <div class="card-body d-flex flex-column">
                                 <span class="badge bg-secondary font-monospace mb-1 align-self-start"
                                       th:text="${controlEntry.key.getCode()}">CODE</span>
-                                <h6 class="card-title fw-bold mt-1 mb-3"
-                                    th:text="${controlEntry.key.getName()}">Control Name</h6>
+                                <button type="button"
+                                        class="btn btn-link p-0 text-start fw-bold text-body text-decoration-none mt-1 mb-3"
+                                        style="font-size: 1rem; line-height: 1.2;"
+                                        data-control-title
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#assessmentModal"
+                                        th:hx-get="@{/control/{id}/fragment(id=${controlEntry.key.getId()})}"
+                                        hx-target="#controlDetailContent"
+                                        hx-swap="innerHTML"
+                                        th:text="${controlEntry.key.getName()}">Control Name</button>
 
                                 <div class="row g-2 mt-auto">
                                     <div class="col">

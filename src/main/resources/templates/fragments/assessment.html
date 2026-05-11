@@ -29,4 +29,45 @@
                              htmx.find('.sticky-top h3').textContent = n || 'New Assessment';">Save</button>
     </div>
 </div>
+
+<div th:fragment="controlDetailModal" class="modal-content d-none" id="controlDetailPanel">
+    <div class="modal-header">
+        <div>
+            <span class="badge bg-secondary font-monospace me-2" id="modalControlCode"></span>
+            <h5 class="modal-title d-inline" id="modalControlName"></h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="px-4 py-3 border-bottom bg-light">
+        <div class="row g-3 align-items-end">
+            <div class="col">
+                <label class="form-label small text-muted mb-1" for="modalMaturity">Maturity</label>
+                <select class="form-select form-select-sm" id="modalMaturity">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+                <small class="text-muted mt-1 d-block" id="modalMaturityHint" style="min-height: 4.5em;"></small>
+            </div>
+            <div class="col">
+                <label class="form-label small text-muted mb-1" for="modalScope">Scope</label>
+                <select class="form-select form-select-sm" id="modalScope">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+                <small class="text-muted mt-1 d-block" id="modalScopeHint" style="min-height: 4.5em;"></small>
+            </div>
+        </div>
+    </div>
+    <div class="modal-body">
+        <div id="controlDetailContent"></div>
+    </div>
+</div>
 </html>
