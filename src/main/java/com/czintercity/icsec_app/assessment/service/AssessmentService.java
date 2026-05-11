@@ -2,15 +2,23 @@ package com.czintercity.icsec_app.assessment.service;
 
 import com.czintercity.icsec_app.assessment.dto.AssessmentDTO;
 import com.czintercity.icsec_app.assessment.dto.ControlStatusDTO;
+import com.czintercity.icsec_app.assessment.dto.TechniquePriorityDTO;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.assessment.entity.ControlStatus;
 import com.czintercity.icsec_app.assessment.repository.AssessmentRepository;
 import com.czintercity.icsec_app.assessment.repository.ControlStatusRepository;
+import com.czintercity.icsec_app.attack.entity.Tactic;
+import com.czintercity.icsec_app.attack.entity.Technique;
+import com.czintercity.icsec_app.attack.repository.TacticRepository;
+import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
 import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.controls.repository.ControlRepository;
 import com.czintercity.icsec_app.topics.entity.Topic;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -20,11 +28,17 @@ public class AssessmentService {
     private final ControlRepository controlRepository;
     private final ControlStatusRepository controlStatusRepository;
     private final AssessmentRepository assessmentRepository;
+    private final TacticRepository tacticRepository;
+    private final TechniqueRepository techniqueRepository;
 
-    public AssessmentService(ControlRepository controlRepository, ControlStatusRepository controlStatusRepository, AssessmentRepository assessmentRepository) {
+    public AssessmentService(ControlRepository controlRepository, ControlStatusRepository controlStatusRepository,
+                             AssessmentRepository assessmentRepository, TacticRepository tacticRepository,
+                             TechniqueRepository techniqueRepository) {
         this.controlRepository = controlRepository;
         this.controlStatusRepository = controlStatusRepository;
         this.assessmentRepository = assessmentRepository;
+        this.tacticRepository = tacticRepository;
+        this.techniqueRepository = techniqueRepository;
     }
 
     /**
@@ -111,6 +125,47 @@ public class AssessmentService {
             }
         }
         assessment.setControlStatusMapping(statusList);
+        return assessmentRepository.save(assessment);
+    }
+
+    @Transactional
+    public LinkedHashMap<Tactic, List<Technique>> getTacticsWithTechniques() {
+        List<Tactic> tactics = tacticRepository.findAll(Sort.by("mitreId"));
+        LinkedHashMap<Tactic, List<Technique>> result = new LinkedHashMap<>();
+        for (Tactic tactic : tactics) {
+            List<Technique> sorted = new ArrayList<>(tactic.getTechniques());
+            sorted.sort(Comparator.comparing(Technique::getMitreId));
+            result.put(tactic, sorted);
+        }
+        return result;
+    }
+
+    @Transactional
+    public Map<UUID, Short> getTechniquePriorities(UUID assessmentId) {
+        Assessment assessment = assessmentRepository.findById(assessmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found"));
+        Map<UUID, Short> priorities = new HashMap<>();
+        if (assessment.getTechniquePriorities() != null) {
+            for (Map.Entry<Technique, Short> entry : assessment.getTechniquePriorities().entrySet()) {
+                priorities.put(entry.getKey().getId(), entry.getValue());
+            }
+        }
+        return priorities;
+    }
+
+    @Transactional
+    public Assessment saveTechniquePriorities(UUID assessmentId, List<TechniquePriorityDTO> priorities) {
+        Assessment assessment = assessmentRepository.findById(assessmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found"));
+        Map<Technique, Short> priorityMap = new HashMap<>();
+        if (priorities != null) {
+            for (TechniquePriorityDTO dto : priorities) {
+                if (dto.getPriority() != null && dto.getPriority() > 0) {
+                    priorityMap.put(techniqueRepository.getReferenceById(dto.getTechniqueId()), dto.getPriority());
+                }
+            }
+        }
+        assessment.setTechniquePriorities(priorityMap);
         return assessmentRepository.save(assessment);
     }
 }

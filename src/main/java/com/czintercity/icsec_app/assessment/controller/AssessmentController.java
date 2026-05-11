@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.czintercity.icsec_app.assessment.dto.AssessmentDTO;
+import com.czintercity.icsec_app.assessment.dto.TechniquePrioritiesFormDTO;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.assessment.repository.AssessmentRepository;
 import com.czintercity.icsec_app.assessment.service.AssessmentService;
@@ -52,13 +53,31 @@ public class AssessmentController {
     }
 
     @PostMapping("/assessment/save")
-    public String saveAssessment(@ModelAttribute AssessmentDTO dto) {
+    public String saveAssessment(@ModelAttribute AssessmentDTO dto,
+                                 @org.springframework.web.bind.annotation.RequestParam(required = false) String redirectTo) {
         Assessment assessment = assessmentService.saveAssessment(dto);
+        if ("prioritize".equals(redirectTo)) {
+            return "redirect:/assessment/" + assessment.getId() + "/prioritize";
+        }
         return "redirect:/assessment/" + assessment.getId();
     }
 
-    @GetMapping({"/assessment/{assessmentId}/prioritize", "/assessment/new/prioritize"})
-    public String prioritizeMitre(@ModelAttribute AssessmentDTO dto) {
-        return "index";
+    @GetMapping("/assessment/{assessmentId}/prioritize")
+    public String prioritizeMitre(Model model, @PathVariable UUID assessmentId) {
+        Optional<Assessment> existing = assessmentRepository.findById(assessmentId);
+        if (existing.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
+        }
+        model.addAttribute("assessment", new AssessmentDTO(existing.get()));
+        model.addAttribute("tacticsMap", assessmentService.getTacticsWithTechniques());
+        model.addAttribute("existingPriorities", assessmentService.getTechniquePriorities(assessmentId));
+        return "assessment/mitreAssessment";
+    }
+
+    @PostMapping("/assessment/{assessmentId}/prioritize")
+    public String saveTechniquePriorities(@PathVariable UUID assessmentId,
+                                          @ModelAttribute TechniquePrioritiesFormDTO formDTO) {
+        assessmentService.saveTechniquePriorities(assessmentId, formDTO.getPriorities());
+        return "redirect:/assessment/" + assessmentId + "/prioritize";
     }
 }
