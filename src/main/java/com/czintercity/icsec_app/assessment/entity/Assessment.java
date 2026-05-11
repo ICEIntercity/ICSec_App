@@ -1,5 +1,6 @@
 package com.czintercity.icsec_app.assessment.entity;
 
+import com.czintercity.icsec_app.attack.entity.Technique;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -35,6 +36,12 @@ public class Assessment {
     @OneToMany(mappedBy="assessment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ControlStatus> controlStatusMapping;
 
+    @ElementCollection
+    @CollectionTable(name="technique_priorities", joinColumns = @JoinColumn(name="assessment_id"))
+    @MapKeyJoinColumn(name="technique_id")
+    @Column(name="technique_priority")
+    private Map<Technique, Short> techniquePriorities;
+
     public Assessment() {
         this.id = UUID.randomUUID();
     }
@@ -50,12 +57,12 @@ public class Assessment {
     public LocalDateTime getCreated() { return this.created; }
     public LocalDateTime getUpdated() { return this.updated; }
     public List<ControlStatus> getControlStatusMapping() { return this.controlStatusMapping; }
+    public Map<Technique, Short> getTechniquePriorities() { return this.techniquePriorities; }
 
     // SETTERS
     public void setName(String name) { this.name = name; }
     public void setDescription(String description) { this.description = description; }
-    public void setControlStatusMapping(List<ControlStatus> controlStatusMapping) {
-        this.controlStatusMapping = controlStatusMapping;
-    }
+    public void setControlStatusMapping(List<ControlStatus> controlStatusMapping) { this.controlStatusMapping = controlStatusMapping; }
+    public void setTechniquePriorities(Map<Technique, Short> techniquePriorities) { this.techniquePriorities = techniquePriorities; }
 
 }
