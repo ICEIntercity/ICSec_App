@@ -1,6 +1,6 @@
 package com.czintercity.icsec_app.assessment.dto;
 
-import com.czintercity.icsec_app.assessment.dto.util.TechniqueScore;
+import com.czintercity.icsec_app.assessment.dto.util.TacticCoverageScore;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.attack.entity.Tactic;
 
@@ -8,12 +8,12 @@ import java.util.Map;
 
 public class MitreCoverageDTO {
     private Assessment assessment;
-    private Map<Tactic, TechniqueScore> techniqueCoverageScore;
+    private Map<Tactic, TacticCoverageScore> coverageScores;
 
-    void setAssessment(Assessment assessment) { this.assessment = assessment; }
-    void setTechniqueCoverageScore(Map<Tactic, TechniqueScore> techniqueCoverageScore) { this.techniqueCoverageScore = techniqueCoverageScore; }
+    public void setAssessment(Assessment assessment) { this.assessment = assessment; }
+    public void setCoverageScores(Map<Tactic, TacticCoverageScore> coverageScores) { this.coverageScores = coverageScores; }
 
-    Map<Tactic, TechniqueScore> getTechniqueCoverageScore() { return this.techniqueCoverageScore; }
-    Assessment getAssessment() { return this.assessment; }
+    public Assessment getAssessment() { return this.assessment; }
+    public Map<Tactic, TacticCoverageScore> getCoverageScores() { return this.coverageScores; }
 }
 
