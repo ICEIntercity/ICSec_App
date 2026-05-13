@@ -18,6 +18,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Calculates MITRE ATT&amp;CK coverage scores for a given {@link Assessment}.
+ * <p>
+ * For every technique in the framework, each active control reduces the residual
+ * failure probability for the coverage types it addresses. The effective contribution
+ * of a control is weighted by its scope and maturity scores:
+ * <pre>
+ *   effectiveCoverageScore = (scope^0.65 × maturity^0.35 / 5) × coverageRating
+ *   effectiveFailureProbability = max(0, 1 − effectiveCoverageScore / 5)
+ * </pre>
+ * Multiple controls compound multiplicatively: each one further reduces the
+ * probability that remains after the previous controls have been applied.
+ */
 @Service
 public class CoverageCalculationService {
 
@@ -27,6 +40,20 @@ public class CoverageCalculationService {
         this.tacticRepository = tacticRepository;
     }
 
+    /**
+     * Computes a full MITRE ATT&amp;CK coverage assessment and returns the results as a
+     * {@link MitreCoverageDTO}.
+     * <p>
+     * All tactics and techniques are initialised with a failure probability of {@code 1.0}.
+     * Each {@link ControlStatus} in the assessment is then applied: for every
+     * {@link TechniqueCoverage} relationship on the control, the residual failure
+     * probability for the corresponding technique and coverage type is multiplied by
+     * the control's effective failure probability.
+     *
+     * @param assessment the assessment whose control statuses drive the calculation
+     * @return a {@link MitreCoverageDTO} containing per-technique scores for every tactic
+     * @throws BlankAssessmentException if the assessment or its control status mapping is {@code null}
+     */
     @Transactional
     public MitreCoverageDTO calculateMitreCoverage(Assessment assessment) {
         if (assessment == null || assessment.getControlStatusMapping() == null) {

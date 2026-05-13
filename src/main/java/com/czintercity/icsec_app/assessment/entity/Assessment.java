@@ -10,6 +10,18 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * Root aggregate representing a named security assessment.
+ * <p>
+ * An assessment captures two kinds of data:
+ * <ul>
+ *   <li>{@link ControlStatus} entries — the maturity and scope scores assigned to each
+ *       security control for this assessment.</li>
+ *   <li>Technique priorities — a 0–5 priority score per MITRE ATT&amp;CK technique,
+ *       stored as an element collection keyed by {@link com.czintercity.icsec_app.attack.entity.Technique}.</li>
+ * </ul>
+ * Creation and last-update timestamps are managed automatically by Hibernate.
+ */
 @Entity
 public class Assessment {
 

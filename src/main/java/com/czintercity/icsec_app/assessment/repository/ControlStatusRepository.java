@@ -7,5 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
+/**
+ * Spring Data repository for {@link ControlStatus} entities, keyed by {@link java.util.UUID}.
+ * Used primarily to bulk-delete existing status entries before re-saving a revised assessment.
+ */
 public interface ControlStatusRepository extends JpaRepository<ControlStatus, UUID> {
 }

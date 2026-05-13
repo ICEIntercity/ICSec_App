@@ -24,12 +24,15 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
+/**
+ * Core service for creating, loading, and persisting {@link Assessment} records.
+ * <p>
+ * Responsibilities include building the control-status display map used by the
+ * assessment edit view, delegating to repositories for persistence, and managing
+ * MITRE ATT&amp;CK technique priorities.
+ */
 @Service
 public class AssessmentService {
-
-    private static final Double COVERAGE_WEIGHT = 0.6;
-    private static final Double MATURITY_WEIGHT = 0.4;
-
     private final ControlRepository controlRepository;
     private final ControlStatusRepository controlStatusRepository;
     private final AssessmentRepository assessmentRepository;
@@ -100,6 +103,14 @@ public class AssessmentService {
         return grouped;
     }
 
+    /**
+     * Persists an assessment from the given {@link AssessmentDTO}.
+     * If an assessment with the same ID already exists it is updated in place;
+     * otherwise a new record is created. All existing {@link ControlStatus} entries
+     * are replaced with the ones provided in the DTO, skipping any blank entries.
+     *
+     * @return the saved {@link Assessment} entity
+     */
     @Transactional
     public Assessment saveAssessment(AssessmentDTO dto) {
         Optional<Assessment> existing = assessmentRepository.findById(dto.getId());
@@ -133,6 +144,10 @@ public class AssessmentService {
         return assessmentRepository.save(assessment);
     }
 
+    /**
+     * Returns all tactics sorted by MITRE ID, each paired with its techniques sorted
+     * by MITRE ID. Used to populate the prioritisation and coverage heatmap views.
+     */
     @Transactional
     public LinkedHashMap<Tactic, List<Technique>> getTacticsWithTechniques() {
         List<Tactic> tactics = tacticRepository.findAll(Sort.by("mitreId"));
@@ -145,6 +160,10 @@ public class AssessmentService {
         return result;
     }
 
+    /**
+     * Returns a map of technique ID to priority score for the given assessment,
+     * containing only techniques that have been explicitly prioritised (score &gt; 0).
+     */
     @Transactional
     public Map<UUID, Short> getTechniquePriorities(UUID assessmentId) {
         Assessment assessment = assessmentRepository.findById(assessmentId)
@@ -158,6 +177,13 @@ public class AssessmentService {
         return priorities;
     }
 
+    /**
+     * Saves technique priorities from a DTO for an existing {@link Assessment}.
+     *
+     * @param assessmentId the {@link UUID} of the {@link Assessment} object that the technique priorities belong to
+     * @param priorities a {@link List} of {@link TechniquePriorityDTO} for each technique
+     * @return the updated {@link Assessment} object
+     */
     @Transactional
     public Assessment saveTechniquePriorities(UUID assessmentId, List<TechniquePriorityDTO> priorities) {
         Assessment assessment = assessmentRepository.findById(assessmentId)

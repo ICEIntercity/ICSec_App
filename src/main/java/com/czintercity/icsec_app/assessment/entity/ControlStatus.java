@@ -7,6 +7,16 @@ import jakarta.validation.constraints.Min;
 
 import java.util.UUID;
 
+/**
+ * Records the maturity and scope ratings given to a specific
+ * {@link com.czintercity.icsec_app.controls.entity.Control} within a single {@link Assessment}.
+ * <p>
+ * Both scores use a 0–5 scale and feed directly into the coverage calculation formula.
+ * A status where both scores are zero and the note is empty is considered blank and is
+ * excluded from persistence.
+ *
+ * @see com.czintercity.icsec_app.assessment.service.CoverageCalculationService
+ */
 @Entity
 public class ControlStatus {
     /**

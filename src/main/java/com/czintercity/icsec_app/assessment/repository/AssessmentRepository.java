@@ -5,5 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.UUID;
 
+/** Spring Data repository for {@link Assessment} entities, keyed by {@link java.util.UUID}. */
 public interface AssessmentRepository extends CrudRepository<Assessment, UUID> {
 }
