@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: html}">
+<head>
+    <title>Assessments</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h3 class="mb-0">Assessments</h3>
+        <a th:href="@{/assessment}" class="btn btn-success">
+            <i class="bi bi-plus-lg me-1"></i>New Assessment
+        </a>
+    </div>
+
+    <div id="assessment-list-container">
+
+        <div th:fragment="assessmentList">
+
+            <div th:if="${assessmentPage.isEmpty()}" class="text-center py-5 text-muted">
+                <i class="bi bi-clipboard2-x fs-1 d-block mb-3 opacity-50"></i>
+                <p class="mb-0">No assessments found. Create one to get started.</p>
+            </div>
+
+            <div th:each="assessment : ${assessmentPage.content}"
+                 class="card border-0 shadow-sm mb-3">
+                <div class="card-body py-3 px-4 d-flex align-items-center gap-3">
+
+                    <a th:href="@{/assessment/{id}(id=${assessment.getId()})}"
+                       class="text-decoration-none text-reset flex-grow-1 d-flex align-items-center gap-4"
+                       style="min-width: 0;">
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <h6 class="fw-semibold mb-1 text-truncate" th:text="${assessment.getName()}">Assessment name</h6>
+                            <p class="text-muted mb-0 small"
+                               style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;"
+                               th:text="${assessment.getDescription() != null and !assessment.getDescription().isBlank()}
+                                        ? ${assessment.getDescription()}
+                                        : 'No description.'">Description</p>
+                        </div>
+                        <div class="text-end text-muted small flex-shrink-0" style="min-width: 140px;">
+                            <div>
+                                <i class="bi bi-calendar3 me-1"></i>
+                                <span th:text="${#temporals.format(assessment.getCreated(), 'dd MMM yyyy')}">01 Jan 2025</span>
+                            </div>
+                            <div class="mt-1">
+                                <i class="bi bi-pencil me-1"></i>
+                                <span th:text="${#temporals.format(assessment.getUpdated(), 'dd MMM yyyy HH:mm')}">01 Jan 2025 12:00</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <button class="btn btn-sm btn-outline-danger flex-shrink-0"
+                            th:hx-delete="@{/assessment/{id}/delete(id=${assessment.getId()})}"
+                            th:attr="hx-confirm=|Delete '${assessment.getName()}'? This action cannot be undone.|"
+                            hx-target="body">
+                        <i class="bi bi-trash"></i>
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${assessmentPage.totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center mb-0">
+
+                    <li class="page-item" th:classappend="${assessmentPage.first} ? 'disabled'">
+                        <button class="page-link"
+                                th:hx-get="@{/assessment/all/page(page=${assessmentPage.number - 1})}"
+                                hx-target="#assessment-list-container"
+                                hx-swap="innerHTML">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                    </li>
+
+                    <li class="page-item disabled">
+                        <span class="page-link text-muted">
+                            Page
+                            <span th:text="${assessmentPage.number + 1}">1</span>
+                            of
+                            <span th:text="${assessmentPage.totalPages}">1</span>
+                        </span>
+                    </li>
+
+                    <li class="page-item" th:classappend="${assessmentPage.last} ? 'disabled'">
+                        <button class="page-link"
+                                th:hx-get="@{/assessment/all/page(page=${assessmentPage.number + 1})}"
+                                hx-target="#assessment-list-container"
+                                hx-swap="innerHTML">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </li>
+
+                </ul>
+            </nav>
+
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>
