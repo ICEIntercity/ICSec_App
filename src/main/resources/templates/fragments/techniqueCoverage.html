@@ -87,7 +87,9 @@
 
             <div class="col-md-2">
                 <small class="text-muted d-block">Type</small>
-                <strong th:text="${coverage.coverageType.displayValue}"/>
+                <span class="badge"
+                      th:style="|background-color: ${coverage.coverageType.hexColor}|"
+                      th:text="${coverage.coverageType.displayValue}"/>
                 <input type="hidden" th:name="|techniqueCoverage[${index}].coverageType|" th:value="${coverage.coverageType}"/>
             </div>
             <div class="col-md-7">
@@ -126,5 +128,25 @@
         </div>
     </div>
 </div>
+
+<div th:fragment="techniqueCoverageDetailRow(coverage)" class="card mb-2">
+    <div class="card-body py-2">
+        <div class="row align-items-center g-2">
+            <div class="col-auto text-center" style="min-width: 3rem;">
+                <h4 class="fw-bold mb-0"
+                    th:text="${coverage.getCoverageRating()}"
+                    th:classappend="${coverage.getCoverageRating() <= 1 ? 'text-danger' :
+                                     (coverage.getCoverageRating() <= 3 ? 'text-warning' : 'text-success')}">0</h4>
+                <small class="text-muted" style="font-size: 0.65rem;">/ 5</small>
+            </div>
+            <div class="col border-start ps-3">
+                <span class="fw-semibold small d-block"
+                      th:text="${coverage.getControl().getCode() + ' — ' + coverage.getControl().getName()}">Control</span>
+                <span class="text-muted small" th:text="${coverage.getJustification()}"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

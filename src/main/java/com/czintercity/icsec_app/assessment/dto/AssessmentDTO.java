@@ -7,6 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Data transfer object representing an {@link com.czintercity.icsec_app.assessment.entity.Assessment}.
+ * Used for form binding on the assessment edit view and as a lightweight projection
+ * passed between the controller and service layers.
+ * <p>
+ * A fresh instance is always assigned a random {@link java.util.UUID} so that a new
+ * assessment can be persisted without a separate ID-generation step.
+ */
 public class AssessmentDTO {
     private UUID id;
     private String name;
@@ -26,6 +34,11 @@ public class AssessmentDTO {
         this.id = UUID.randomUUID();
     }
 
+    /**
+     * Constructs an {@code AssessmentDTO} from an existing {@link Assessment} entity,
+     * converting each {@link com.czintercity.icsec_app.assessment.entity.ControlStatus}
+     * into a {@link ControlStatusDTO}.
+     */
     public AssessmentDTO(Assessment assessment) {
         this.id = assessment.getId();
         this.name = assessment.getName();

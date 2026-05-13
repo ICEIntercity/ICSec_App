@@ -19,6 +19,6 @@ public class TechniqueCoverageScore {
         if(!typeFailureProbabilities.containsKey(type)){
             throw new IllegalArgumentException("Invalid coverage type: " + type);
         }
-        return 5 - typeFailureProbabilities.get(type);
+        return 5 - (typeFailureProbabilities.get(type) * 5);
     }
 }

@@ -14,23 +14,31 @@ package com.czintercity.icsec_app.relationships.techniqueCoverage;
  */
 public enum CoverageType {
     /** Discourages an attacker from attempting the technique. */
-    DETERRENT("Deterrent"),
+    DETERRENT("Deterrent", "#F59E0B"),
     /** Blocks or stops the technique from succeeding. */
-    PREVENTATIVE("Preventative"),
+    PREVENTATIVE("Preventative", "#EF4444"),
     /** Identifies or alerts on the use of the technique. */
-    DETECTIVE("Detective"),
+    DETECTIVE("Detective", "#3B82F6"),
     /** Restores normal operation after the technique has been executed. */
-    RECOVERY("Recovery"),
+    RECOVERY("Recovery", "#10B981"),
     /** Limits the blast radius or lateral spread of the technique. */
-    CONTAINMENT("Containment"),
+    CONTAINMENT("Containment", "#8B5CF6"),
     /** Fallback used when the coverage type cannot be determined. */
-    UNKNOWN("Unknown");
+    UNKNOWN("Unknown", "#6B7280");
 
     private final String displayValue;
-    private CoverageType(String displayValue) {
+    private final String hexColor;
+
+    CoverageType(String displayValue, String hexColor) {
         this.displayValue = displayValue;
+        this.hexColor = hexColor;
     }
+
     public String getDisplayValue() {
         return displayValue;
+    }
+
+    public String getHexColor() {
+        return hexColor;
     }
 }
