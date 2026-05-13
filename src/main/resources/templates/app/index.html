@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: html}">
+<head>
+    <title>ICSec Framework Explorer</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <!-- Hero -->
+    <div class="text-center py-5 mb-4">
+        <h1 class="display-5 fw-bold mb-3">
+            <i class="bi bi-shield-lock-fill me-2 text-danger"></i>ICSec Framework Explorer
+        </h1>
+        <p class="lead text-muted mx-auto" style="max-width: 640px;">
+            A structured companion for ICS security posture analysis. Map MITRE ATT&amp;CK for ICS
+            techniques against deployed controls and evaluate coverage across your OT environment.
+        </p>
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a th:href="@{/assessment/all}" class="btn btn-danger btn-lg px-4">
+                <i class="bi bi-bar-chart-fill me-2"></i>Assessments
+            </a>
+            <a th:href="@{/topic/all}" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="bi bi-diagram-3 me-2"></i>Techniques
+            </a>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Feature cards -->
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <span class="p-2 rounded bg-danger bg-opacity-10">
+                            <i class="bi bi-diagram-3-fill text-danger fs-4"></i>
+                        </span>
+                    </div>
+                    <h5 class="card-title fw-semibold">MITRE ATT&amp;CK Techniques</h5>
+                    <p class="card-text text-muted">
+                        ICS technique catalogue organised by tactic. Each entry includes attacker behaviour
+                        descriptions and supporting references.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-4 px-4">
+                    <a th:href="@{/topic/all}" class="btn btn-sm btn-outline-danger">
+                        Browse <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <span class="p-2 rounded bg-primary bg-opacity-10">
+                            <i class="bi bi-shield-check-fill text-primary fs-4"></i>
+                        </span>
+                    </div>
+                    <h5 class="card-title fw-semibold">Security Controls</h5>
+                    <p class="card-text text-muted">
+                        Define and manage controls with typed coverage classification — preventative,
+                        detective, corrective, deterrent, and recovery.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-4 px-4">
+                    <a th:href="@{/control/all}" class="btn btn-sm btn-outline-primary">
+                        Browse <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <span class="p-2 rounded bg-success bg-opacity-10">
+                            <i class="bi bi-bar-chart-fill text-success fs-4"></i>
+                        </span>
+                    </div>
+                    <h5 class="card-title fw-semibold">Coverage Assessments</h5>
+                    <p class="card-text text-muted">
+                        Compute MITRE coverage scores and render posture heatmaps. Technique
+                        prioritisation identifies high-risk gaps across the attack surface.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-4 px-4">
+                    <a th:href="@{/assessment/all}" class="btn btn-sm btn-outline-success">
+                        Browse <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>
