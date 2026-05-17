@@ -2,7 +2,6 @@ package com.czintercity.icsec_app.assessment.service;
 
 import com.czintercity.icsec_app.assessment.dto.AssessmentDTO;
 import com.czintercity.icsec_app.assessment.dto.ControlStatusDTO;
-import com.czintercity.icsec_app.assessment.dto.MitreCoverageDTO;
 import com.czintercity.icsec_app.assessment.dto.TechniquePriorityDTO;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.assessment.entity.ControlStatus;
@@ -14,7 +13,6 @@ import com.czintercity.icsec_app.attack.repository.TacticRepository;
 import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
 import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.controls.repository.ControlRepository;
-import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
 import com.czintercity.icsec_app.topics.entity.Topic;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Sort;

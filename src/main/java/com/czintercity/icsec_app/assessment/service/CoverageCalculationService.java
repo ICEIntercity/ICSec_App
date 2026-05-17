@@ -1,8 +1,9 @@
 package com.czintercity.icsec_app.assessment.service;
 
-import com.czintercity.icsec_app.assessment.dto.MitreCoverageDTO;
-import com.czintercity.icsec_app.assessment.dto.util.TacticCoverageScore;
-import com.czintercity.icsec_app.assessment.dto.util.TechniqueCoverageScore;
+import com.czintercity.icsec_app.assessment.dto.AssessmentResultDTO;
+import com.czintercity.icsec_app.assessment.model.AssessmentValues;
+import com.czintercity.icsec_app.assessment.model.TacticAssessmentResult;
+import com.czintercity.icsec_app.assessment.model.TechniqueAssessmentResult;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.assessment.entity.ControlStatus;
 import com.czintercity.icsec_app.assessment.exception.BlankAssessmentException;
@@ -42,7 +43,7 @@ public class CoverageCalculationService {
 
     /**
      * Computes a full MITRE ATT&amp;CK coverage assessment and returns the results as a
-     * {@link MitreCoverageDTO}.
+     * {@link AssessmentResultDTO}.
      * <p>
      * All tactics and techniques are initialised with a failure probability of {@code 1.0}.
      * Each {@link ControlStatus} in the assessment is then applied: for every
@@ -51,23 +52,48 @@ public class CoverageCalculationService {
      * the control's effective failure probability.
      *
      * @param assessment the assessment whose control statuses drive the calculation
-     * @return a {@link MitreCoverageDTO} containing per-technique scores for every tactic
+     * @return a {@link AssessmentResultDTO} containing per-technique scores for every tactic
      * @throws BlankAssessmentException if the assessment or its control status mapping is {@code null}
      */
     @Transactional
-    public MitreCoverageDTO calculateMitreCoverage(Assessment assessment) {
+    public AssessmentResultDTO calculateMitreCoverage(Assessment assessment) {
         if (assessment == null || assessment.getControlStatusMapping() == null) {
             throw new BlankAssessmentException("Missing assessment or control status mapping.");
         }
 
-        // Initialize a TacticCoverageScore per tactic, with a blank TechniqueCoverageScore per technique
-        Map<Tactic, TacticCoverageScore> coverageScores = new HashMap<>();
+        // Initialize a TacticAssessmentResult per tactic, with a blank TechniqueCoverageScore per technique
+        Map<Tactic, TacticAssessmentResult> tacticAssessmentResults = new HashMap<>();
         for (Tactic tactic : tacticRepository.findAll()) {
-            TacticCoverageScore tacticScore = new TacticCoverageScore();
+            TacticAssessmentResult tacticResult = new TacticAssessmentResult();
             for (Technique technique : tactic.getTechniques()) {
-                tacticScore.techniqueCoverageScores.put(technique, new TechniqueCoverageScore());
+                // Initialize a blank technique assessment
+                TechniqueAssessmentResult techniqueResult = new TechniqueAssessmentResult();
+                Short techniquePriority = assessment.getTechniquePriorities().getOrDefault(technique, (short) 0);
+
+                // Initialize coverages for each type of coverage
+                for (CoverageType coverageType : CoverageType.values()) {
+
+                    // Load the result for coverage type (for easier access)
+                    AssessmentValues typeValues = techniqueResult.getAssessmentResults().get(coverageType);
+
+                    // Set weight for assessment
+                    typeValues.setPriority(techniquePriority);
+
+                    // Prepare for calculating the "optimum state" if all possible controls are applied.
+                    // Start with 1.0 value because if no controls are applied, p(Failure) = 1
+                    double optimumFailureProbability = 1.0;
+
+                    // Calculate optimum state
+                    for (TechniqueCoverage coverage : technique.getCoverages()) {
+                        if(coverage.getCoverageType() == coverageType) {
+                            optimumFailureProbability = optimumFailureProbability * ((double) (5 - coverage.getCoverageRating()) / 5);
+                        }
+                    }
+                    typeValues.setOptimumFailureProbability(optimumFailureProbability);
+                }
+                tacticResult.getTechniqueAssessmentResults().put(technique, techniqueResult);
             }
-            coverageScores.put(tactic, tacticScore);
+            tacticAssessmentResults.put(tactic, tacticResult);
         }
 
         // Multiply each technique's failure probability by the control's effective reduction
@@ -86,16 +112,19 @@ public class CoverageCalculationService {
                 double effectiveFailureProbability = Math.max(0.0, 1 - (effectiveCoverageScore / 5));
 
                 for (Tactic tactic : technique.getTactics()) {
-                    TechniqueCoverageScore techniqueScore = coverageScores.get(tactic).techniqueCoverageScores.get(technique);
-                    double current = techniqueScore.typeFailureProbabilities.get(coverageType);
-                    techniqueScore.typeFailureProbabilities.put(coverageType, current * effectiveFailureProbability);
+                    TechniqueAssessmentResult techniqueResult = tacticAssessmentResults.get(tactic).getTechniqueAssessmentResults().get(technique);
+                    AssessmentValues values = techniqueResult.getAssessmentResults().get(coverageType);
+
+                    // Recalculate failure probability (using parallel systems failure probability formula)
+                    double currentFailureProbability = values.getEffectiveFailureProbability();
+                    values.setEffectiveFailureProbability(currentFailureProbability * effectiveFailureProbability);
                 }
             }
         }
 
-        MitreCoverageDTO dto = new MitreCoverageDTO();
+        AssessmentResultDTO dto = new AssessmentResultDTO();
         dto.setAssessment(assessment);
-        dto.setCoverageScores(coverageScores);
+        dto.setCoverageScores(tacticAssessmentResults);
         return dto;
     }
 }

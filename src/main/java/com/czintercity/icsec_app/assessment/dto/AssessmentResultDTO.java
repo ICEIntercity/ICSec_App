@@ -1,6 +1,7 @@
 package com.czintercity.icsec_app.assessment.dto;
 
-import com.czintercity.icsec_app.assessment.dto.util.TacticCoverageScore;
+import com.czintercity.icsec_app.assessment.model.TacticAssessmentResult;
+import com.czintercity.icsec_app.assessment.model.TechniqueAssessmentResult;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.attack.entity.Tactic;
 
@@ -11,20 +12,20 @@ import java.util.Map;
  * {@link com.czintercity.icsec_app.assessment.entity.Assessment}.
  * <p>
  * Coverage scores are organised as a two-level map: tactic → technique →
- * {@link com.czintercity.icsec_app.assessment.dto.util.TechniqueCoverageScore}, where
+ * {@link TechniqueAssessmentResult}, where
  * each score tracks the residual failure probability per
  * {@link com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType}.
  *
  * @see com.czintercity.icsec_app.assessment.service.CoverageCalculationService
  */
-public class MitreCoverageDTO {
+public class AssessmentResultDTO {
     private Assessment assessment;
-    private Map<Tactic, TacticCoverageScore> coverageScores;
+    private Map<Tactic, TacticAssessmentResult> coverageScores;
 
     public void setAssessment(Assessment assessment) { this.assessment = assessment; }
-    public void setCoverageScores(Map<Tactic, TacticCoverageScore> coverageScores) { this.coverageScores = coverageScores; }
+    public void setCoverageScores(Map<Tactic, TacticAssessmentResult> coverageScores) { this.coverageScores = coverageScores; }
 
     public Assessment getAssessment() { return this.assessment; }
-    public Map<Tactic, TacticCoverageScore> getCoverageScores() { return this.coverageScores; }
+    public Map<Tactic, TacticAssessmentResult> getCoverageScores() { return this.coverageScores; }
 }
 
