@@ -1,9 +1,9 @@
 package com.czintercity.icsec_app.assessment.controller;
 
 import com.czintercity.icsec_app.assessment.dto.AssessmentDTO;
-import com.czintercity.icsec_app.assessment.dto.MitreCoverageDTO;
-import com.czintercity.icsec_app.assessment.dto.util.TacticCoverageScore;
-import com.czintercity.icsec_app.assessment.dto.util.TechniqueCoverageScore;
+import com.czintercity.icsec_app.assessment.dto.AssessmentResultDTO;
+import com.czintercity.icsec_app.assessment.model.TacticAssessmentResult;
+import com.czintercity.icsec_app.assessment.model.TechniqueAssessmentResult;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.assessment.repository.AssessmentRepository;
 import com.czintercity.icsec_app.assessment.service.AssessmentService;
@@ -71,16 +71,23 @@ public class CoverageController {
         Assessment assessment = existing.get();
 
         CoverageType selectedType = CoverageType.valueOf(coverageType);
-        MitreCoverageDTO coverageDTO = coverageCalculationService.calculateMitreCoverage(assessment);
+        AssessmentResultDTO coverageDTO = coverageCalculationService.calculateMitreCoverage(assessment);
         Map<UUID, String> techniqueColors = buildColorMap(coverageDTO, selectedType);
         Map<UUID, Double> techniqueScores = buildScoreMap(coverageDTO, selectedType);
+        Map<UUID, Double> techniqueOptimumScores = buildOptimumScoreMap(coverageDTO, selectedType);
+        Map<UUID, String> techniquePriorityColors = buildPriorityColorMap(coverageDTO, selectedType);
+        Map<UUID, Double> techniquePriorityScores = buildPriorityScoreMap(coverageDTO, selectedType);
 
         model.addAttribute("assessment", new AssessmentDTO(assessment));
         model.addAttribute("coverageTypes", CoverageType.values());
         model.addAttribute("selectedCoverageType", selectedType);
+        model.addAttribute("coverageTypeHex", selectedType.getHexColor());
         model.addAttribute("tacticsMap", assessmentService.getTacticsWithTechniques());
         model.addAttribute("techniqueColors", techniqueColors);
         model.addAttribute("techniqueScores", techniqueScores);
+        model.addAttribute("techniqueOptimumScores", techniqueOptimumScores);
+        model.addAttribute("techniquePriorityColors", techniquePriorityColors);
+        model.addAttribute("techniquePriorityScores", techniquePriorityScores);
 
         return "assessment/assessmentResult";
     }
@@ -103,14 +110,21 @@ public class CoverageController {
         Assessment assessment = existing.get();
 
         CoverageType selectedType = CoverageType.valueOf(coverageType);
-        MitreCoverageDTO coverageDTO = coverageCalculationService.calculateMitreCoverage(assessment);
+        AssessmentResultDTO coverageDTO = coverageCalculationService.calculateMitreCoverage(assessment);
         Map<UUID, String> techniqueColors = buildColorMap(coverageDTO, selectedType);
         Map<UUID, Double> techniqueScores = buildScoreMap(coverageDTO, selectedType);
+        Map<UUID, Double> techniqueOptimumScores = buildOptimumScoreMap(coverageDTO, selectedType);
+        Map<UUID, String> techniquePriorityColors = buildPriorityColorMap(coverageDTO, selectedType);
+        Map<UUID, Double> techniquePriorityScores = buildPriorityScoreMap(coverageDTO, selectedType);
 
         model.addAttribute("selectedCoverageType", selectedType);
+        model.addAttribute("coverageTypeHex", selectedType.getHexColor());
         model.addAttribute("tacticsMap", assessmentService.getTacticsWithTechniques());
         model.addAttribute("techniqueColors", techniqueColors);
         model.addAttribute("techniqueScores", techniqueScores);
+        model.addAttribute("techniqueOptimumScores", techniqueOptimumScores);
+        model.addAttribute("techniquePriorityColors", techniquePriorityColors);
+        model.addAttribute("techniquePriorityScores", techniquePriorityScores);
 
         return "assessment/assessmentResult :: heatmap";
     }
@@ -153,36 +167,81 @@ public class CoverageController {
     }
 
     /**
-     * Builds a map from technique ID to a CSS {@code rgb()} tint string for the given coverage type.
-     * The tint is interpolated linearly from white (score 0) to the type's base colour (score 5).
+     * Builds a map from technique ID to a CSS tint string for the given coverage type.
+     * Colour intensity reflects the effective coverage score on a fixed 0–5 scale.
      */
-    private Map<UUID, String> buildColorMap(MitreCoverageDTO coverageDTO, CoverageType type) {
+    private Map<UUID, String> buildColorMap(AssessmentResultDTO coverageDTO, CoverageType type) {
         Map<UUID, String> colors = new HashMap<>();
         String hex = type.getHexColor();
-
-        for (TacticCoverageScore tacticScore : coverageDTO.getCoverageScores().values()) {
-            for (Map.Entry<Technique, TechniqueCoverageScore> entry : tacticScore.techniqueCoverageScores.entrySet()) {
+        for (TacticAssessmentResult tacticScore : coverageDTO.getCoverageScores().values()) {
+            for (Map.Entry<Technique, TechniqueAssessmentResult> entry : tacticScore.getTechniqueAssessmentResults().entrySet()) {
                 UUID techniqueId = entry.getKey().getId();
-                double score = entry.getValue().getCoverageScore(type);
+                double score = entry.getValue().getAssessmentResults().get(type).getEffectiveCoverageScore();
                 colors.put(techniqueId, tintColor(hex, score));
             }
         }
-
         return colors;
     }
 
-    /** Builds a map from technique ID to its computed coverage score (0–5) for the given coverage type. */
-    private Map<UUID, Double> buildScoreMap(MitreCoverageDTO coverageDTO, CoverageType type) {
+    /** Builds a map from technique ID to its effective coverage score (0–5) for the given coverage type. */
+    private Map<UUID, Double> buildScoreMap(AssessmentResultDTO coverageDTO, CoverageType type) {
         Map<UUID, Double> scores = new HashMap<>();
-
-        for (TacticCoverageScore tacticScore : coverageDTO.getCoverageScores().values()) {
-            for (Map.Entry<Technique, TechniqueCoverageScore> entry : tacticScore.techniqueCoverageScores.entrySet()) {
+        for (TacticAssessmentResult tacticScore : coverageDTO.getCoverageScores().values()) {
+            for (Map.Entry<Technique, TechniqueAssessmentResult> entry : tacticScore.getTechniqueAssessmentResults().entrySet()) {
                 UUID techniqueId = entry.getKey().getId();
-                double score = entry.getValue().getCoverageScore(type);
-                scores.put(techniqueId, score);
+                scores.put(techniqueId, entry.getValue().getAssessmentResults().get(type).getEffectiveCoverageScore());
+            }
+        }
+        return scores;
+    }
+
+    /** Builds a map from technique ID to its optimum coverage score (0–5) for the given coverage type. */
+    private Map<UUID, Double> buildOptimumScoreMap(AssessmentResultDTO coverageDTO, CoverageType type) {
+        Map<UUID, Double> scores = new HashMap<>();
+        for (TacticAssessmentResult tacticScore : coverageDTO.getCoverageScores().values()) {
+            for (Map.Entry<Technique, TechniqueAssessmentResult> entry : tacticScore.getTechniqueAssessmentResults().entrySet()) {
+                UUID techniqueId = entry.getKey().getId();
+                scores.put(techniqueId, entry.getValue().getAssessmentResults().get(type).getOptimumCoverageScore());
+            }
+        }
+        return scores;
+    }
+
+    /**
+     * Builds a map from technique ID to a CSS tint string representing weighted priority for the given coverage type.
+     * Colour intensity is normalised so the technique with the highest weighted priority renders at full saturation.
+     */
+    private Map<UUID, String> buildPriorityColorMap(AssessmentResultDTO coverageDTO, CoverageType type) {
+        Map<UUID, Double> priorities = new HashMap<>();
+        double maxPriority = 0.0;
+
+        for (TacticAssessmentResult tacticScore : coverageDTO.getCoverageScores().values()) {
+            for (Map.Entry<Technique, TechniqueAssessmentResult> entry : tacticScore.getTechniqueAssessmentResults().entrySet()) {
+                double p = entry.getValue().getAssessmentResults().get(type).getWeightedPriority();
+                priorities.put(entry.getKey().getId(), p);
+                if (p > maxPriority) maxPriority = p;
             }
         }
 
+        Map<UUID, String> colors = new HashMap<>();
+        double max = maxPriority;
+        for (Map.Entry<UUID, Double> entry : priorities.entrySet()) {
+            double normalised = max > 0 ? (entry.getValue() / max) * 5.0 : 0.0;
+            colors.put(entry.getKey(), tintColor(type.getHexColor(), normalised));
+        }
+        return colors;
+    }
+
+    /** Builds a map from technique ID to its weighted priority score (0–5) for the given coverage type. */
+    private Map<UUID, Double> buildPriorityScoreMap(AssessmentResultDTO coverageDTO, CoverageType type) {
+        Map<UUID, Double> scores = new HashMap<>();
+        for (TacticAssessmentResult tacticScore : coverageDTO.getCoverageScores().values()) {
+            for (Map.Entry<Technique, TechniqueAssessmentResult> entry : tacticScore.getTechniqueAssessmentResults().entrySet()) {
+                UUID techniqueId = entry.getKey().getId();
+                double priority = entry.getValue().getAssessmentResults().get(type).getWeightedPriority();
+                scores.put(techniqueId, priority);
+            }
+        }
         return scores;
     }
 

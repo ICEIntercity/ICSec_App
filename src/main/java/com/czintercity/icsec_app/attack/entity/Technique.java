@@ -1,7 +1,9 @@
 package com.czintercity.icsec_app.attack.entity;
 
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,6 +33,9 @@ public class Technique {
     )
     private Set<Tactic> tactics;
 
+    @OneToMany(mappedBy = "technique")
+    private List<TechniqueCoverage> coverages;
+
     public String toString(){
         return String.format("Technique [id='%s';mitre_id='%s',name='%s';description='%s';]", id, mitreId, name, description);
     }
@@ -42,6 +47,7 @@ public class Technique {
     public String getDescription(){ return this.description; }
     public String getMitreLink(){ return this.mitreLink; }
     public Set<Tactic> getTactics(){ return this.tactics; }
+    public List<TechniqueCoverage> getCoverages(){ return this.coverages; }
 
     // SETTERS
     public void setId(UUID id) { this.id = id; }
