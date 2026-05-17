@@ -88,8 +88,8 @@
                         <div class="col-auto text-center" style="min-width: 3rem;">
                             <h4 class="fw-bold mb-0"
                                 th:text="${#numbers.formatDecimal(row.effectiveRating, 1, 1)}"
-                                th:classappend="${row.effectiveRating <= 1 ? 'text-danger' :
-                                                 (row.effectiveRating <= 3 ? 'text-warning' : 'text-success')}">0</h4>
+                                th:classappend="${row.effectiveRating < 2 ? 'text-danger' :
+                                                 (row.effectiveRating < 4 ? 'text-warning' : 'text-success')}">0</h4>
                             <small class="text-muted" style="font-size: 0.65rem;" th:text="'/ ' + ${row.coverage.coverageRating}">/ 5</small>
                         </div>
                         <div class="col border-start ps-3">
@@ -121,10 +121,10 @@
                 <div class="card-body py-2">
                     <div class="row align-items-center g-2">
                         <div class="col-auto text-center" style="min-width: 3rem;">
-                            <h4 class="fw-bold mb-0"
-                                th:text="${row.coverage.getCoverageRating()}"
-                                th:classappend="${row.coverage.getCoverageRating() <= 1 ? 'text-danger' :
-                                                 (row.coverage.getCoverageRating() <= 3 ? 'text-warning' : 'text-success')}">0</h4>
+                            <span class="badge border bg-transparent fw-bold fs-5"
+                                  th:text="${row.coverage.getCoverageRating()}"
+                                  th:classappend="${row.coverage.getCoverageRating() < 2 ? 'border-danger text-danger' :
+                                                   (row.coverage.getCoverageRating() < 4 ? 'border-warning text-warning' : 'border-success text-success')}">0</span>
                         </div>
                         <div class="col border-start ps-3">
                             <span class="fw-semibold small d-block"
