@@ -49,8 +49,7 @@ public class ControlController {
     @GetMapping("/control/all")
     public String listControls(Model model) {
         log.trace("listControls called.");
-        Iterable<Control> controls = controlRepository.findAll();
-        model.addAttribute("controls", controls);
+        model.addAttribute("topics", topicRepository.findAll());
         return "control/allControls";
     }
 

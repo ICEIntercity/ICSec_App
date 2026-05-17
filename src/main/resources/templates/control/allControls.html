@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: html}">
 <head>
-    <th:block th:with="pageTitle='TopControlsics'"></th:block>
+    <th:block th:with="pageTitle='Controls'"></th:block>
 </head>
 <body>
 <div th:fragment="content">
@@ -11,7 +11,14 @@
     </div>
     <a class="btn btn-success" th:href="@{/control/new}">Add new control</a>
     <div class="container-fluid py-4">
-        <div th:replace="~{fragments/controlList :: controlGrid(controlList=${controls})}"></div>
+        <div th:each="topic : ${topics}" class="mb-5">
+            <div class="d-flex align-items-center mb-3 gap-2">
+                <span class="badge text-bg-secondary font-monospace fs-6" th:text="${topic.getCode()}"></span>
+                <h4 class="mb-0 fw-bold" th:text="${topic.getName()}"></h4>
+            </div>
+            <div th:replace="~{fragments/controlList :: controlGrid(controlList=${topic.getControls()})}"></div>
+            <hr class="mt-4">
+        </div>
     </div>
 </div>
 </body>
