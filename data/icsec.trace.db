@@ -16682,3 +16682,12 @@ Caused by: org.h2.jdbc.JdbcSQLInvalidAuthorizationSpecException: Wrong user name
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:522)
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
 	... 50 more
+2026-05-17 16:46:36.586159+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "script [*]data to './data/backup.sql'"; SQL statement:
+script data to './data/backup.sql' [42000-240]
+2026-05-17 16:47:01.952371+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "script [*]data to './data/backup_data.sql'"; SQL statement:
+script data to './data/backup_data.sql' [42000-240]
+2026-05-17 16:49:54.309675+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "script [*]simle to './data/backup_full.sql'"; SQL statement:
+script simle to './data/backup_full.sql' [42000-240]
