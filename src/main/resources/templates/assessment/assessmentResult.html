@@ -84,7 +84,7 @@
                                            th:attr="data-coverage-score=${techniqueScores[technique.getId()]},
                                                     data-priority-score=${techniquePriorityScores[technique.getId()]},
                                                     data-priority-optimum-score=${techniqueOptimumScores[technique.getId()]}"
-                                           th:text="${#numbers.formatDecimal(techniqueScores[technique.getId()], 1, 'COMMA', 1, 'POINT') + ' / 5'}">0.0 / 5</small>
+                                           th:text="${#numbers.formatDecimal(techniqueScores[technique.getId()], 1, 'COMMA', 2, 'POINT') + ' / 5'}">0.00 / 5</small>
                                 </div>
                             </div>
                         </div>
@@ -103,10 +103,10 @@
             });
             document.querySelectorAll('small[data-coverage-score]').forEach(el => {
                 if (isCoverage) {
-                    el.textContent = parseFloat(el.dataset.coverageScore).toFixed(1) + ' / 5';
+                    el.textContent = parseFloat(el.dataset.coverageScore).toFixed(2) + ' / 5';
                 } else {
-                    const effective = parseFloat(el.dataset.coverageScore).toFixed(1);
-                    const optimum = parseFloat(el.dataset.priorityOptimumScore).toFixed(1);
+                    const effective = parseFloat(el.dataset.coverageScore).toFixed(2);
+                    const optimum = parseFloat(el.dataset.priorityOptimumScore).toFixed(2);
                     el.textContent = effective + ' / ' + optimum;
                 }
             });
