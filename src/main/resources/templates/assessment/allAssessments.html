@@ -8,9 +8,10 @@
 
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h3 class="mb-0">Assessments</h3>
-        <a th:href="@{/assessment}" class="btn btn-success">
+        <button type="button" class="btn btn-success"
+                data-bs-toggle="modal" data-bs-target="#newAssessmentModal">
             <i class="bi bi-plus-lg me-1"></i>New Assessment
-        </a>
+        </button>
     </div>
 
     <div id="assessment-list-container">
@@ -106,6 +107,49 @@
         </div>
 
     </div>
+
+    <!-- New Assessment Modal -->
+    <div class="modal fade" id="newAssessmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Assessment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/assessment/save}" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="newAssessmentName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="newAssessmentName"
+                                   name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newAssessmentDescription" class="form-label">
+                                Description <span class="text-muted fw-normal">(optional)</span>
+                            </label>
+                            <textarea class="form-control" id="newAssessmentDescription"
+                                      name="description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-lg me-1"></i>Create
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('newAssessmentModal').addEventListener('show.bs.modal', function () {
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const formatted = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}.${String(now.getMilliseconds()).padStart(6, '0')}`;
+            document.getElementById('newAssessmentName').value = 'Assessment on ' + formatted;
+        });
+    </script>
 
 </div>
 </body>
