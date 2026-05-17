@@ -30,6 +30,9 @@ public class Topic {
     @Length(max=4096, message="Description must be 4096 characters or shorter.")
     private String description;
 
+    @Column
+    private String color;
+
     @OneToMany(mappedBy="topic")
     Set<Control> controls;
 
@@ -48,12 +51,22 @@ public class Topic {
     public String getCode() { return this.code; }
     public String getName() { return this.name; }
     public String getDescription() { return this.description; }
+    public String getColor() { return this.color; }
     public Iterable<Control> getControls() { return this.controls;}
+
+    public String getContrastColor() {
+        if (this.color == null || !this.color.matches("^#[0-9A-Fa-f]{6}$")) return "white";
+        int r = Integer.parseInt(this.color.substring(1, 3), 16);
+        int g = Integer.parseInt(this.color.substring(3, 5), 16);
+        int b = Integer.parseInt(this.color.substring(5, 7), 16);
+        return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.5 ? "#212529" : "white";
+    }
 
     public void setId(UUID id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setCode(String code) { this.code = code; }
     public void setDescription(String description) { this.description = description; }
+    public void setColor(String color) { this.color = color; }
 
     public Topic(){
         this.name = "";

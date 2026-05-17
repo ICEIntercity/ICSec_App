@@ -19,7 +19,11 @@
     </div>
     <div id="message-container"></div>
       <div class="container py-4">
-          <h1 th:text="${topic.getName()}"></h1> <span class="badge text-bg-secondary" th:text="${topic.getCode()}"></span>
+          <h1 th:text="${topic.getName()}"></h1>
+          <span class="badge"
+                th:classappend="${topic.getColor() == null ? 'bg-secondary' : ''}"
+                th:style="${topic.getColor() != null ? 'background-color: ' + topic.getColor() + '; color: ' + topic.getContrastColor() + ';' : ''}"
+                th:text="${topic.getCode()}"></span>
           <hr>
           <p th:text="${topic.getDescription()}"/>
           </div>

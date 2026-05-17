@@ -74,6 +74,9 @@ public class TopicController {
 
         if (!result.hasErrors()) {
             try {
+                if (received.getColor() != null && received.getColor().isBlank()) {
+                    received.setColor(null);
+                }
                 topicRepository.save(received);
                 model.addAttribute("formSuccess", "Topic updated successfully.");
             }

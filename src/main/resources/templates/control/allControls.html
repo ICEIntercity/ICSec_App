@@ -13,7 +13,10 @@
     <div class="container-fluid py-4">
         <div th:each="topic : ${topics}" class="mb-5">
             <div class="d-flex align-items-center mb-3 gap-2">
-                <span class="badge text-bg-secondary font-monospace fs-6" th:text="${topic.getCode()}"></span>
+                <span class="badge font-monospace fs-6"
+                      th:classappend="${topic.getColor() == null ? 'bg-secondary' : ''}"
+                      th:style="${topic.getColor() != null ? 'background-color: ' + topic.getColor() + '; color: ' + topic.getContrastColor() + ';' : ''}"
+                      th:text="${topic.getCode()}"></span>
                 <h4 class="mb-0 fw-bold" th:text="${topic.getName()}"></h4>
             </div>
             <div th:replace="~{fragments/controlList :: controlGrid(controlList=${topic.getControls()})}"></div>
