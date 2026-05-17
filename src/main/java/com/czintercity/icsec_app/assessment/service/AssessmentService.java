@@ -7,15 +7,12 @@ import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.assessment.entity.ControlStatus;
 import com.czintercity.icsec_app.assessment.repository.AssessmentRepository;
 import com.czintercity.icsec_app.assessment.repository.ControlStatusRepository;
-import com.czintercity.icsec_app.attack.entity.Tactic;
 import com.czintercity.icsec_app.attack.entity.Technique;
-import com.czintercity.icsec_app.attack.repository.TacticRepository;
 import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
 import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.controls.repository.ControlRepository;
 import com.czintercity.icsec_app.topics.entity.Topic;
 import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,16 +31,13 @@ public class AssessmentService {
     private final ControlRepository controlRepository;
     private final ControlStatusRepository controlStatusRepository;
     private final AssessmentRepository assessmentRepository;
-    private final TacticRepository tacticRepository;
     private final TechniqueRepository techniqueRepository;
 
     public AssessmentService(ControlRepository controlRepository, ControlStatusRepository controlStatusRepository,
-                             AssessmentRepository assessmentRepository, TacticRepository tacticRepository,
-                             TechniqueRepository techniqueRepository) {
+                             AssessmentRepository assessmentRepository, TechniqueRepository techniqueRepository) {
         this.controlRepository = controlRepository;
         this.controlStatusRepository = controlStatusRepository;
         this.assessmentRepository = assessmentRepository;
-        this.tacticRepository = tacticRepository;
         this.techniqueRepository = techniqueRepository;
     }
 
@@ -140,22 +134,6 @@ public class AssessmentService {
         }
         assessment.setControlStatusMapping(statusList);
         return assessmentRepository.save(assessment);
-    }
-
-    /**
-     * Returns all tactics sorted by MITRE ID, each paired with its techniques sorted
-     * by MITRE ID. Used to populate the prioritisation and coverage heatmap views.
-     */
-    @Transactional
-    public LinkedHashMap<Tactic, List<Technique>> getTacticsWithTechniques() {
-        List<Tactic> tactics = tacticRepository.findAll(Sort.by("mitreId"));
-        LinkedHashMap<Tactic, List<Technique>> result = new LinkedHashMap<>();
-        for (Tactic tactic : tactics) {
-            List<Technique> sorted = new ArrayList<>(tactic.getTechniques());
-            sorted.sort(Comparator.comparing(Technique::getMitreId));
-            result.put(tactic, sorted);
-        }
-        return result;
     }
 
     /**

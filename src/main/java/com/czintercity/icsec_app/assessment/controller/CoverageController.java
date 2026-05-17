@@ -9,6 +9,7 @@ import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.assessment.repository.AssessmentRepository;
 import com.czintercity.icsec_app.assessment.service.AssessmentService;
 import com.czintercity.icsec_app.assessment.service.CoverageCalculationService;
+import com.czintercity.icsec_app.attack.service.AttackService;
 import com.czintercity.icsec_app.attack.entity.Technique;
 import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType;
@@ -40,16 +41,18 @@ public class CoverageController {
 
     private final AssessmentRepository assessmentRepository;
     private final AssessmentService assessmentService;
+    private final AttackService attackService;
     private final CoverageCalculationService coverageCalculationService;
     private final TechniqueRepository techniqueRepository;
     private final TechniqueCoverageRepository techniqueCoverageRepository;
 
     public CoverageController(AssessmentRepository assessmentRepository, AssessmentService assessmentService,
-                              CoverageCalculationService coverageCalculationService,
+                              AttackService attackService, CoverageCalculationService coverageCalculationService,
                               TechniqueRepository techniqueRepository,
                               TechniqueCoverageRepository techniqueCoverageRepository) {
         this.assessmentRepository = assessmentRepository;
         this.assessmentService = assessmentService;
+        this.attackService = attackService;
         this.coverageCalculationService = coverageCalculationService;
         this.techniqueRepository = techniqueRepository;
         this.techniqueCoverageRepository = techniqueCoverageRepository;
@@ -83,7 +86,7 @@ public class CoverageController {
         model.addAttribute("coverageTypes", CoverageType.values());
         model.addAttribute("selectedCoverageType", selectedType);
         model.addAttribute("coverageTypeHex", selectedType.getHexColor());
-        model.addAttribute("tacticsMap", assessmentService.getTacticsWithTechniques());
+        model.addAttribute("tacticsMap", attackService.getTacticsWithTechniques());
         model.addAttribute("techniqueColors", techniqueColors);
         model.addAttribute("techniqueScores", techniqueScores);
         model.addAttribute("techniqueOptimumScores", techniqueOptimumScores);
@@ -120,7 +123,7 @@ public class CoverageController {
 
         model.addAttribute("selectedCoverageType", selectedType);
         model.addAttribute("coverageTypeHex", selectedType.getHexColor());
-        model.addAttribute("tacticsMap", assessmentService.getTacticsWithTechniques());
+        model.addAttribute("tacticsMap", attackService.getTacticsWithTechniques());
         model.addAttribute("techniqueColors", techniqueColors);
         model.addAttribute("techniqueScores", techniqueScores);
         model.addAttribute("techniqueOptimumScores", techniqueOptimumScores);
