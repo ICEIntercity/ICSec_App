@@ -9,6 +9,7 @@ import com.czintercity.icsec_app.assessment.dto.TechniquePrioritiesFormDTO;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.assessment.repository.AssessmentRepository;
 import com.czintercity.icsec_app.assessment.service.AssessmentService;
+import com.czintercity.icsec_app.attack.service.AttackService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,10 +27,13 @@ import org.springframework.web.server.ResponseStatusException;
 public class AssessmentController {
     private final AssessmentRepository assessmentRepository;
     private final AssessmentService assessmentService;
+    private final AttackService attackService;
 
-    public AssessmentController(AssessmentRepository assessmentRepository, AssessmentService assessmentService) {
+    public AssessmentController(AssessmentRepository assessmentRepository, AssessmentService assessmentService,
+                                AttackService attackService) {
         this.assessmentRepository = assessmentRepository;
         this.assessmentService = assessmentService;
+        this.attackService = attackService;
     }
 
     /**
@@ -91,7 +95,7 @@ public class AssessmentController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
         }
         model.addAttribute("assessment", new AssessmentDTO(existing.get()));
-        model.addAttribute("tacticsMap", assessmentService.getTacticsWithTechniques());
+        model.addAttribute("tacticsMap", attackService.getTacticsWithTechniques());
         model.addAttribute("existingPriorities", assessmentService.getTechniquePriorities(assessmentId));
         return "assessment/mitreAssessment";
     }

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="techniqueDetail" class="modal-content">
+    <div class="modal-header">
+        <div>
+            <span class="badge bg-danger font-monospace me-2" th:text="${technique.getMitreId()}">T0001</span>
+            <span class="modal-title fw-bold" th:text="${technique.getName()}">Technique Name</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <div class="modal-body">
+        <p class="text-muted small" th:text="${technique.getDescription()}"></p>
+
+        <a th:if="${technique.getMitreLink() != null}"
+           th:href="${technique.getMitreLink()}"
+           target="_blank"
+           class="btn btn-sm btn-outline-secondary mb-4">
+            <i class="bi bi-box-arrow-up-right me-1"></i>View on MITRE ATT&amp;CK
+        </a>
+
+        <h6 class="border-bottom pb-2 mb-3">Coverage</h6>
+
+        <div th:if="${coverageByType.isEmpty()}" class="text-muted fst-italic">
+            No coverage defined for this technique.
+        </div>
+
+        <div th:each="typeEntry : ${coverageByType}" class="mb-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge fs-6"
+                      th:style="'background-color: ' + ${typeEntry.key.hexColor}"
+                      th:text="${typeEntry.key.displayValue}">Type</span>
+            </div>
+            <div th:each="coverage : ${typeEntry.value}" class="card mb-2">
+                <div class="card-body py-2">
+                    <div class="row align-items-center g-2">
+                        <div class="col-auto text-center" style="min-width: 3rem;">
+                            <span class="badge border bg-transparent fw-bold fs-5"
+                                  th:text="${coverage.getCoverageRating()}"
+                                  th:classappend="${coverage.getCoverageRating() < 2 ? 'border-danger text-danger' :
+                                                   (coverage.getCoverageRating() < 4 ? 'border-warning text-warning' : 'border-success text-success')}">0</span>
+                        </div>
+                        <div class="col border-start ps-3">
+                            <span class="fw-semibold small d-block"
+                                  th:text="${coverage.getControl().getCode() + ' — ' + coverage.getControl().getName()}">Control</span>
+                            <span class="text-muted small" th:text="${coverage.getJustification()}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+</div>
+
+</body>
+</html>

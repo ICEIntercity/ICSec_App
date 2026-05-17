@@ -4,6 +4,10 @@ import com.czintercity.icsec_app.attack.entity.Tactic;
 import com.czintercity.icsec_app.attack.entity.Technique;
 import com.czintercity.icsec_app.attack.repository.TacticRepository;
 import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
+import com.czintercity.icsec_app.attack.service.AttackService;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.repository.TechniqueCoverageRepository;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -11,27 +15,57 @@ import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.core.io.Resource;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Controller
 public class AttackController {
     private static final Logger log = LoggerFactory.getLogger(AttackController.class);
 
-    @Autowired
-    private TechniqueRepository techniqueRepository;
+    private final TechniqueRepository techniqueRepository;
+    private final TacticRepository tacticRepository;
+    private final AttackService attackService;
+    private final TechniqueCoverageRepository techniqueCoverageRepository;
 
-    @Autowired
-    private TacticRepository tacticRepository;
+    public AttackController(TechniqueRepository techniqueRepository, TacticRepository tacticRepository,
+                            AttackService attackService, TechniqueCoverageRepository techniqueCoverageRepository) {
+        this.techniqueRepository = techniqueRepository;
+        this.tacticRepository = tacticRepository;
+        this.attackService = attackService;
+        this.techniqueCoverageRepository = techniqueCoverageRepository;
+    }
+
+    @GetMapping("/attack/techniques")
+    public String techniqueList(Model model) {
+        model.addAttribute("tacticsMap", attackService.getTacticsWithTechniques());
+        return "attack/techniqueList";
+    }
+
+    @GetMapping("/attack/technique/{techniqueId}/detail")
+    public String techniqueDetail(Model model, @PathVariable UUID techniqueId) {
+        Technique technique = techniqueRepository.findById(techniqueId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Technique not found"));
+
+        List<TechniqueCoverage> allCoverage = techniqueCoverageRepository.findByTechnique(technique);
+        Map<CoverageType, List<TechniqueCoverage>> coverageByType = new LinkedHashMap<>();
+        for (TechniqueCoverage coverage : allCoverage) {
+            coverageByType.computeIfAbsent(coverage.getCoverageType(), k -> new ArrayList<>()).add(coverage);
+        }
+
+        model.addAttribute("technique", technique);
+        model.addAttribute("coverageByType", coverageByType);
+        return "fragments/attack :: techniqueDetail";
+    }
 
     @GetMapping("/attack/reload")
     public ResponseEntity<String> reloadAttack(){
