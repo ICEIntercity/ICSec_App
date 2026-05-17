@@ -2,6 +2,7 @@ package com.czintercity.icsec_app.assessment.controller;
 
 import com.czintercity.icsec_app.assessment.dto.AssessmentDTO;
 import com.czintercity.icsec_app.assessment.dto.AssessmentResultDTO;
+import com.czintercity.icsec_app.assessment.dto.TechniqueAssessmentDetailDTO;
 import com.czintercity.icsec_app.assessment.model.TacticAssessmentResult;
 import com.czintercity.icsec_app.assessment.model.TechniqueAssessmentResult;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
@@ -164,6 +165,32 @@ public class CoverageController {
         model.addAttribute("maxRatings", maxRatings);
 
         return "fragments/techniqueDetail :: techniqueDetail";
+    }
+
+    /**
+     * Returns the assessment-aware technique detail modal fragment.
+     * Controls covering the technique are split into those already active in the assessment
+     * (shown with effective ratings) and those not yet included (shown with raw ratings).
+     */
+    @GetMapping("/assessment/{assessmentId}/technique/{techniqueId}/coverage-detail")
+    public String techniqueAssessmentDetail(Model model, @PathVariable UUID assessmentId,
+                                            @PathVariable UUID techniqueId) {
+        Optional<Assessment> assessmentOpt = assessmentRepository.findById(assessmentId);
+        if (assessmentOpt.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
+        }
+        Optional<Technique> techniqueOpt = techniqueRepository.findById(techniqueId);
+        if (techniqueOpt.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Technique not found");
+        }
+
+        TechniqueAssessmentDetailDTO detail = coverageCalculationService
+                .getTechniqueAssessmentDetail(assessmentOpt.get(), techniqueOpt.get());
+
+        model.addAttribute("technique", techniqueOpt.get());
+        model.addAttribute("detail", detail);
+
+        return "fragments/techniqueDetail :: techniqueAssessmentDetail";
     }
 
     /**

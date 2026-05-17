@@ -1,6 +1,8 @@
 package com.czintercity.icsec_app.assessment.service;
 
 import com.czintercity.icsec_app.assessment.dto.AssessmentResultDTO;
+import com.czintercity.icsec_app.assessment.dto.ControlCoverageRowDTO;
+import com.czintercity.icsec_app.assessment.dto.TechniqueAssessmentDetailDTO;
 import com.czintercity.icsec_app.assessment.model.AssessmentValues;
 import com.czintercity.icsec_app.assessment.model.TacticAssessmentResult;
 import com.czintercity.icsec_app.assessment.model.TechniqueAssessmentResult;
@@ -16,8 +18,12 @@ import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.Techniqu
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Calculates MITRE ATT&amp;CK coverage scores for a given {@link Assessment}.
@@ -126,5 +132,53 @@ public class CoverageCalculationService {
         dto.setAssessment(assessment);
         dto.setCoverageScores(tacticAssessmentResults);
         return dto;
+    }
+
+    /**
+     * Builds a {@link TechniqueAssessmentDetailDTO} for a single technique in the context of
+     * an assessment. Controls that cover the technique are split into two groups:
+     * <ul>
+     *   <li><em>Existing</em> — controls with a non-blank {@link ControlStatus} in the assessment,
+     *       shown with their maturity/scope-adjusted effective rating.</li>
+     *   <li><em>Additional</em> — controls not yet active in the assessment,
+     *       shown with their raw coverage rating as the potential gain.</li>
+     * </ul>
+     * Within each group the rows are further grouped by {@link CoverageType}.
+     *
+     * @param assessment the assessment providing the active control statuses
+     * @param technique  the technique whose coverage rows are being inspected
+     * @return a {@link TechniqueAssessmentDetailDTO} ready for the detail modal fragment
+     */
+    @Transactional
+    public TechniqueAssessmentDetailDTO getTechniqueAssessmentDetail(Assessment assessment, Technique technique) {
+        Map<UUID, ControlStatus> statusMap = new HashMap<>();
+        for (ControlStatus cs : assessment.getControlStatusMapping()) {
+            statusMap.put(cs.getControl().getId(), cs);
+        }
+
+        Map<CoverageType, List<ControlCoverageRowDTO>> existingByType = new LinkedHashMap<>();
+        Map<CoverageType, List<ControlCoverageRowDTO>> additionalByType = new LinkedHashMap<>();
+
+        for (TechniqueCoverage coverage : technique.getCoverages()) {
+            CoverageType type = coverage.getCoverageType();
+            ControlStatus status = statusMap.get(coverage.getControl().getId());
+
+            if (status != null && !status.isBlank()) {
+                double effectiveRating = (Math.pow(status.getCoverageScope(), 0.65)
+                        * Math.pow(status.getCoverageMaturity(), 0.35) / 5)
+                        * coverage.getCoverageRating();
+                if (!existingByType.containsKey(type)) {
+                    existingByType.put(type, new ArrayList<>());
+                }
+                existingByType.get(type).add(new ControlCoverageRowDTO(coverage, effectiveRating));
+            } else {
+                if (!additionalByType.containsKey(type)) {
+                    additionalByType.put(type, new ArrayList<>());
+                }
+                additionalByType.get(type).add(new ControlCoverageRowDTO(coverage, null));
+            }
+        }
+
+        return new TechniqueAssessmentDetailDTO(existingByType, additionalByType);
     }
 }

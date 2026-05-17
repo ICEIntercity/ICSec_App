@@ -50,5 +50,97 @@
     </div>
 </div>
 
+
+<div th:fragment="techniqueAssessmentDetail" class="modal-content">
+    <div class="modal-header">
+        <div>
+            <span class="badge bg-danger font-monospace me-2" th:text="${technique.getMitreId()}">T0001</span>
+            <span class="modal-title fw-bold" th:text="${technique.getName()}">Technique Name</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <div class="modal-body">
+        <p class="text-muted small" th:text="${technique.getDescription()}"></p>
+
+        <a th:if="${technique.getMitreLink() != null}"
+           th:href="${technique.getMitreLink()}"
+           target="_blank"
+           class="btn btn-sm btn-outline-secondary mb-4">
+            <i class="bi bi-box-arrow-up-right me-1"></i>View on MITRE ATT&amp;CK
+        </a>
+
+        <h6 class="border-bottom pb-2 mb-3">Coverage from existing controls</h6>
+
+        <div th:if="${detail.existingByType.isEmpty()}" class="text-muted fst-italic mb-4">
+            No active controls cover this technique.
+        </div>
+
+        <div th:each="typeEntry : ${detail.existingByType}" class="mb-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge fs-6"
+                      th:style="'background-color: ' + ${typeEntry.key.hexColor}"
+                      th:text="${typeEntry.key.displayValue}">Type</span>
+            </div>
+            <div th:each="row : ${typeEntry.value}" class="card mb-2">
+                <div class="card-body py-2">
+                    <div class="row align-items-center g-2">
+                        <div class="col-auto text-center" style="min-width: 3rem;">
+                            <h4 class="fw-bold mb-0"
+                                th:text="${#numbers.formatDecimal(row.effectiveRating, 1, 1)}"
+                                th:classappend="${row.effectiveRating <= 1 ? 'text-danger' :
+                                                 (row.effectiveRating <= 3 ? 'text-warning' : 'text-success')}">0</h4>
+                            <small class="text-muted" style="font-size: 0.65rem;" th:text="'/ ' + ${row.coverage.coverageRating}">/ 5</small>
+                        </div>
+                        <div class="col border-start ps-3">
+                            <span class="fw-semibold small d-block"
+                                  th:text="${row.coverage.control.code + ' — ' + row.coverage.control.name}">Control</span>
+                            <span class="text-muted small">
+                                Raw rating: <strong th:text="${row.coverage.coverageRating} + ' / 5'">0 / 5</strong>
+                            </span>
+                            <span class="text-muted small d-block" th:text="${row.coverage.justification}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h6 class="border-bottom pb-2 mb-3">Coverage from additional controls</h6>
+
+        <div th:if="${detail.additionalByType.isEmpty()}" class="text-muted fst-italic">
+            No additional controls available.
+        </div>
+
+        <div th:each="typeEntry : ${detail.additionalByType}" class="mb-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge fs-6"
+                      th:style="'background-color: ' + ${typeEntry.key.hexColor}"
+                      th:text="${typeEntry.key.displayValue}">Type</span>
+            </div>
+            <div th:each="row : ${typeEntry.value}" class="card mb-2">
+                <div class="card-body py-2">
+                    <div class="row align-items-center g-2">
+                        <div class="col-auto text-center" style="min-width: 3rem;">
+                            <h4 class="fw-bold mb-0"
+                                th:text="${row.coverage.getCoverageRating()}"
+                                th:classappend="${row.coverage.getCoverageRating() <= 1 ? 'text-danger' :
+                                                 (row.coverage.getCoverageRating() <= 3 ? 'text-warning' : 'text-success')}">0</h4>
+                        </div>
+                        <div class="col border-start ps-3">
+                            <span class="fw-semibold small d-block"
+                                  th:text="${row.coverage.getControl().getCode() + ' — ' + row.coverage.getControl().getName()}">Control</span>
+                            <span class="text-muted small" th:text="${row.coverage.getJustification()}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+</div>
+
 </body>
 </html>

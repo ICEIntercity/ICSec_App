@@ -57,7 +57,7 @@
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3">
                     <div class="col" th:each="technique : ${tacticEntry.value}">
                         <div class="card h-100 shadow-sm border-0"
-                             th:attr="hx-get=@{/technique/{id}/coverage-detail(id=${technique.getId()})},
+                             th:attr="hx-get=@{/assessment/{assessmentId}/technique/{id}/coverage-detail(assessmentId=${assessment.getId()},id=${technique.getId()})},
                                       data-coverage-color=${techniqueColors[technique.getId()]},
                                       data-priority-color=${techniquePriorityColors[technique.getId()]}"
                              hx-target="#techniqueDetailHolder"
