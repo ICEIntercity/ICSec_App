@@ -112,9 +112,10 @@ public class AIService {
 
         for (Map<String, Object> item : items) {
             String mitreId = (String) item.get("technique_id");
-            String coverageTypeStr = (String) item.get("coverage_type");
-            int score = ((Number) item.get("coverage_score")).intValue();
-            String reasoning = (String) item.get("reasoning");
+            if (mitreId == null) {
+                log.warn("Skipping entry with missing technique_id: {}", item);
+                continue;
+            }
 
             Technique technique = techniqueRepository.findByMitreId(mitreId).orElse(null);
             if (technique == null) {
@@ -122,9 +123,16 @@ public class AIService {
                 continue;
             }
 
+            String coverageTypeStr = (String) item.get("coverage_type");
+            Number scoreNum = (Number) item.get("coverage_score");
+            int score = scoreNum != null ? scoreNum.intValue() : 0;
+            String reasoning = (String) item.get("reasoning");
+
             CoverageType coverageType;
             try {
-                coverageType = CoverageType.valueOf(coverageTypeStr.toUpperCase());
+                coverageType = coverageTypeStr != null
+                        ? CoverageType.valueOf(coverageTypeStr.toUpperCase())
+                        : CoverageType.UNKNOWN;
             } catch (IllegalArgumentException e) {
                 log.warn("Unknown coverage type '{}', defaulting to UNKNOWN", coverageTypeStr);
                 coverageType = CoverageType.UNKNOWN;

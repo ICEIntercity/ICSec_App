@@ -13,7 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -39,9 +39,7 @@ public class AIController {
      * a template fragment containing the resulting coverage list.
      */
     @PostMapping("/ai/assess-coverage")
-    public String assessControlCoverage(@RequestBody java.util.Map<String, String> payload, Model model) {
-        String name = payload.get("name");
-        String description = payload.get("description");
+    public String assessControlCoverage(@RequestParam String name, @RequestParam String description, Model model) {
 
         // Create a transient control object to pass to existing logic
         Control control = new Control();
@@ -65,9 +63,7 @@ public class AIController {
      * fragment without making any AI calls.
      */
     @PostMapping("/ai/test-render")
-    public String testRender(@RequestBody java.util.Map<String, String> payload, Model model) throws IOException {
-        String name = payload.get("name");
-        String description = payload.get("description");
+    public String testRender(@RequestParam String name, @RequestParam String description, Model model) throws IOException {
 
         // Create a transient control object for the parser
         Control control = new Control();

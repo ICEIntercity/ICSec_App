@@ -49,6 +49,7 @@ public class CoverageAssessmentAgent {
                     + "---\n\n"
                     + "## Step 3 — Coverage Verification\n\n"
                     + "Each coverage tool returns `coverage_rating` (0–5) and `coverage_justification`. For each response, assess whether the rating and justification are accurate given the control and the technique's mechanics in an OT/ICS environment.\n\n"
+                    + "Think through your assessment in plain prose (no JSON, no code blocks). For each entry, note in a numbered list whether you accept it or override it, and what the final values are.\n\n"
                     + "If your assessed score differs by more than 1 point from `coverage_rating`, OR the justification is factually or logically flawed:\n"
                     + "  → Override `coverage_rating` with your assessed value, replace `coverage_justification` with your own (1–3 sentences, specific to this technique and category), and set `overridden: true`.\n\n"
                     + "Discard any entry whose final `coverage_rating` is 0.\n\n"
