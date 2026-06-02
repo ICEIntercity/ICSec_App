@@ -60,7 +60,7 @@ public class CoverageAssessmentAgent {
                     + "  \"technique_id\": \"string\",    // e.g. \"T0859\"\n"
                     + "  \"technique_name\": \"string\",  // technique_title from Step 1\n"
                     + "  \"coverage_type\": \"string\",   // lowercase mapped_categories value\n"
-                    + "  \"coverage_score\": integer,     // final coverage_rating (1–5)\n"
+                    + "  \"coverage_rating\": integer,     // final coverage_rating (1–5)\n"
                     + "  \"reasoning\": \"string\",        // final coverage_justification\n"
                     + "  \"overridden\": boolean\n"
                     + "}\n\n"

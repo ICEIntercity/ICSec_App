@@ -15,10 +15,10 @@
 
 <div th:fragment="coverageTable" class="modal-content">
     <div class="modal-header bg-light d-flex justify-content-between align-items-center">
-        <h5 class="modal-title mb-0"><i class="bi bi-stars text-info"></i> AI Proposed Coverage</h5>
+        <h5 class="modal-title mb-0"><i class="bi bi-stars text-info"></i> <span th:text="${coverageSourceLabel ?: 'AI Proposed Coverage'}">AI Proposed Coverage</span></h5>
         <div class="d-flex gap-2">
-            <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Reject AI output</button>
-            <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal" onclick="acceptAITechniqueCoverage()">Accept AI output</button>
+            <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Reject</button>
+            <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal" onclick="acceptProposedCoverage()">Accept</button>
             <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
     </div>
@@ -32,7 +32,7 @@
     </div>
 
     <script>
-        function acceptAITechniqueCoverage() {
+        function acceptProposedCoverage() {
             const sourceList = document.getElementById('aiProposedCoverageList');
             const targetList = document.getElementById('coverageList');
 

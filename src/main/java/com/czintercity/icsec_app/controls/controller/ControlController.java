@@ -1,5 +1,7 @@
 package com.czintercity.icsec_app.controls.controller;
 
+import com.czintercity.icsec_app.ai.service.AIService;
+import com.czintercity.icsec_app.ai.utils.AIUtils;
 import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
 import com.czintercity.icsec_app.controls.repository.ControlRepository;
 import com.czintercity.icsec_app.controls.ControlService;
@@ -7,6 +9,7 @@ import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.controls.form.EditControlForm;
 import com.czintercity.icsec_app.relationships.controlRelationship.repository.ControlRelationshipRepository;
 import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelationshipService;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.repository.TechniqueCoverageRepository;
 import com.czintercity.icsec_app.topics.repository.TopicRepository;
 import jakarta.validation.Valid;
@@ -32,12 +35,14 @@ public class ControlController {
     private final TopicRepository topicRepository;
     private final TechniqueRepository techniqueRepository;
     private final ControlService controlService;
+    private final AIService aiService;
 
-    public ControlController(ControlRepository controlRepository, TopicRepository topicRepository, TechniqueCoverageRepository techniqueCoverageRepository, TechniqueRepository techniqueRepository, ControlRelationshipRepository controlRelationshipRepository, ControlRelationshipService controlRelationshipService, ControlService controlService) {
+    public ControlController(ControlRepository controlRepository, TopicRepository topicRepository, TechniqueCoverageRepository techniqueCoverageRepository, TechniqueRepository techniqueRepository, ControlRelationshipRepository controlRelationshipRepository, ControlRelationshipService controlRelationshipService, ControlService controlService, AIService aiService) {
         this.controlRepository = controlRepository;
         this.topicRepository = topicRepository;
         this.techniqueRepository = techniqueRepository;
         this.controlService = controlService;
+        this.aiService = aiService;
     }
 
     /**
@@ -144,6 +149,28 @@ public class ControlController {
         else {
             return "redirect:/control/new";
         }
+    }
+
+    @PostMapping("/control/import-coverage")
+    public String importCoverageFromJson(@RequestParam String json, Model model) {
+        Control control = new Control();
+        log.info("Importing technique coverage from JSON ({} chars)", json.length());
+
+        List<TechniqueCoverage> coverages = List.of();
+        Optional<String> extracted = AIUtils.extractJson(json);
+        if (extracted.isPresent()) {
+            try {
+                coverages = aiService.parseAssessmentOutput(extracted.get(), control);
+            } catch (Exception e) {
+                log.warn("Failed to parse import JSON: {}", e.getMessage());
+            }
+        } else {
+            log.warn("No JSON array found in import input");
+        }
+
+        model.addAttribute("coverageList", coverages);
+        model.addAttribute("coverageSourceLabel", "Imported Coverage");
+        return "fragments/ai :: coverageTable";
     }
 
     @DeleteMapping("control/delete/{id}")

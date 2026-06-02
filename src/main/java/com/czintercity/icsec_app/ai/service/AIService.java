@@ -93,7 +93,7 @@ public class AIService {
      * <ul>
      *   <li>{@code technique_id} — MITRE ATT&CK for ICS technique identifier (e.g. {@code "T0859"})</li>
      *   <li>{@code coverage_type} — coverage category string (e.g. {@code "detective"})</li>
-     *   <li>{@code coverage_score} — integer rating from 1 to 5</li>
+     *   <li>{@code coverage_rating} — integer rating from 1 to 5</li>
      *   <li>{@code reasoning} — plain-language justification for the score</li>
      * </ul>
      *
@@ -124,7 +124,7 @@ public class AIService {
             }
 
             String coverageTypeStr = (String) item.get("coverage_type");
-            Number scoreNum = (Number) item.get("coverage_score");
+            Number scoreNum = (Number) item.get("coverage_rating");
             int score = scoreNum != null ? scoreNum.intValue() : 0;
             String reasoning = (String) item.get("reasoning");
 
