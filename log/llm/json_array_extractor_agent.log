@@ -1,0 +1,504 @@
+2026-05-31 12:37:46.230 INFO  - INPUT  Now I'll assess these responses and apply overrides where needed based on the accuracy of the ratings and justifications.
+
+**Assessment of Coverage Responses:**
+
+After reviewing the tool responses, I'll now apply my assessment to identify any overrides needed:
+
+1. **T0801 (Monitor Process State)** - Rating 1: Appropriate. EDR cannot directly monitor OPC tags, historian data, or PLC block information. Detection would only occur on higher-level endpoints if process state monitoring generates suspicious process behavior.
+
+2. **T0802 (Automated Collection)** - Rating 2: Appropriate. EDR can detect some automated collection activities through process monitoring, but the architecture limits visibility to higher-level endpoints.
+
+3. **T0807 (Command-Line Interface)** - Rating 2: Appropriate. EDR can monitor CLI usage through process execution, but has limited visibility into embedded ICS devices and legacy systems.
+
+4. **T0840 (Network Connection Enumeration)** - Rating 3: Appropriate. EDR can detect execution of enumeration tools like netstat, though visibility is limited to monitored endpoints.
+
+5. **T0842 (Network Sniffing)** - Rating 1: This rating seems slightly harsh. While EDR has limitations, it can detect packet capture tools being executed. I'd assess this as 2 rather than 1, since EDR can identify suspicious process execution of packet capture utilities. **Override to 2.**
+
+6. **T0852 (Screen Capture)** - Rating 2: Appropriate. Limited to higher-level endpoints and can miss native OS screenshot functions.
+
+7. **T0872 (Indicator Removal on Host)** - Rating 3: Appropriate. EDR's continuous telemetry collection provides good visibility into file deletion, log tampering, etc., though limited by ICS architectural constraints.
+
+8. **T0895 (Autorun Image)** - Rating 3: Appropriate. EDR can detect registry modifications and suspicious process execution following media insertion on monitored endpoints.
+
+9. **T0890 (Exploitation for Privilege Escalation)** - Rating 3: Appropriate. EDR can detect behavioral anomalies and API calls associated with privilege escalation exploits on monitored endpoints.
+
+10. **T0866 (Exploitation of Remote Services)** - Rating 2: Appropriate. EDR's limitations in detecting the exploitation itself (versus post-exploitation activities) justify this rating.
+
+11. **T0874 (Hooking)** - Rating 3: Appropriate. EDR can detect DLL injection and API hooking through behavioral monitoring, though limited by ICS constraints.
+
+12. **T0851 (Rootkit)** - Rating 2: Appropriate. EDR has significant difficulty detecting kernel/firmware-level rootkits.
+
+13. **T0853 (Scripting)** - Rating 2: Appropriate. Limited to monitored endpoints and constrained by ICS operational requirements.
+
+14. **T0893 (Data from Local System)** - Rating 3: Appropriate. EDR can monitor file system access and command execution on higher-level endpoints.
+
+15. **T0894 (System Binary Proxy Execution)** - Rating 3: Appropriate. EDR can detect suspicious process chains from trusted binaries, though limited by ICS constraints.
+
+16. **T0867 (Lateral Tool Transfer)** - Rating 3: Appropriate. EDR can detect file transfers and SMB activity on monitored endpoints, though constrained by device coverage.
+
+17. **T0814 (Denial of Service)** - Rating 2: Appropriate. EDR has limited ability to detect network-level DoS attacks and resource exhaustion attacks.
+
+One override identified:
+2026-05-31 12:37:47.724 INFO  - OUTPUT ```json
+[
+  {
+    "technique_id": "T0842",
+    "original_rating": 1,
+    "overridden_rating": 2,
+    "justification": "EDR can detect packet capture tools being executed through process monitoring and suspicious process execution patterns, despite limitations in visibility to embedded ICS devices. Rating of 1 was too harsh given EDR's capability to identify packet capture utility execution."
+  }
+]
+```
+2026-05-31 17:48:51.876 INFO  - INPUT  ## Step 3 — Coverage Verification
+
+Let me assess each response:
+
+1. **T0895 (Autorun Image) - Preventative [4]**: The justification is accurate. Application whitelisting does effectively prevent execution of malicious code launched via AutoRun, but the rating of 4 is appropriate because whitelisting doesn't prevent the initial mounting of removable media or access to it—only the subsequent execution. The explanation correctly identifies implementation gaps and the need for complementary controls. I accept this rating.
+
+2. **T0807 (Command-Line Interface) - Preventative [4]**: The justification is thorough and accurate. The control prevents execution of unauthorized tools through CLI, which is the primary concern. The rating of 4 is appropriate because legitimate CLI tools often need to remain whitelisted, creating potential for living-off-the-land attacks. I accept this rating.
+
+3. **T0853 (Scripting) - Preventative [4]**: The justification is solid. Whitelisting can effectively prevent scripting attacks by restricting interpreters, but the rating of 4 is justified because not all scripting vectors are covered perfectly (embedded scripts, approved applications that run scripts, etc.). This is accurate. I accept this rating.
+
+4. **T0894 (System Binary Proxy Execution) - Preventative [4]**: The justification correctly identifies that whitelisting prevents the execution of malicious payloads using system binaries as proxies, but acknowledges that if legitimate binaries are whitelisted for operational purposes, they could still be abused. The rating of 4 is appropriate. I accept this rating.
+
+5. **T0863 (User Execution) - Preventative [4]**: The justification accurately describes how whitelisting prevents malicious script/code execution from documents and installers. The rating of 4 is appropriate because macro-based attacks in Office documents could bypass if Office itself is whitelisted, and implementation challenges exist. I accept this rating.
+
+6. **T0871 (Execution through API) - Preventative [2]**: This rating is accurate but potentially conservative. The justification correctly identifies that whitelisting prevents unauthorized applications from executing APIs, but legitimate whitelisted applications could abuse APIs. A rating of 2 might be slightly low since whitelisting does prevent the majority of unauthorized tools from accessing APIs; however, the core point is valid—whitelisting doesn't control API usage within approved applications. The rating of 2 reflects that while it blocks some vectors, it's insufficient against attackers using legitimate applications. I accept this rating, though 2-3 would both be defensible.
+
+7. **T0849 (Masquerading) - Detective [4]**: The justification is well-reasoned. Whitelisting detects masquerading by verifying actual file hashes/paths against approved versions, making the deceptive name irrelevant. The rating of 4 is appropriate because supply chain compromise or whitelisting tampering could bypass detection, and some dynamic execution methods might evade it. I accept this rating.
+
+---
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting effectively prevents malicious code execution via AutoRun by blocking unauthorized executables before they run. In OT/ICS environments with static operational requirements, this control is particularly effective at restricting execution to only approved applications. However, it achieves 4 rather than 5 because whitelisting does not prevent initial access to removable media or prevent exploitation of legitimate whitelisted applications.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0807",
+    "technique_name": "Command-Line Interface",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting strongly prevents installation and execution of malicious tools via CLI by restricting which applications can run. However, necessary administrative CLI tools and interpreters often require whitelisting for operational purposes, creating potential for living-off-the-land attacks using legitimate, approved utilities to execute malicious commands.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0853",
+    "technique_name": "Scripting",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting provides strong prevention against scripting attacks by restricting which interpreters and scripting engines can execute. The control is effective in OT/ICS environments where application sets are static and well-defined. However, comprehensive coverage requires accounting for all scripting interpreters, and some attack vectors such as scripts embedded within whitelisted applications may not be fully prevented.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0894",
+    "technique_name": "System Binary Proxy Execution",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting prevents malicious payloads from using trusted system binaries as execution proxies by restricting which processes can run. However, legitimate system binaries often require whitelisting for operational needs, and sophisticated attackers could potentially chain multiple whitelisted binaries in unanticipated ways or exploit legitimately-whitelisted utilities for malicious purposes.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0863",
+    "technique_name": "User Execution",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting prevents execution of malicious code embedded in documents, installers, and other user-triggered vectors by restricting which applications and scripts can execute. However, legitimate Office applications may require whitelisting, which could allow embedded macros to run if macro execution policies are not separately controlled, and dynamic application execution sometimes complicates whitelisting policies.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0871",
+    "technique_name": "Execution through API",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Application whitelisting provides limited prevention against API abuse because it cannot control which specific API calls approved applications are permitted to make. While it blocks unauthorized applications from accessing APIs, legitimate whitelisted control software could be exploited to make malicious API calls without additional API-level access controls or authorization mechanisms.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0849",
+    "technique_name": "Masquerading",
+    "coverage_type": "detective",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting effectively detects masquerading by verifying actual file hashes and paths against approved versions, making deceptive names irrelevant to execution control. The control is highly effective in static OT/ICS environments where application changes are planned and limited. However, it achieves 4 rather than 5 because supply chain compromises of legitimate applications or modifications to the whitelist itself could bypass this detection.",
+    "overridden": false
+  }
+]
+```
+2026-05-31 17:48:55.878 INFO  - OUTPUT ```json
+[
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting effectively prevents malicious code execution via AutoRun by blocking unauthorized executables before they run. In OT/ICS environments with static operational requirements, this control is particularly effective at restricting execution to only approved applications. However, it achieves 4 rather than 5 because whitelisting does not prevent initial access to removable media or prevent exploitation of legitimate whitelisted applications.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0807",
+    "technique_name": "Command-Line Interface",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting strongly prevents installation and execution of malicious tools via CLI by restricting which applications can run. However, necessary administrative CLI tools and interpreters often require whitelisting for operational purposes, creating potential for living-off-the-land attacks using legitimate, approved utilities to execute malicious commands.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0853",
+    "technique_name": "Scripting",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting provides strong prevention against scripting attacks by restricting which interpreters and scripting engines can execute. The control is effective in OT/ICS environments where application sets are static and well-defined. However, comprehensive coverage requires accounting for all scripting interpreters, and some attack vectors such as scripts embedded within whitelisted applications may not be fully prevented.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0894",
+    "technique_name": "System Binary Proxy Execution",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting prevents malicious payloads from using trusted system binaries as execution proxies by restricting which processes can run. However, legitimate system binaries often require whitelisting for operational needs, and sophisticated attackers could potentially chain multiple whitelisted binaries in unanticipated ways or exploit legitimately-whitelisted utilities for malicious purposes.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0863",
+    "technique_name": "User Execution",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting prevents execution of malicious code embedded in documents, installers, and other user-triggered vectors by restricting which applications and scripts can execute. However, legitimate Office applications may require whitelisting, which could allow embedded macros to run if macro execution policies are not separately controlled, and dynamic application execution sometimes complicates whitelisting policies.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0871",
+    "technique_name": "Execution through API",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Application whitelisting provides limited prevention against API abuse because it cannot control which specific API calls approved applications are permitted to make. While it blocks unauthorized applications from accessing APIs, legitimate whitelisted control software could be exploited to make malicious API calls without additional API-level access controls or authorization mechanisms.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0849",
+    "technique_name": "Masquerading",
+    "coverage_type": "detective",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting effectively detects masquerading by verifying actual file hashes and paths against approved versions, making deceptive names irrelevant to execution control. The control is highly effective in static OT/ICS environments where application changes are planned and limited. However, it achieves 4 rather than 5 because supply chain compromises of legitimate applications or modifications to the whitelist itself could bypass this detection.",
+    "overridden": false
+  }
+]
+```
+2026-06-02 10:50:42.369 INFO  - INPUT  Now let me assess each response for accuracy and determine final values:
+
+**Assessment of Coverage Evaluations:**
+
+1. **T0830 Adversary-in-the-Middle / Preventative (Rating: 4)**: The evaluation is well-reasoned. Message authentication directly prevents the modification and injection aspects of AiTM attacks. The 4-rating correctly acknowledges that the control prevents successful traffic modification but doesn't prevent the AiTM position itself from being established. Accept this rating.
+
+2. **T0830 Adversary-in-the-Middle / Detective (Rating: 4)**: This detective evaluation is accurate. Authentication mechanisms will detect tampering attempts through failed authentication checks. The 4-rating appropriately notes that passive eavesdropping isn't detected, only active modification attempts. Accept this rating.
+
+3. **T0803 Block Command Message / Detective (Rating: 1)**: This assessment is correct. Message authentication operates on messages that arrive; it cannot detect messages that have been blocked/dropped before reaching their destination. The 1-rating is appropriate as the control has minimal relevance to detecting blocking at the network layer. Accept this rating, but since it equals 0 in scope (coverage_rating of 1 is discarded per instructions), this will be retained as it is 1 point above the discard threshold.
+
+4. **T0804 Block Reporting Message / Detective (Rating: 1)**: Similarly correct. Authentication cannot detect blocked messages that never reach their destination. The control would need external monitoring (heartbeats, timeouts) to detect blocking. The 1-rating is appropriate. Accept this rating.
+
+5. **T0855 Unauthorized Command Message / Preventative (Rating: 4)**: Accurate. Message authentication prevents forged/unauthenticated commands from being accepted. The 4-rating correctly identifies that the control prevents injection but depends on proper implementation, key management, and comprehensive deployment. Accept this rating.
+
+6. **T0855 Unauthorized Command Message / Detective (Rating: 4)**: Accurate. Authentication rejects unauthenticated commands, detecting injection attempts. The 4-rating appropriately notes implementation gaps and key management risks. Accept this rating.
+
+7. **T0856 Spoof Reporting Message / Preventative (Rating: 4)**: Accurate. Message authentication prevents spoofed reporting messages from being accepted. The 4-rating correctly acknowledges the control's limitations from incomplete deployment and key compromise scenarios. Accept this rating.
+
+8. **T0856 Spoof Reporting Message / Detective (Rating: 4)**: Accurate. Authentication failures will detect spoofing attempts. The 4-rating appropriately qualifies the control with considerations for credential compromise and implementation gaps. Accept this rating.
+
+9. **T0842 Network Sniffing / Preventative (Rating: 2)**: This is accurate. Message authentication doesn't prevent sniffing (capture of traffic) but makes captured data less useful. The 2-rating correctly identifies that the control addresses data confidentiality but not the act of sniffing itself. Accept this rating.
+
+10. **T0869 Standard Application Layer Protocol / Detective (Rating: 2)**: This evaluation is well-reasoned. Authentication can detect unauthenticated C2 attempts, but if credentials are compromised, malicious C2 will appear legitimate. The 2-rating appropriately reflects that the control has limited utility against sophisticated attackers who use legitimate credentials. Accept this rating.
+2026-06-02 10:50:50.072 INFO  - OUTPUT ```json
+[
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "tactic": "Impair Process Control",
+    "coverage_type": "Preventative",
+    "coverage_rating": 4,
+    "rationale": "Message authentication directly prevents the modification and injection aspects of AiTM attacks by ensuring that any tampering with messages in transit will be detected and rejected. However, the control does not prevent an adversary from establishing an AiTM position itself—it only prevents successful exploitation once that position is established."
+  },
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "tactic": "Impair Process Control",
+    "coverage_type": "Detective",
+    "coverage_rating": 4,
+    "rationale": "Authentication mechanisms will detect tampering attempts through failed authentication checks when modified messages are rejected. The 4-rating appropriately notes that passive eavesdropping without modification is not detected, only active modification attempts."
+  },
+  {
+    "technique_id": "T0803",
+    "technique_name": "Block Command Message",
+    "tactic": "Impair Process Control",
+    "coverage_type": "Detective",
+    "coverage_rating": 1,
+    "rationale": "Message authentication operates on messages that arrive at their destination; it cannot detect messages that have been blocked or dropped before reaching that destination. The control has minimal relevance to detecting blocking at the network layer."
+  },
+  {
+    "technique_id": "T0804",
+    "technique_name": "Block Reporting Message",
+    "tactic": "Impair Process Control",
+    "coverage_type": "Detective",
+    "coverage_rating": 1,
+    "rationale": "Authentication cannot detect blocked messages that never reach their destination. Detection of reporting message blocking would require external monitoring mechanisms such as heartbeats or timeout detection, not message authentication."
+  },
+  {
+    "technique_id": "T0855",
+    "technique_name": "Unauthorized Command Message",
+    "tactic": "Impair Process Control",
+    "coverage_type": "Preventative",
+    "coverage_rating": 4,
+    "rationale": "Message authentication prevents forged and unauthenticated commands from being accepted by the system. The 4-rating reflects that while the control effectively prevents injection of unauthorized commands, its effectiveness depends on proper implementation, secure key management, and comprehensive deployment across all command channels."
+  },
+  {
+    "technique_id": "T0855",
+    "technique_name": "Unauthorized Command Message",
+    "tactic": "Impair Process Control",
+    "coverage_type": "Detective",
+    "coverage_rating": 4,
+    "rationale": "Authentication rejects unauthenticated commands, detecting injection attempts through authentication failures. The 4-rating appropriately notes that detection depends on proper implementation and key management, with residual risk from credential compromise scenarios."
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Spoof Reporting Message",
+    "tactic": "Impair Process Control",
+    "coverage_type": "Preventative",
+    "coverage_rating": 4,
+    "rationale": "Message authentication prevents spoofed reporting messages from being accepted by rejecting messages that fail authentication verification. The 4-rating correctly acknowledges limitations from incomplete deployment across all reporting channels and potential key compromise scenarios."
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Spoof Reporting Message",
+    "tactic": "Impair Process Control",
+    "coverage_type": "Detective",
+    "coverage_rating": 4,
+    "rationale": "Authentication failures will detect spoofing attempts when forged messages fail verification checks. The 4-rating appropriately qualifies the control by accounting for credential compromise risks and implementation gaps that could allow spoofed messages with valid credentials to appear legitimate."
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "tactic": "Discover",
+    "coverage_type": "Preventative",
+    "coverage_rating": 2,
+    "rationale": "Message authentication does not prevent network sniffing or the capture of traffic in transit. However, it does address the confidentiality aspect by making captured traffic less useful without the ability to decrypt or modify it. The 2-rating reflects that the control mitigates impact rather than preventing the technique itself."
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "tactic": "Command and Control",
+    "coverage_type": "Detective",
+    "coverage_rating": 2,
+    "rationale": "Message authentication can detect unauthenticated C2 communication attempts, but if an attacker has compromised legitimate credentials, malicious C2 traffic will appear authenticated and legitimate. The 2-rating reflects that the control has limited utility against sophisticated adversaries who operate with valid credentials or against implementation gaps where authentication is incomplete."
+  }
+]
+```
+2026-06-02 11:18:14.828 INFO  - INPUT  Now let me assess the coverage ratings and justifications provided by the evaluation tools for accuracy and consistency.
+
+**Step 3 - Coverage Verification:**
+
+1. **T0830 (Adversary-in-the-Middle) - Preventative [Rating: 4]**: The justification is well-reasoned. Secure transport protocols with encryption, authentication, and integrity controls do prevent most AiTM attacks, but limitations like implementation weaknesses, key compromise, and endpoint vulnerabilities are valid reasons to cap at 4 rather than 5. The assessment is sound. **Accept: 4**
+
+2. **T0830 (Adversary-in-the-Middle) - Detective [Rating: 4]**: The reasoning correctly identifies that TLS/SSH/IPSec detect tampering and failed authentication, though detection is reactive rather than proactive. Limitations around misconfigurations and protocol coverage gaps justify the 4 rating. **Accept: 4**
+
+3. **T0842 (Network Sniffing) - Preventative [Rating: 4]**: Encryption directly prevents sniffing from extracting information. The justification appropriately acknowledges that while traffic is encrypted, some legacy systems may lack encryption, and side-channel attacks remain possible. The 4 rating correctly reflects that prevention is comprehensive but not absolute. **Accept: 4**
+
+4. **T0842 (Network Sniffing) - Detective [Rating: 4]**: The response conflates prevention with detection somewhat, but the core logic is valid—encrypted protocols prevent the harm from sniffing. However, the justification claims this is "detective" when it's primarily preventative. The rating of 4 is defensible as this control prevents meaningful extraction of information rather than detecting sniffing activity itself. I would assess this more accurately as a **preventative** control with limited detective value. The tool classified it as both detective and preventative, but encrypting traffic doesn't actively detect sniffing attempts—it only prevents successful information extraction. **Override to 2**: Secure transport protocols do not detect sniffing activity; they only prevent successful data extraction. Detecting wireless sniffing would require passive RF monitoring or IDS alerts, not encryption. This control prevents harm but does not detect the sniffing attempt itself.
+
+5. **T0869 (Standard Application Layer Protocol) - Preventative [Rating: 2]**: This assessment is correct. Secure transport protocols can wrap some protocols (DNP3 → TLS-DNP3), but they cannot prevent an attacker using legitimate encrypted protocols like HTTPS or SSH for C2. An attacker with valid credentials or system compromise can still execute C2 over secure protocols. The 2 rating appropriately reflects that this control prevents only unencrypted C2 vectors (~25-50%), leaving many attack paths open. **Accept: 2**
+
+6. **T0869 (Standard Application Layer Protocol) - Detective [Rating: 1]**: The justification is sound. Secure transport protocols do not detect whether legitimate encrypted traffic is being used for C2 purposes. Detection requires behavioral analysis, not encryption. A rating of 1 is appropriate for minimal detective value. **Accept: 1**
+
+7. **T0885 (Commonly Used Port) - Preventative [Rating: 1]**: Correctly identifies that secure transport protocols do not prevent the use of common ports; they only secure what's transmitted over those ports. An attacker using HTTPS over port 443 remains undetected. The 1 rating is accurate. **Accept: 1**
+
+8. **T0885 (Commonly Used Port) - Detective [Rating: 1]**: Appropriately notes that secure protocols don't generate alerts for suspicious port usage. Using legitimate ports remains legitimate even with encryption. The 1 rating is justified. **Accept: 1**
+
+9. **T0887 (Wireless Sniffing) - Preventative [Rating: 4]**: Valid reasoning that encryption prevents information extraction from captured wireless traffic, but physical sniffing still occurs. The 4 rating properly reflects prevention of harm while acknowledging that encryption doesn't prevent the sniffing act itself. **Accept: 4**
+
+10. **T0887 (Wireless Sniffing) - Detective [Rating: 2]**: The justification correctly states that encryption doesn't detect RF sniffing, only prevents successful exploitation. Detection would require RF monitoring or WIDS. However, the rating of 2 seems slightly generous—this control provides very minimal detective value. An attacker passively capturing encrypted RF signals will not trigger any alerts from this control alone. **Override to 1**: Secure transport protocols provide essentially no detection of wireless sniffing activity. Encrypted RF traffic is still sniffed successfully; the control only prevents decryption. Detection requires dedicated RF monitoring or wireless intrusion detection systems, not encryption. The presence of this control does not alert operators to ongoing sniffing attempts.
+
+**Final Assessment Summary:**
+- T0830 Preventative: Accept 4
+- T0830 Detective: Accept 4
+- T0842 Preventative: Accept 4
+- T0842 Detective: Override to 2 (from 4)
+- T0869 Preventative: Accept 2
+- T0869 Detective: Accept 1
+- T0885 Preventative: Accept 1
+- T0885 Detective: Accept 1
+- T0887 Preventative: Accept 4
+- T0887 Detective: Override to 1 (from 2)
+
+```json
+[
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Secure transport protocols with encryption, message authentication (HMAC, digital signatures), and mutual authentication prevent most AiTM attacks by making traffic unreadable and detectable if modified. However, implementation weaknesses, key compromise, certificate validation failures, and sophisticated attackers with endpoint access can circumvent these protections, preventing a perfect score.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "TLS, SSH, and IPSec protocols detect unauthorized modification and session hijacking through cryptographic authentication and integrity verification, making unauthorized message tampering extremely difficult. However, detection effectiveness depends on proper implementation, certificate validation, and comprehensive protocol deployment across all critical segments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Encryption via TLS, SSH, and IPSec directly prevents attackers from extracting useful information from captured network traffic, including credentials previously exposed over unencrypted protocols. This control stops approximately 75-90% of sniffing vectors, though gaps may exist with legacy systems lacking encryption support or misconfiguration of secure protocols.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "Secure transport protocols prevent information extraction from sniffed traffic through encryption but do not actively detect sniffing activity itself. An attacker capturing encrypted network traffic generates no alerts; detection of sniffing requires network monitoring tools or IDS mechanisms, not encryption alone.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "preventative",
+    "coverage_rating": 2,
+    "reasoning": "Secure transport protocols prevent only unencrypted C2 communications (~25-50% of vectors). An attacker can establish C2 over legitimate encrypted protocols (HTTPS, SSH, TLS-wrapped OPC) or via compromised systems with valid credentials, making this control architecturally relevant but insufficient to prevent the broader technique.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols do not detect whether standard application layer protocols are being used for malicious C2 purposes. An attacker can establish C2 over HTTPS, SSH, or encrypted OPC without triggering alerts; detection requires behavioral analysis and command validation, not transport-layer encryption.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "preventative",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols do not prevent adversaries from communicating over commonly used ports (80, 443, 22, etc.). An attacker using HTTPS over port 443 or SSH over port 22 remains legitimate and undetected; the control secures the channel but does not restrict port selection or evasion.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols provide no detection capability for the abuse of commonly used ports. Implementation of encrypted protocols on standard ports (HTTPS on 443, SSH on 22) does not generate alerts for suspicious use; detection requires behavioral analysis or anomalous port usage monitoring.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0887",
+    "technique_name": "Wireless Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Encryption protocols (TLS, SSH, IPSec) render captured RF communications unintelligible, preventing information disclosure from wireless sniffing in approximately 75-90% of scenarios. However, implementation gaps with legacy ICS devices, key management vulnerabilities, and specialized protocol weaknesses prevent a perfect score.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0887",
+    "technique_name": "Wireless Sniffing",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols do not detect wireless RF sniffing activity itself. An attacker using specialized hardware to capture encrypted wireless traffic generates no alerts; encryption prevents decryption of captured data but does not detect the sniffing act. Detection requires dedicated RF monitoring or wireless intrusion detection systems.",
+    "overridden": true
+  }
+]
+```
+2026-06-02 11:18:21.566 INFO  - OUTPUT ```json
+[
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Secure transport protocols with encryption, message authentication (HMAC, digital signatures), and mutual authentication prevent most AiTM attacks by making traffic unreadable and detectable if modified. However, implementation weaknesses, key compromise, certificate validation failures, and sophisticated attackers with endpoint access can circumvent these protections, preventing a perfect score.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "TLS, SSH, and IPSec protocols detect unauthorized modification and session hijacking through cryptographic authentication and integrity verification, making unauthorized message tampering extremely difficult. However, detection effectiveness depends on proper implementation, certificate validation, and comprehensive protocol deployment across all critical segments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Encryption via TLS, SSH, and IPSec directly prevents attackers from extracting useful information from captured network traffic, including credentials previously exposed over unencrypted protocols. This control stops approximately 75-90% of sniffing vectors, though gaps may exist with legacy systems lacking encryption support or misconfiguration of secure protocols.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "Secure transport protocols prevent information extraction from sniffed traffic through encryption but do not actively detect sniffing activity itself. An attacker capturing encrypted network traffic generates no alerts; detection of sniffing requires network monitoring tools or IDS mechanisms, not encryption alone.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "preventative",
+    "coverage_rating": 2,
+    "reasoning": "Secure transport protocols prevent only unencrypted C2 communications (~25-50% of vectors). An attacker can establish C2 over legitimate encrypted protocols (HTTPS, SSH, TLS-wrapped OPC) or via compromised systems with valid credentials, making this control architecturally relevant but insufficient to prevent the broader technique.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols do not detect whether standard application layer protocols are being used for malicious C2 purposes. An attacker can establish C2 over HTTPS, SSH, or encrypted OPC without triggering alerts; detection requires behavioral analysis and command validation, not transport-layer encryption.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "preventative",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols do not prevent adversaries from communicating over commonly used ports (80, 443, 22, etc.). An attacker using HTTPS over port 443 or SSH over port 22 remains legitimate and undetected; the control secures the channel but does not restrict port selection or evasion.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols provide no detection capability for the abuse of commonly used ports. Implementation of encrypted protocols on standard ports (HTTPS on 443, SSH on 22) does not generate alerts for suspicious use; detection requires behavioral analysis or anomalous port usage monitoring.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0887",
+    "technique_name": "Wireless Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Encryption protocols (TLS, SSH, IPSec) render captured RF communications unintelligible, preventing information disclosure from wireless sniffing in approximately 75-90% of scenarios. However, implementation gaps with legacy ICS devices, key management vulnerabilities, and specialized protocol weaknesses prevent a perfect score.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0887",
+    "technique_name": "Wireless Sniffing",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols do not detect wireless RF sniffing activity itself. An attacker using specialized hardware to capture encrypted wireless traffic generates no alerts; encryption prevents decryption of captured data but does not detect the sniffing act. Detection requires dedicated RF monitoring or wireless intrusion detection systems.",
+    "overridden": true
+  }
+]
+```

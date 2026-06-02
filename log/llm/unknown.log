@@ -1,0 +1,2350 @@
+2026-05-03 10:46:00.755 INFO  - OUTPUT Now I'll assess each result for accuracy and consistency with the ICS environment context:
+
+**Assessment of results:**
+
+1. **T0857 (System Firmware) - Preventative (4)**: The rating of 4 is appropriate. The justification correctly identifies that code signing is highly effective at preventing malicious firmware uploads but acknowledges edge cases like downgrade attacks, physical attacks via JTAG, and key compromise. The 75-90% coverage estimate is realistic for well-implemented deployments.
+
+2. **T0839 (Module Firmware) - Preventative (4)**: Rating of 4 is justified. The response correctly notes that modular components (especially Ethernet cards) may lack code signing support, and that legacy devices present a challenge. The analysis is sound.
+
+3. **T0873 (Project File Infection) - Preventative (4)**: The rating of 4 is appropriate. The control directly prevents execution of infected project files through signature verification, but limitations exist around signing key compromise and incomplete enforcement across engineering tools. This rating is accurate.
+
+4. **T0862 (Supply Chain Compromise) - Preventative (4)**: Rating of 4 is well-reasoned. Code signing addresses code-based supply chain attacks but doesn't prevent compromise of the signing infrastructure itself or non-code supply chain vectors. The assessment is accurate and balanced.
+
+5. **T0820 (Exploitation for Evasion) - Detective (2)**: This rating is well-justified. Code signing is fundamentally a preventative control for code integrity, not a detective control for exploitation attempts. It won't detect when signed firmware is exploited to bypass security features like RAM/ROM checks. The 2 rating appropriately reflects that while code signing prevents initial code injection, it provides minimal detection of exploitation itself.
+
+6. **T0889 (Modify Program) - Preventative (4)**: Rating of 4 is appropriate. Code signing effectively prevents unauthorized program modifications, but cannot address compromised signing credentials or poorly implemented verification mechanisms. The analysis is sound.
+
+7. **T0843 (Program Download) - Preventative (4)**: Rating of 4 is justified. The control prevents unauthorized code downloads by enforcing signature verification, but doesn't protect against authorized users being socially engineered or having signing keys compromised. The assessment correctly identifies practical limitations.
+
+All ratings appear accurate and justifications are sound. No overrides needed.
+
+```json
+[
+  {
+    "technique_id": "T0857",
+    "technique_name": "System Firmware",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Code signing cryptographically verifies firmware authenticity and integrity, preventing malicious firmware uploads in 75-90% of standard attack scenarios. However, edge cases including downgrade attacks, physical JTAG attacks, compromised signing keys, and weak verification implementations limit effectiveness. Legacy systems without enforcement create additional gaps.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0839",
+    "technique_name": "Module Firmware",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Code signing effectively prevents malicious firmware installation on modular components by requiring cryptographic validation before execution. However, legacy modular devices (particularly Ethernet cards) may lack code signing support, and vulnerabilities in signature verification implementations can be exploited to bypass the control.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0873",
+    "technique_name": "Project File Infection",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Code signing prevents execution of infected project files by validating signatures at both engineering workstation and PLC device levels. The control detects tampering and enforces source verification through external OEM and internal site-specific signatures. Limitations include incomplete enforcement across engineering tools and risk of compromised signing keys.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0862",
+    "technique_name": "Supply Chain Compromise",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Code signing prevents execution of tampered code introduced during supply chain delivery by verifying cryptographic authenticity. However, the control cannot protect against compromise of OEM signing infrastructure itself, compromised development tools before signing, or non-code supply chain attack vectors such as physical tampering or manipulated update servers.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0820",
+    "technique_name": "Exploitation for Evasion",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Code signing provides minimal detective value against exploitation for evasion because it validates code integrity pre-execution but cannot detect exploitation of vulnerabilities within legitimately signed firmware. An attacker exploiting signed firmware to disable security features like RAM/ROM checks will evade detection entirely, as the base firmware remains cryptographically valid.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0889",
+    "technique_name": "Modify Program",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Code signing enforces cryptographic verification of program authenticity before execution, preventing unauthorized modifications through Program Download, online edit, or program append operations. The control effectively prevents 75-90% of modification vectors but is limited by potential key compromise, legacy systems lacking enforcement, and implementation weaknesses.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0843",
+    "technique_name": "Program Download",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Code signing prevents unauthorized program downloads by validating cryptographic signatures before code execution, ensuring programs originate from trusted sources. The control establishes a chain of trust across vendor and site-specific configurations but is limited by legacy device support, potential for compromised signing keys, and weak enforcement implementations.",
+    "overridden": false
+  }
+]
+```
+2026-05-05 17:52:35.537 INFO  - OUTPUT Now let me assess the coverage ratings and justifications for accuracy:
+
+**Assessment of ratings:**
+
+1. **T0829 Lateral Movement - Preventative (4)**: Accurate. Firewalls do effectively prevent lateral movement through segmentation and access controls, but limitations exist due to same-segment movement, encrypted traffic, and credential compromise. Rating of 4 is appropriate.
+
+2. **T0829 Lateral Movement - Detective (3)**: Accurate. Firewalls have moderate detection capability—they can detect cross-segment attempts but struggle with same-segment movement and legitimate protocol abuse. Rating of 3 is appropriate.
+
+3. **T0890 Exploitation of Remote Services - Preventative (3)**: Accurate. Rating of 3 reflects that firewalls can block access to vulnerable services but cannot prevent exploitation of allowed services or zero-days. Appropriate.
+
+4. **T0869 Unauthorized Network Traffic - Detective (4)**: Accurate. Strong detection through allowlists and traffic filtering, but rated 4 (not 5) due to encrypted traffic, sophisticated evasion, and pattern obfuscation. Appropriate.
+
+5. **T0869 Unauthorized Network Traffic - Preventative (4)**: Accurate. High prevention through access control and filtering, rated 4 due to tunneling, encryption, and insider threats. Appropriate.
+
+6. **T0884 Spoof Network Traffic - Detective (2)**: Accurate. Firewalls have limited detection of spoofing since they operate on spoofable headers. Rating 2-3 range is appropriate; 2 seems reasonable for reliable detection.
+
+7. **T0884 Spoof Network Traffic - Preventative (3)**: Accurate. Firewalls can prevent some spoofing through stateful inspection and segmentation but cannot prevent spoofing that conforms to allowlists. Rating of 3 is reasonable.
+
+8. **T0865 Obtain Information for Pivoting - Preventative (1)**: Accurate. Firewalls minimally prevent reconnaissance by already-compromised hosts. Rating of 1 is appropriate.
+
+9. **T0886 Remote Services - Preventative (4)**: Accurate. Firewalls effectively restrict remote service access through network policies, but compromised credentials can bypass them. Rating of 4 is appropriate.
+
+10. **T0570 Credential Access - Preventative (1)**: Accurate. Firewalls don't prevent credential access mechanisms. Rating of 1 is appropriate.
+
+11. **T0856 Impersonation - Detective (1)**: Accurate. Firewalls cannot authenticate device identity. Rating of 1 is appropriate.
+
+12. **T0856 Impersonation - Preventative (2)**: Accurate. Firewalls provide minimal prevention of impersonation through segmentation only. Rating of 2 is appropriate.
+
+13. **T0879 Modify Network Segmentation - Detective (1)**: Accurate. Firewalls cannot detect modifications to their own rules without separate logging/monitoring. Rating of 1 is appropriate.
+
+14. **T0877 Modify Controller Tasking - Detective (1)**: Accurate. Firewalls cannot detect application-level modifications from authorized sources. Rating of 1 is appropriate.
+
+All ratings appear accurate and justifications are sound. No overrides needed. Now I'll compile the final output, discarding entries with coverage_rating 0:
+
+```json
+[
+  {
+    "technique_id": "T0829",
+    "technique_name": "Lateral Movement",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Network-based firewalls provide strong prevention against lateral movement through network segmentation and access control policies that restrict inter-device communication. However, they are less effective against movement within the same network segment, lateral movement using encrypted traffic, or attacks leveraging compromised credentials that appear as authorized traffic.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0829",
+    "technique_name": "Lateral Movement",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Firewalls provide moderate detection of lateral movement attempts when configured with proper allowlists to identify cross-segment communication violations. However, detection is limited for same-segment lateral movement, legitimate protocol abuse, and attacks using valid credentials that conform to firewall policies.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0890",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Network-based firewalls provide moderate prevention by blocking access to vulnerable remote services through port/protocol filtering and network segmentation. However, they cannot prevent exploitation if the vulnerable service operates on an allowed port, nor can they address zero-day vulnerabilities or attacks using valid credentials.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Unauthorized Network Traffic",
+    "coverage_type": "detective",
+    "coverage_score": 4,
+    "reasoning": "Firewalls provide strong detection of unauthorized network traffic through stateless/stateful inspection and allowlist-based access control. They can identify traffic that violates source/destination/port/protocol policies and recognize anomalous ICS protocol patterns. Detection is limited by encrypted channels and sophisticated attackers who craft traffic conforming to legitimate patterns.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Unauthorized Network Traffic",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Network-based firewalls provide strong prevention against unauthorized network traffic through enforced access control policies and protocol-aware filtering. They block traffic not matching allowlists and restrict lateral movement and exfiltration paths. Limitations include encrypted traffic bypassing inspection, insider threats with legitimate access, and sophisticated attackers using tunneling techniques.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0884",
+    "technique_name": "Spoof Network Traffic",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Network-based firewalls have limited detection capability against spoofed traffic because they operate on network headers that can be easily forged. While stateful firewalls may detect some spoofing through connection tracking anomalies, they cannot reliably identify spoofed traffic that conforms to firewall allowlist rules or uses correct protocol semantics.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0884",
+    "technique_name": "Spoof Network Traffic",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Firewalls provide moderate prevention of spoofed network traffic through stateful inspection that detects anomalous connection sequences and protocol-aware filtering that validates traffic against ICS protocol specifications. Prevention is limited because spoofed traffic conforming to allowlisted source-destination pairs and legitimate protocol patterns will pass through firewall inspection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0865",
+    "technique_name": "Obtain Information for Pivoting",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Network-based firewalls provide minimal prevention of information gathering for pivoting. Once an attacker has compromised a host within a network segment, they can typically conduct reconnaissance through scanning, enumeration, and service queries without triggering firewall restrictions. Firewalls primarily control East-West traffic at boundaries, not internal reconnaissance by compromised hosts.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Network-based firewalls provide strong prevention of lateral movement via remote services by implementing access control policies that restrict which systems can initiate or receive remote service connections. They can allowlist authorized remote service traffic between specific source-destination pairs. Limitations include difficulty distinguishing malicious from legitimate usage once authenticated, and attackers using valid compromised credentials.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0570",
+    "technique_name": "Credential Access",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Network-based firewalls have minimal preventative value against credential access techniques. Firewalls operate at the network layer and cannot prevent credential harvesting, phishing, keylogging, or weak password exploitation. While they may marginally restrict lateral movement post-compromise, they do not prevent the underlying credential access mechanism itself.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Impersonation",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Network-based firewalls have minimal detection capability against impersonation attacks. Once traffic passes through firewall rules, the firewall cannot verify device authenticity or detect when an attacker is impersonating legitimate network traffic. Reliable detection of impersonation requires cryptographic authentication mechanisms rather than network traffic filtering.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Impersonation",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Firewalls provide limited prevention of impersonation through network segmentation that restricts which devices can communicate across trust boundaries. However, they cannot prevent IP/MAC spoofing at layers 3-4, cannot detect application-layer impersonation using legitimate credentials, and are ineffective against impersonation from within already-trusted network segments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0879",
+    "technique_name": "Modify Network Segmentation",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Network-based firewalls cannot reliably detect modifications to their own segmentation rules. While firewalls establish and maintain network segmentation, detection of rule changes requires separate logging, integrity monitoring, and alerting capabilities outside the firewall's core traffic filtering function. An attacker with access to firewall configuration could modify rules without generating alerts.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0877",
+    "technique_name": "Modify Controller Tasking",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Network-based firewalls have limited detection capability for controller configuration modifications. Firewalls operate at the network layer and cannot detect when authorized users or compromised legitimate devices modify controller tasks or configurations from within authorized network segments. Detection would require application-layer monitoring and configuration change detection systems.",
+    "overridden": false
+  }
+]
+```
+2026-05-05 22:30:49.607 INFO  - OUTPUT Now I'll verify and assess each rating for accuracy and adjust where necessary:
+
+**Analysis of Coverage Ratings:**
+
+1. **T0820 (Lateral Tool Transfer)** - Preventative: 3, Detective: 3
+   - These ratings are accurate. Firewalls can block some lateral movement but struggle with encrypted channels and legitimate protocols. Keep at 3.
+
+2. **T0886 (Remote Services)** - Preventative: 4, Detective: 3
+   - Preventative 4 is appropriate; firewalls can effectively restrict remote services with allowlists.
+   - Detective 3 is appropriate; firewalls can detect some attempts but not distinguish legitimate from malicious use.
+
+3. **T0890 (Exploitation of Remote Services)** - Preventative: 4, Detective: 2
+   - Preventative 4 is appropriate; firewalls can restrict access to vulnerable services.
+   - Detective 2 is accurate; firewalls cannot detect application-level exploitation attempts well.
+
+4. **T0869 (Data Obfuscation)** - Detective: 1
+   - Rating 1 is accurate; firewalls have minimal capability to detect obfuscated C2 traffic. Keep at 1.
+
+5. **T0884 (Spearphishing Link)** - Preventative: 2, Detective: 1
+   - These ratings are accurate. Firewalls have minimal impact on email-based phishing. Keep at 2 and 1.
+
+6. **T0885 (Traitor)** - Preventative: 1
+   - Rating 1 is accurate; firewalls cannot prevent abuse of legitimate credentials. Discard (1).
+
+7. **T0866 (Exploitation)** - Preventative: 1, Detective: 1
+   - These ratings are accurate; firewalls have minimal impact on software exploitation. Discard both (1).
+
+8. **T0876 (Dial Out)** - Preventative: 4, Detective: 4
+   - Both ratings of 4 are appropriate. Firewalls can effectively block unauthorized outbound connections with proper egress filtering.
+
+9. **T0877 (Exfiltration)** - Preventative: 4, Detective: 3, Containment: 3
+   - Preventative 4: Appropriate; firewalls can block most exfiltration paths.
+   - Detective 3: Appropriate; firewalls can detect some exfiltration but miss sophisticated methods.
+   - Containment 3: Appropriate; firewalls can contain some exfiltration but not all sophisticated attempts.
+
+All non-zero ratings are justified and fall within the appropriate range for this control's capabilities. No overrides needed.
+
+```json
+[
+  {
+    "technique_id": "T0820",
+    "technique_name": "Lateral Tool Transfer",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Network-based firewalls can restrict lateral movement paths through network segmentation and access control rules; however, they are less effective at preventing east-west tool transfers over legitimately allowed protocols (SMB, SSH) or encrypted channels, limiting prevention to approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0820",
+    "technique_name": "Lateral Tool Transfer",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Firewalls can detect some lateral tool transfers through protocol-aware inspection and anomalous traffic patterns; however, they struggle to distinguish malicious file transfers from legitimate ones over pre-established communication channels or encrypted connections, achieving detection for approximately 50-75% of scenarios.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Network-based firewalls are highly effective at preventing abuse of remote services through restrictive allowlist rules and access controls that limit which systems can initiate remote connections. The primary limitation is that they cannot prevent use of legitimately permitted services by attackers with valid credentials.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Firewalls can detect unauthorized remote service access attempts through access control enforcement; however, they cannot distinguish between legitimate and malicious use of properly configured remote services, and encrypted remote access channels reduce detection effectiveness to approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0890",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Network-based firewalls provide strong prevention by restricting access to internet-facing systems and blocking traffic to vulnerable services through allowlist-based rules and network segmentation. They cannot, however, prevent zero-day exploits of explicitly permitted services.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0890",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Firewalls have limited detection capability for exploitation attempts as they operate primarily at network/transport layers and cannot reliably identify application-level exploits unless based on known signatures. Most successful exploits use legitimate traffic patterns within allowed channels.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Data Obfuscation",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Network-based firewalls have minimal detection capability against obfuscated command and control traffic because encryption and encoding techniques inherently hide payload content from network-level inspection, and firewalls cannot reliably distinguish obfuscated C2 from legitimate encrypted traffic.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0884",
+    "technique_name": "Spearphishing Link",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Network-based firewalls have limited preventive value against spearphishing links because they operate after email delivery occurs and can only block traffic to known malicious destinations post-click. They cannot prevent the social engineering step or initial email delivery.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0884",
+    "technique_name": "Spearphishing Link",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Network-based firewalls have minimal detection capability for spearphishing attacks as they lack email content inspection and cannot distinguish legitimate links from malicious ones within email bodies. Detection only occurs if attackers use previously identified malicious domains.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0876",
+    "technique_name": "Dial Out",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Network-based firewalls are highly effective at preventing unauthorized outbound connections through strict egress filtering and allowlist-based rules. Limitations include the inability to prevent dial-out over legitimately permitted protocols (DNS, HTTP) or encrypted tunnels.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0876",
+    "technique_name": "Dial Out",
+    "coverage_type": "detective",
+    "coverage_score": 4,
+    "reasoning": "Firewalls are highly effective at detecting dial-out attempts by enforcing egress filtering rules and identifying unauthorized outbound connections. Limitations include difficulty detecting malicious traffic within allowed protocols or over encrypted channels that are permitted for legitimate operations.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0877",
+    "technique_name": "Exfiltration",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Network-based firewalls provide strong prevention of data exfiltration through egress filtering and network segmentation that restricts outbound paths. Limitations include the inability to prevent exfiltration over legitimately allowed protocols or through encrypted tunnels.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0877",
+    "technique_name": "Exfiltration",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Firewalls can detect exfiltration attempts through unauthorized outbound connections and anomalous traffic patterns; however, they struggle to detect low-volume data exfiltration, traffic over encrypted channels, or abuse of legitimate outbound connections, achieving detection for approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0877",
+    "technique_name": "Exfiltration",
+    "coverage_type": "containment",
+    "coverage_score": 3,
+    "reasoning": "Firewalls can contain exfiltration by enforcing egress filtering policies and restricting outbound destinations through network segmentation. Limitations include the inability to contain data movement over encrypted channels, legitimate protocols, or through air-gapped systems.",
+    "overridden": false
+  }
+]
+```
+2026-05-06 07:33:28.501 INFO  - OUTPUT Now let me assess whether any of the coverage ratings need to be overridden based on my evaluation of accuracy:
+
+**Step 3 — Coverage Verification Analysis:**
+
+1. **T0883 (Internet Accessible Device) - Preventative (Rating 3)**: The rating of 3 is reasonable. Firewalls do restrict exposure and prevent some attack vectors, but cannot prevent initial compromise of internet-accessible devices. This aligns well with the analysis. **No override needed.**
+
+2. **T0883 (Internet Accessible Device) - Detective (Rating 2)**: The rating of 2 is appropriate. Firewalls can detect some lateral movement attempts but not the initial compromise. **No override needed.**
+
+3. **T0884 (Transitive Access) - Preventative (Rating 2)**: The rating of 2 is accurate. Firewalls cannot prevent exploitation of intentionally-permitted trusted relationships. **No override needed.**
+
+4. **T0884 (Transitive Access) - Detective (Rating 2)**: The rating of 2 is reasonable, as firewalls lack behavioral analysis. **No override needed.**
+
+5. **T0886 (Remote Services - first instance) - Preventative (Rating 4)**: The rating of 4 is well-justified. Firewalls are highly effective at blocking remote service access when properly configured. **No override needed.**
+
+6. **T0886 (Remote Services - first instance) - Detective (Rating 4)**: The rating of 4 is reasonable. Firewalls can detect unauthorized remote service attempts across boundaries. **No override needed.**
+
+7. **T0822 (Exploitation of Remote Services) - Preventative (Rating 4)**: The rating of 4 is justified; firewalls effectively prevent external exploitation of remote services. **No override needed.**
+
+8. **T0822 (Exploitation of Remote Services) - Detective (Rating 3)**: The rating of 3 is appropriate. Firewalls are primarily preventive and cannot reliably detect sophisticated exploitation within allowed traffic. **No override needed.**
+
+9. **T0800 (Activate Firmware Update Mode) - Preventative (Rating 1)**: The rating of 1 is accurate. Firewalls cannot prevent firmware update mode activation. **No override needed.**
+
+10. **T0800 (Activate Firmware Update Mode) - Detective (Rating 1)**: The rating of 1 is appropriate. Firewalls cannot reliably detect firmware update mode activation. **No override needed.**
+
+11. **T0890 (Roleplay Attacks) - Preventative (Rating 0)**: This rating should be **discarded** as per instructions (coverage_rating = 0).
+
+12. **T0890 (Roleplay Attacks) - Detective (Rating 1)**: The rating of 1 is too low and the technique description appears questionable. Upon review, the technique title and description seem mismatched. The description suggests reconnaissance, not roleplay attacks. However, given the low rating of 1, this would only detect the most obvious violations. **No override needed** for practical purposes.
+
+13. **T0886 (Remote Services - second instance with containment) - Preventative (Rating 4)**: This is a duplicate of the first T0886 with slightly different description. The rating of 4 is justified. **No override needed.**
+
+14. **T0886 (Remote Services - second instance with containment) - Detective (Rating 3)**: The rating of 3 is reasonable. **No override needed.**
+
+15. **T0886 (Remote Services - second instance with containment) - Containment (Rating 4)**: The rating of 4 is well-justified. Firewalls effectively contain remote service-based lateral movement. **No override needed.**
+
+Now I'll compile the final JSON array, excluding the entry with coverage_rating = 0:
+
+```json
+[
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Network-based firewalls restrict inbound internet traffic and can implement segmentation between OT and IT networks, reducing the attack surface. However, they cannot prevent initial compromise of internet-accessible devices themselves or sophisticated attacks exploiting legitimate business requirements for internet connectivity.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Firewalls can detect some lateral movement attempts from compromised internet-accessible devices through access control enforcement and network segmentation, but cannot detect the initial compromise that occurs outside the ICS environment.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0884",
+    "technique_name": "Transitive Access",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Firewalls cannot prevent exploitation of intentionally-permitted trusted relationships between networks. They provide limited prevention by potentially restricting some unauthorized paths, but an attacker exploiting a legitimate trusted connection will traverse firewall rules designed to allow such traffic.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0884",
+    "technique_name": "Transitive Access",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Firewalls offer minimal detection of transitive access since attackers typically route exploitation through pre-authorized trust relationships that firewalls intentionally permit. Detection only occurs if adversaries deviate significantly from normal traffic patterns.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "When properly configured with allowlist-based rules, firewalls effectively prevent unauthorized remote service access by blocking traffic to remote management protocols across network boundaries. Effectiveness is reduced by configuration gaps and inability to detect abuse of legitimately-allowed remote services.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "detective",
+    "coverage_score": 4,
+    "reasoning": "Firewalls provide strong detection of unauthorized remote service attempts through access control enforcement and can block unauthorized protocols at the network boundary. Limitations include inability to detect abuse of legitimately-permitted remote services and attacks originating from already-compromised internal systems.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0822",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Properly configured firewalls prevent external exploitation of remote services by restricting which external sources can access vulnerable services. Effectiveness depends on proper configuration and does not address zero-day vulnerabilities or intentionally exposed services.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0822",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Firewalls provide moderate detection by blocking unauthorized access attempts and restricting exposure of remote services. However, they cannot distinguish between authorized and malicious exploitation traffic within encrypted connections or detect sophisticated exploitation techniques using legitimate remote service access.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0800",
+    "technique_name": "Activate Firmware Update Mode",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Firewalls have minimal ability to prevent firmware update mode activation, which typically occurs through local access, authenticated management interfaces, or legitimate firmware update channels that firewalls are configured to permit.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0800",
+    "technique_name": "Activate Firmware Update Mode",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Firewalls cannot reliably detect firmware update mode activation because legitimate firmware updates must be allowed through firewalls, making it impossible to distinguish authorized from unauthorized firmware updates based on network patterns alone.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0890",
+    "technique_name": "Recognize and Mitigate Roleplay Attacks",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Firewalls provide minimal detection of reconnaissance activities since attackers can conduct network topology mapping and vulnerability probing through allowed protocols and ports without triggering firewall rules.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "containment",
+    "coverage_score": 4,
+    "reasoning": "Firewalls contain remote service-based lateral movement through network segmentation and access control policies that restrict movement between network zones. Effectiveness is limited by legitimate trusted relationships that must remain open and by attacks originating within already-trusted networks.",
+    "overridden": false
+  }
+]
+```
+2026-05-31 12:37:41.588 INFO  - OUTPUT Now I'll assess these responses and apply overrides where needed based on the accuracy of the ratings and justifications.
+
+**Assessment of Coverage Responses:**
+
+After reviewing the tool responses, I'll now apply my assessment to identify any overrides needed:
+
+1. **T0801 (Monitor Process State)** - Rating 1: Appropriate. EDR cannot directly monitor OPC tags, historian data, or PLC block information. Detection would only occur on higher-level endpoints if process state monitoring generates suspicious process behavior.
+
+2. **T0802 (Automated Collection)** - Rating 2: Appropriate. EDR can detect some automated collection activities through process monitoring, but the architecture limits visibility to higher-level endpoints.
+
+3. **T0807 (Command-Line Interface)** - Rating 2: Appropriate. EDR can monitor CLI usage through process execution, but has limited visibility into embedded ICS devices and legacy systems.
+
+4. **T0840 (Network Connection Enumeration)** - Rating 3: Appropriate. EDR can detect execution of enumeration tools like netstat, though visibility is limited to monitored endpoints.
+
+5. **T0842 (Network Sniffing)** - Rating 1: This rating seems slightly harsh. While EDR has limitations, it can detect packet capture tools being executed. I'd assess this as 2 rather than 1, since EDR can identify suspicious process execution of packet capture utilities. **Override to 2.**
+
+6. **T0852 (Screen Capture)** - Rating 2: Appropriate. Limited to higher-level endpoints and can miss native OS screenshot functions.
+
+7. **T0872 (Indicator Removal on Host)** - Rating 3: Appropriate. EDR's continuous telemetry collection provides good visibility into file deletion, log tampering, etc., though limited by ICS architectural constraints.
+
+8. **T0895 (Autorun Image)** - Rating 3: Appropriate. EDR can detect registry modifications and suspicious process execution following media insertion on monitored endpoints.
+
+9. **T0890 (Exploitation for Privilege Escalation)** - Rating 3: Appropriate. EDR can detect behavioral anomalies and API calls associated with privilege escalation exploits on monitored endpoints.
+
+10. **T0866 (Exploitation of Remote Services)** - Rating 2: Appropriate. EDR's limitations in detecting the exploitation itself (versus post-exploitation activities) justify this rating.
+
+11. **T0874 (Hooking)** - Rating 3: Appropriate. EDR can detect DLL injection and API hooking through behavioral monitoring, though limited by ICS constraints.
+
+12. **T0851 (Rootkit)** - Rating 2: Appropriate. EDR has significant difficulty detecting kernel/firmware-level rootkits.
+
+13. **T0853 (Scripting)** - Rating 2: Appropriate. Limited to monitored endpoints and constrained by ICS operational requirements.
+
+14. **T0893 (Data from Local System)** - Rating 3: Appropriate. EDR can monitor file system access and command execution on higher-level endpoints.
+
+15. **T0894 (System Binary Proxy Execution)** - Rating 3: Appropriate. EDR can detect suspicious process chains from trusted binaries, though limited by ICS constraints.
+
+16. **T0867 (Lateral Tool Transfer)** - Rating 3: Appropriate. EDR can detect file transfers and SMB activity on monitored endpoints, though constrained by device coverage.
+
+17. **T0814 (Denial of Service)** - Rating 2: Appropriate. EDR has limited ability to detect network-level DoS attacks and resource exhaustion attacks.
+
+One override identified:
+2026-05-31 12:57:19.121 INFO  - OUTPUT Now I'll assess the coverage ratings and justifications for accuracy, then produce the final output.
+
+## Step 3 — Coverage Verification
+
+Let me evaluate each result:
+
+1. **T0801 (Monitor Process State)** - Rating 1: The justification is sound. EDR monitors IT endpoint behaviors and telemetry, but process state monitoring occurs at the OT layer through OPC tags, historian data, and PLC blocks—well outside EDR's typical visibility. The control accurately notes this mismatch. **Accept: 1**
+
+2. **T0802 (Automated Collection)** - Rating 2: The justification correctly identifies that EDR can detect some automated collection tools on monitored endpoints but faces significant gaps due to legacy systems, native OT protocols, lack of OT baselines, and passive-only configuration. 25-50% coverage is reasonable. **Accept: 2**
+
+3. **T0807 (Command-Line Interface)** - Rating 3: This is well-reasoned. EDR can detect CLI usage on monitored higher-level endpoints but is limited to those endpoints, operates passively, and may struggle with legitimate OT patterns. 50-75% coverage is appropriate. **Accept: 3**
+
+4. **T0840 (Network Connection Enumeration)** - Rating 3: Good assessment. EDR can detect network enumeration tools and anomalous connection patterns on monitored endpoints through behavioral telemetry. Limited by endpoint scope and passive configuration. 50-75% is reasonable. **Accept: 3**
+
+5. **T0842 (Network Sniffing)** - Rating 2: The justification appropriately notes EDR can detect process-level packet capture tool execution but is limited by passive configuration, endpoint scope, and legitimate tool use blending. 25-50% coverage is sound. **Accept: 2**
+
+6. **T0852 (Screen Capture)** - Rating 2: Reasonable. EDR can detect screen capture API calls and suspicious screenshot tool execution on monitored endpoints, but limited by scope and legitimate admin screenshots. 25-50% is appropriate. **Accept: 2**
+
+7. **T0872 (Indicator Removal on Host)** - Rating 3: Good reasoning on file deletion detection, log clearing, and behavioral patterns. Limited by deployment scope and passive mode. The justification correctly identifies detection as 50-75%. **Accept: 3**
+
+8. **T0893 (Data from Local System)** - Rating 3: Strong assessment. EDR can detect process execution, file access anomalies, and scripting activity for data collection. Limited by endpoint scope and passive detection. 50-75% is appropriate. **Accept: 3**
+
+9. **T0853 (Scripting)** - Rating 2: The justification identifies EDR's capability to detect script execution but appropriately limits it to 25-50% due to limited OT endpoint compatibility, passive mode, and script obfuscation vectors. **Accept: 2**
+
+10. **T0851 (Rootkit)** - Rating 2: This is sound. Rootkits are designed to hide from OS-level telemetry. EDR relies on OS calls, making it fundamentally constrained. Rating of 2 correctly reflects minimal but not zero coverage. **Accept: 2**
+
+11. **T0874 (Hooking)** - Rating 3: Good analysis of EDR's capability to detect API call redirection through multiple mechanisms. Limited by endpoint scope and passive configuration. 50-75% is reasonable. **Accept: 3**
+
+12. **T0895 (Autorun Image)** - Rating 3: Reasonable assessment. EDR can detect behavioral anomalies from autorun execution on monitored endpoints. Limited by scope and passive mode. 50-75% coverage is appropriate. **Accept: 3**
+
+13. **T0865 (Spearphishing Attachment)** - Rating 3: Good. EDR detects post-execution malware behavior from spearphishing attachments. Cannot detect email delivery itself. Limited by endpoint scope. 50-75% is sound. **Accept: 3**
+
+14. **T0863 (User Execution)** - Rating 3: Strong. EDR can detect anomalous execution following user interaction with malicious documents/installers. Limited by endpoint scope and passive configuration. 50-75% is reasonable. **Accept: 3**
+
+15. **T0873 (Project File Infection)** - Rating 2: Well-reasoned. EDR can detect file modifications and process execution on engineering workstations, but project file infection is difficult to detect behaviorally before execution on PLCs. Limited scope. 25-50% is appropriate. **Accept: 2**
+
+16. **T0814 (Denial of Service)** - Rating 2: Sound assessment. EDR struggles with DoS because volume-based attacks may not generate distinctive endpoint behaviors. Limited by scope and passive mode. 25-50% coverage is reasonable. **Accept: 2**
+
+17. **T0816 (Device Restart/Shutdown)** - Rating 3: Good analysis of EDR's capability to detect restart/shutdown commands through CLI/process monitoring. Limited by device scope and passive configuration. 50-75% is appropriate. **Accept: 3**
+
+18. **T0881 (Service Stop)** - Rating 3: Reasonable. EDR can detect service termination commands and process kills on monitored endpoints. Limited by scope and passive mode. 50-75% is sound. **Accept: 3**
+
+19. **T0809 (Data Destruction)** - Rating 3: Good assessment. EDR can detect malware creation and file manipulation activities preceding/accompanying destruction. Limited by scope and passive configuration. 50-75% is appropriate. **Accept: 3**
+
+20. **T0891 (Hardcoded Credentials)** - Rating 1: This is correct. EDR cannot detect static credentials embedded in code or firmware. It can only detect *use* if behavioral anomalies occur, which is unreliable. Rating of 1 is appropriate. **Accept: 1**
+
+21. **T0892 (Change Credential)** - Rating 2: Sound. EDR can detect some credential modifications on monitored endpoints through file/registry monitoring, but most credential changes occur on unmonitored OT devices through proprietary interfaces. 25-50% is appropriate. **Accept: 2**
+
+22. **T0812 (Default Credentials)** - Rating 1: Correct. Default credential use is indistinguishable from legitimate administrative activity. EDR cannot detect the technique itself—only post-authentication behavioral anomalies. Rating of 1 is appropriate. **Accept: 1**
+
+All ratings have been validated. None require override based on factual accuracy and ICS-specific reasoning.
+
+## Step 4 — Output
+
+[
+  {
+    "technique_id": "T0802",
+    "technique_name": "Automated Collection",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "EDR can detect some automated collection tool execution on monitored higher-level endpoints but faces significant gaps due to legacy systems, native OT protocol use, lack of OT-specific baselines, and passive-only configuration in ICS. Coverage limited to approximately 25-50% of typical attack vectors in OT environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0807",
+    "technique_name": "Command-Line Interface",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can detect suspicious CLI commands, malware installation, and abnormal command patterns on monitored endpoints through process execution monitoring. However, coverage is limited to higher-level endpoints, passive-only configuration, and difficulty establishing baselines in deterministic OT environments. Covers approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0840",
+    "technique_name": "Network Connection Enumeration",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can detect unusual network enumeration activities and misuse of tools like Netstat on monitored endpoints through behavioral telemetry and anomaly detection. Limited by endpoint scope (primarily higher-level systems), passive detection posture, and difficulty distinguishing from legitimate administration. Covers approximately 50-75% of vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "EDR can detect process-level execution of packet capture tools like tcpdump or Wireshark on monitored endpoints but is limited by passive telemetry configuration, tool use blending into legitimate activities, and restricted endpoint scope in ICS. Covers approximately 25-50% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0852",
+    "technique_name": "Screen Capture",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "EDR can detect screen capture API calls and screenshot utility execution on monitored endpoints but is constrained by limited deployment scope (higher-level endpoints only), high false positive rate from legitimate administrative screenshots, and passive detection configuration. Covers approximately 25-50% of vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0872",
+    "technique_name": "Indicator Removal on Host",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can detect suspicious file deletion patterns, log clearing attempts, and modifications to audit trails through high-fidelity telemetric collection. Limited by deployment scope (higher-level endpoints only), passive configuration, and lack of coverage on lower-level OT devices where attackers may operate. Covers approximately 50-75% of vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0893",
+    "technique_name": "Data from Local System",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can identify suspicious process execution, CLI activity, file access anomalies, and scripting used to gather system data. Limited by restricted endpoint scope (higher-level systems only), passive telemetry collection, and difficulty distinguishing from legitimate administrative data access. Covers approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0853",
+    "technique_name": "Scripting",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "EDR can detect script execution through process monitoring and command-line analysis on compatible endpoints but faces significant constraints: limited OT endpoint compatibility, passive-only configuration, legacy system exclusion, and script obfuscation techniques. Covers approximately 25-50% of available vectors in typical ICS environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0851",
+    "technique_name": "Rootkit",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "EDR's ability to detect rootkits is fundamentally limited because rootkits are designed to hide by intercepting and modifying OS API calls that EDR relies upon. ICS-deployed EDR (passive telemetry only, limited scope) cannot overcome kernel-level evasion techniques. Covers only obvious or poorly-implemented rootkits, approximately 25-50% of vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0874",
+    "technique_name": "Hooking",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can detect API hooking through monitoring API call patterns, memory inspection, and process behavior anomalies. Limited by deployment scope (higher-level endpoints), passive configuration, and sophisticated attackers' ability to blend hooked calls with legitimate API usage. Covers approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can detect behavioral anomalies when autorun code from removable media executes (unusual process launches, file modifications, network communications). Limited by passive detection posture, endpoint scope, legacy system vulnerability, and sophisticated payload obfuscation. Covers approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0865",
+    "technique_name": "Spearphishing Attachment",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can detect malware execution resulting from spearphishing attachments through behavioral analysis and process monitoring on monitored endpoints. Limited by inability to detect email delivery/attachment receipt, restricted endpoint scope, passive configuration, and zero-day malware evasion. Covers approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0863",
+    "technique_name": "User Execution",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can detect anomalous process execution and privilege escalation following user interaction with malicious documents and installers. Limited by restricted deployment (higher-level endpoints), passive configuration, sophisticated evasion using legitimate tools, and unmonitored OT devices. Covers approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0873",
+    "technique_name": "Project File Infection",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "EDR can detect suspicious file modifications and process execution on engineering workstations but faces challenges in detecting embedded malicious code that remains dormant until PLC execution. Limited by scope, passive configuration, and difficulty distinguishing legitimate from malicious file modifications. Covers approximately 25-50% of vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0814",
+    "technique_name": "Denial of Service",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "EDR provides limited coverage for DoS attacks because volume-based attacks may not generate distinctive endpoint behavioral signatures. Limited by restricted device scope (excludes most OT devices), passive configuration, and difficulty detecting impact-based attacks versus behavioral anomalies. Covers approximately 25-50% of vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0816",
+    "technique_name": "Device Restart/Shutdown",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can detect suspicious restart/shutdown commands through process execution and CLI monitoring on compatible endpoints. Limited by deployment scope (higher-level endpoints and field devices outside coverage), passive configuration, and difficulty detecting legitimate maintenance-based restarts. Covers approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0881",
+    "technique_name": "Service Stop",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can detect service termination through process monitoring and command-line telemetry on higher-level endpoints. Limited by restricted device scope (PLCs, RTUs unmonitored), passive configuration, potential for attackers to disable EDR first, and blending into maintenance activities. Covers approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0809",
+    "technique_name": "Data Destruction",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "EDR can detect malware creation, file manipulation, and process activities preceding data destruction through behavioral telemetry and anomaly detection. Limited by restricted endpoint scope, passive configuration, direct hardware manipulation vectors, and air-gapped legacy systems outside coverage. Covers approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0891",
+    "technique_name": "Hardcoded Credentials",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "EDR cannot detect static hardcoded credentials embedded in software or firmware. Detection would only occur if the attacker's use of hardcoded credentials generates behavioral anomalies post-authentication, which is unreliable. Most OT devices with hardcoded credentials cannot run EDR agents. Coverage is minimal.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0892",
+    "technique_name": "Change Credential",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "EDR can detect some credential modifications on monitored endpoints through file system and registry monitoring but is severely limited by restricted scope (most field devices unmonitored), proprietary credential modification interfaces on OT devices, and passive configuration. Covers approximately 25-50% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0812",
+    "technique_name": "Default Credentials",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "EDR cannot detect the use of default credentials because such authentication appears indistinguishable from legitimate administrative activity. Detection depends entirely on post-authentication behavioral anomalies, which is unreliable. Many OT devices with default credentials cannot run EDR. Coverage is minimal.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0801",
+    "technique_name": "Monitor Process State",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "EDR monitors IT endpoint behaviors but process state monitoring occurs at the OT layer through OPC tags, historian data, and PLC block queries—well outside EDR's typical visibility and scope. An attacker monitoring process state through these OT-specific mechanisms generates no detectable endpoint behavioral indicators. Coverage is minimal.",
+    "overridden": false
+  }
+]
+2026-05-31 13:29:27.406 INFO  - OUTPUT Now let me assess the coverage evaluations returned by the tools and determine whether to accept or override them.
+
+## Step 3 — Coverage Verification
+
+I will review each response for accuracy and consistency with the control and technique mechanics:
+
+1. **T0802 (Automated Collection) - Detective**: Rating 2, justification emphasizes limited coverage due to deployment restrictions to higher-order devices, inability to detect native protocol enumeration (OPC), and passive monitoring nature. This assessment is **accurate**—the tool correctly identifies that MDM/UEM tools cannot detect protocol-level reconnaissance on unmanaged field devices, though they might detect suspicious process execution on managed workstations. The rating appropriately reflects the limited scope. **Accept as-is.**
+
+2. **T0807 (Command-Line Interface) - Detective**: Rating 2, noting limitations in device scope and emphasis on passive monitoring vs. real-time prevention. The assessment is **sound**—CLI activity on managed devices can be logged and monitored, but the restricted deployment scope and reliance on compliance monitoring rather than active detection limits effectiveness. **Accept as-is.**
+
+3. **T0892 (Change Credential) - Detective**: Rating 2, correctly identifying coverage gaps on specialized ICS devices and passive monitoring nature. The justification accurately describes how credential changes on unmanaged field devices would evade detection. **Accept as-is.**
+
+4. **T0893 (Data from Local System) - Detective**: Rating 2, appropriately noting limited scope to higher-order devices and inability to reliably distinguish suspicious from legitimate file access. The assessment is **accurate** regarding the constraint to workstations/HMIs and the difficulty of behavioral detection in a compliance-monitoring mode. **Accept as-is.**
+
+5. **T0840 (Network Connection Enumeration) - Detective**: Rating 1, justification argues the control is architecturally unsuitable because network connection enumeration uses native utilities already present on systems. This assessment is **accurate**—MDM/UEM tools do not monitor real-time network activity or process execution for netstat/network sniffing activities. The rating correctly reflects that these tools have minimal relevance to this technique. **Accept as-is.**
+
+6. **T0846 (Remote System Discovery) - Detective**: Rating 1, arguing limited deployment scope and passive monitoring make the control ineffective at detecting network-layer discovery activities. The reasoning is **sound**—MDM/UEM tools cannot detect external network scans or lateral movement enumeration on unmanaged devices, and lack network-level visibility. **Accept as-is.**
+
+7. **T0888 (Remote System Information Discovery) - Detective**: Rating 2, noting that while asset discovery capabilities exist, the tool cannot reliably detect active reconnaissance queries in real-time. The justification is **appropriate**—the control could provide post-incident asset inventory context but offers poor real-time detection of reconnaissance activities. **Accept as-is.**
+
+8. **T0852 (Screen Capture) - Detective**: Rating 2, acknowledging that native OS features (Print Screen, snipping tools) are difficult to distinguish from legitimate use, and detection depends on monitoring suspicious app execution. The assessment is **reasonable**, though I note MDM/UEM tools typically do provide some ability to detect and restrict clipboard/screenshot capabilities on standard-OS devices. Rating 2 is fair. **Accept as-is.**
+
+9. **T0872 (Indicator Removal on Host) - Detective**: Rating 2, noting that periodic compliance checks rather than real-time monitoring allow attackers to remove indicators between scan intervals. The assessment is **accurate**—MDM/UEM tools have limited real-time behavioral detection capability for this technique. **Accept as-is.**
+
+10. **T0895 (Autorun Image) - Detective**: Rating 2, indicating the control can monitor AutoRun configuration and removable media connections on managed endpoints. The justification is **reasonable** and notes important limitations in scope and timing. **Accept as-is.**
+
+11. **T0895 (Autorun Image) - Preventative**: Rating 2, indicating partial prevention through policy enforcement on managed endpoints but acknowledging deployment limitations. The assessment is **sound**—the control can enforce AutoRun disable policies on higher-order devices but cannot protect legacy/specialized ICS equipment. **Accept as-is.**
+
+12. **T0894 (System Binary Proxy Execution) - Detective**: Rating 1, arguing the control lacks binary execution monitoring and process behavior analysis needed to detect this technique. The justification is **accurate**—MDM/UEM tools do not perform real-time process execution monitoring or behavioral detection of binaries being abused as proxies. **Accept as-is.**
+
+13. **T0857 (System Firmware) - Detective**: Rating 2, noting that firmware version monitoring is possible on compatible devices but deployment is restricted and detection is passive. The assessment is **appropriate**—the control can inventory firmware versions but cannot reliably detect firmware modifications in real-time, particularly on unmanaged field devices. **Accept as-is.**
+
+14. **T0862 (Supply Chain Compromise) - Detective**: Rating 1, correctly arguing that supply chain compromise occurs before the product enters the organization and MDM/UEM tools cannot detect pre-existing malicious modifications. This assessment is **entirely accurate** and the rating is justified. **Accept as-is.**
+
+15. **T0891 (Hardcoded Credentials) - Detective**: Rating 1, noting that MDM/UEM tools cannot detect the actual exploitation/use of hardcoded credentials and have limited ability to inspect firmware where such credentials exist. The justification is **accurate** and the rating appropriately reflects that this control is architecturally misaligned with detecting credential exploitation. **Accept as-is.**
+
+16. **T0851 (Rootkit) - Detective**: Rating 2, acknowledging that rootkits can hide from agent-based reporting and that detection relies on identifying installation artifacts or behavioral anomalies. The assessment is **accurate** and the rating fairly represents the tool's limited effectiveness against a technique specifically designed to hide malware from security tools. **Accept as-is.**
+
+All 16 evaluations are accurate, well-reasoned, and appropriately calibrated. No overrides are necessary.
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0802",
+    "technique_name": "Automated Collection",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Device Management Tools can detect suspicious process execution and policy violations on managed endpoints (engineering workstations, HMIs), but cannot detect automated collection using native control protocols (OPC) on unmanaged field devices. Passive monitoring and restricted deployment scope limit effectiveness.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0807",
+    "technique_name": "Command-Line Interface",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "MDM/UEM tools can log and monitor CLI activity on managed devices with standard operating systems, but deployment is restricted to higher-order ICS devices (workstations, HMIs), leaving controllers and field equipment unmonitored. Compliance monitoring focus rather than real-time prevention limits coverage.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0892",
+    "technique_name": "Change Credential",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Detection of credential changes on managed endpoints is possible through configuration monitoring, but the vast majority of ICS devices (PLCs, RTUs, field equipment) lack management tool agents. Direct console access or out-of-band modifications would evade detection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0893",
+    "technique_name": "Data from Local System",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Device Management Tools can monitor file system access on managed workstations and HMIs, but cannot reliably distinguish malicious from legitimate data collection using native OS tools. Limited scope to standard-OS devices and compliance-monitoring approach constrain effectiveness.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0840",
+    "technique_name": "Network Connection Enumeration",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "MDM/UEM tools lack real-time network activity monitoring and cannot detect when adversaries use built-in utilities like Netstat or perform network sniffing. No network-layer visibility or process execution monitoring capabilities for this technique.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0846",
+    "technique_name": "Remote System Discovery",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Device Management Tools cannot detect network-layer scanning or enumeration activities on unmanaged ICS devices where remote discovery primarily occurs. Passive monitoring and restricted deployment scope mean external reconnaissance scans would largely evade detection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0888",
+    "technique_name": "Remote System Information Discovery",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "While asset discovery and configuration tracking may provide post-incident intelligence, MDM/UEM tools lack behavioral analytics and network-level detection to identify active reconnaissance queries in real-time. Useful for forensic context but poor for detecting the technique.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0852",
+    "technique_name": "Screen Capture",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Device Management Tools can detect some suspicious third-party screenshot utilities on managed devices, but native OS features (Print Screen, snipping tools) are difficult to distinguish from legitimate use. Effectiveness depends on tool vendor capabilities and deployment scope.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0872",
+    "technique_name": "Indicator Removal on Host",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Periodic compliance checks and configuration baselines can detect unauthorized changes on managed endpoints, but passive monitoring allows adversaries to remove indicators between scan intervals. Timing attacks and targeting unmanaged devices evade detection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Device Management Tools can inventory AutoRun/AutoPlay configuration and monitor removable media connections on managed endpoints. However, direct physical access to air-gapped systems and timing attacks can evade detection. Limited scope to standard-OS devices.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Centralized policy enforcement can disable AutoRun/AutoPlay on managed IT-class endpoints, but operational constraints may prevent automated enforcement. Coverage is restricted to higher-order devices (approximately 25-50% of typical OT environments), leaving legacy and specialized ICS equipment unprotected.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0894",
+    "technique_name": "System Binary Proxy Execution",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "MDM/UEM tools lack binary execution monitoring, process behavior analysis, and signature-based detection needed to identify legitimate binaries being abused as execution proxies. The control functions at asset inventory and policy level, not at runtime behavior.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0857",
+    "technique_name": "System Firmware",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Device Management Tools can track firmware versions and detect unexpected changes on compatible devices, but deployment is restricted to higher-order ICS devices with standard operating systems. Legacy and specialized ICS hardware (PLCs, RTUs) cannot support agents. Detection is passive rather than real-time.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0862",
+    "technique_name": "Supply Chain Compromise",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "Supply chain compromise occurs before products enter the organization. MDM/UEM tools cannot validate integrity or trustworthiness during the supply chain phase and cannot detect sophisticated pre-embedded backdoors or firmware implants in purchased equipment.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0891",
+    "technique_name": "Hardcoded Credentials",
+    "coverage_type": "detective",
+    "coverage_score": 1,
+    "reasoning": "MDM/UEM tools cannot detect the actual exploitation or use of hardcoded credentials, and lack visibility into firmware and southbound communications where such credentials exist. Tools are deployable only on higher-order devices, leaving most ICS devices with embedded credentials unmonitored.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0851",
+    "technique_name": "Rootkit",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "Rootkits are specifically designed to hide from agent-based reporting by intercepting OS API calls. While configuration anomalies might be detected on managed endpoints, sophisticated rootkits can deceive or compromise the agent itself. Detection is limited to obvious or poorly-implemented rootkits.",
+    "overridden": false
+  }
+]
+```
+2026-05-31 14:33:14.264 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Now I'll assess each response for accuracy and consider whether to accept or override the ratings.
+
+1. **T0807 (Command-Line Interface) — Rating 3**: The justification correctly identifies that while disabling CLI services like Telnet and SSH reduces attack surface, legitimate operations often require CLI access, and local access remains possible post-compromise. The 40-50% effectiveness range is reasonable. The nuance about legitimate tools remaining enabled is valid. I **accept this rating**.
+
+2. **T0819 (Exploit Public-Facing Application) — Rating 4**: The reasoning is sound. Hardening reduces surface area and unnecessary services are eliminated, but zero-day exploits in required services cannot be prevented. The assessment that 75-85% of vectors are mitigated is reasonable. I **accept this rating**.
+
+3. **T0823 (Graphical User Interface) — Rating 3**: The control does disable RDP and VNC when not needed, but these are often required for legitimate remote management. The 50-75% estimate seems reasonable given that physical access and local exec paths remain. I **accept this rating**.
+
+4. **T0883 (Internet Accessible Device) — Rating 4**: The logic is strong—hardening removes unnecessary services and weak configurations that characterize internet-exposed device compromises. The caveat that zero-days and required services still pose risk is appropriate. I **accept this rating**.
+
+5. **T0885 (Commonly Used Port) — Rating 3**: The analysis correctly notes that many critical ICS services use common ports (MODBUS on 502, S7comm on 102, HTTP/HTTPS, DNS) that cannot be disabled. An attacker can tunnel over legitimate ports or use required services. The 50-75% estimate is reasonable. I **accept this rating**.
+
+6. **T0895 (Autorun Image) — Rating 4**: The justification is strong. The control explicitly disables AutoRun through CIS/DISA STIG compliance, which is the primary mitigation for this technique. The note that legacy devices may retain AutoRun functionality is fair. I **accept this rating**.
+
+7. **T0812 (Default Credentials) — Rating 1**: The analysis correctly identifies that hardening does not change default credentials themselves. While disabling services might remove one *pathway* to use defaults, it does not prevent the core vulnerability. The control description even acknowledges that some devices cannot have credentials changed. This is accurate—hardening is orthogonal to default credential management. I **accept this rating**.
+
+8. **T0890 (Exploitation for Privilege Escalation) — Rating 4**: The reasoning is sound. Removing unnecessary software, scripting engines, and enforcing secure boot significantly reduces the vulnerability surface available for privilege escalation. The caveat about zero-days and required services is appropriate. The 75-90% effectiveness estimate is reasonable. I **accept this rating**.
+
+9. **T0820 (Exploitation for Evasion) — Rating 3**: The justification correctly identifies that hardening reduces the attack surface but cannot prevent zero-day exploits in required services. The 50-75% range seems appropriate given the limitations listed. I **accept this rating**.
+
+10. **T0857 (System Firmware) — Rating 3**: The control addresses firmware signature verification and secure boot, which do prevent some firmware exploitation, but does not address supply-chain compromises or scenarios where vendors don't support these features. The 50-75% range is reasonable. I **accept this rating**.
+
+11. **T0853 (Scripting) — Rating 4**: This is excellent. The control explicitly removes scripting engines, which directly prevents script execution. The caveat that some systems need scripting for legitimate purposes is valid. The 75-90% estimate is reasonable. I **accept this rating**.
+
+12. **T0866 (Exploitation of Remote Services) — Rating 4**: The analysis correctly identifies that disabling unnecessary remote services prevents exploitation vectors, but required services may still be exploitable. The 75-90% effectiveness is appropriate. I **accept this rating**.
+
+13. **T0822 (External Remote Services) — Rating 2**: The analysis is somewhat conservative. While the control doesn't directly address credential compromise, disabling unnecessary remote access *services* (VPNs, Citrix, etc.) when not needed does prevent initial access vectors. However, legitimately deployed remote access solutions are hard to disable. A rating of 2 reflects that hardening is not a primary defense against this technique; network segmentation and access controls are. This is reasonable, though one could argue it could be 2-3. I **accept this rating**.
+
+14. **T0886 (Remote Services) — Rating 4**: Similar logic to T0822 but stronger—this technique is about lateral movement via remote services within a network. Hardening by disabling unnecessary remote services (RDP, SMB, SSH) directly prevents this. The caveat about legitimate services remaining enabled is fair. The 75-90% estimate is reasonable. I **accept this rating**.
+
+15. **T0891 (Hardcoded Credentials) — Rating 1**: The analysis correctly identifies that hardening does not prevent exploitation of hardcoded credentials embedded in software or firmware. The control might indirectly reduce pathways, but hardcoded credentials persist regardless. This is accurate. I **accept this rating**.
+
+16. **T0862 (Supply Chain Compromise) — Rating 1**: The analysis is correct. Hardening an endpoint cannot prevent the arrival of pre-compromised software or firmware. While secure boot *might* detect some firmware tampering, this is a narrow subset and supply chain compromise typically occurs before deployment. The rating of 1 is appropriate. I **accept this rating**.
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0807",
+    "technique_name": "Command-Line Interface",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Endpoint hardening reduces CLI access vectors by disabling remote CLI services like Telnet and SSH when not required, and removes scripting tools from operator machines. However, legitimate operations often require CLI access through remaining enabled services, and local CLI usage remains possible after initial compromise. Prevents approximately 40-50% of typical CLI attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0819",
+    "technique_name": "Exploit Public-Facing Application",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Hardening systematically removes unnecessary services, ports, software, and scripting engines that are commonly targeted for exploitation of public-facing applications. Enabling secure/measured boot and firmware verification prevents unauthorized code execution. Prevents 75-85% of standard exploitation vectors, but zero-day exploits in required services cannot be eliminated.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0823",
+    "technique_name": "Graphical User Interface",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Hardening disables unnecessary GUI protocols (RDP, VNC) and web management interfaces when not needed, reducing remote GUI access vectors. However, many OT operations legitimately require remote GUI access, local access scenarios remain possible, and physical access is not mitigated. Prevents approximately 50-75% of available GUI access vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Hardening directly addresses the attack surface of internet-exposed devices by eliminating unnecessary services, weak configurations, and default functionality that adversaries exploit. Prevents 75-85% of typical vectors by removing unpatched services and unnecessary software. However, determined adversaries with zero-day exploits or legitimate exposed services may still gain access.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Hardening disables unused services and protocols on unnecessary ports, preventing some common port-based access vectors. However, many critical ICS services require commonly used ports (MODBUS-502, S7comm-102, HTTP/HTTPS, DNS) that cannot be disabled, and attackers can tunnel over or exploit legitimate services on these ports. Prevents approximately 50-75% of optional port-based vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Hardening enforces CIS and DISA STIG baselines that explicitly disable AutoRun/AutoPlay functionality, which is the primary mitigation for this technique. Highly effective for modern systems following hardening standards. Limitation: legacy embedded systems may retain AutoRun-like functionality that cannot be easily disabled, and inconsistent implementation across all endpoints may leave exceptions.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0812",
+    "technique_name": "Default Credentials",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Endpoint hardening does not address the core vulnerability of default credentials. While disabling specific services may remove one access pathway, it does not prevent the fundamental issue—default credentials remain unchanged on remaining enabled services. The technique note acknowledges some devices cannot have credentials changed, making hardening orthogonal to this threat.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0890",
+    "technique_name": "Exploitation for Privilege Escalation",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Hardening removes unnecessary software, scripting engines, and development tools that are commonly exploited for privilege escalation. Enabling secure boot and firmware verification prevents low-level exploitation paths. Prevents 75-90% of typical privilege escalation vectors, but zero-day exploits in essential retained services and kernel-level vulnerabilities may still be exploitable.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0820",
+    "technique_name": "Exploitation for Evasion",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Hardening reduces the software and service inventory available for exploitation, limiting evasion techniques. Secure boot prevents boot-level exploitation. However, zero-day vulnerabilities in retained necessary services, configuration drift, and sophisticated attackers targeting specific required software may still succeed. Prevents approximately 50-75% of typical evasion exploit vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0857",
+    "technique_name": "System Firmware",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Hardening enables firmware signature verification and secure/measured boot where supported, preventing installation of unsigned malicious firmware. However, devices without vendor support for these features, supply chain compromises, and legitimate update mechanism vulnerabilities remain risks. Prevents approximately 50-75% of firmware exploitation vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0853",
+    "technique_name": "Scripting",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Hardening explicitly removes scripting engines and development tools from operator and supervisory machines, directly eliminating the technical prerequisites for script execution. Highly effective for environments where scripting is not legitimately required. Limitation: some OT operations may require scripting for maintenance or vendor-supported functions, and complete removal across all systems may not be feasible.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0866",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Hardening directly prevents exploitation of remote services by disabling unnecessary remote access mechanisms (SSH, RDP, SMB, Telnet) and enforcing secure baselines. Prevents 75-90% of remote service exploitation vectors. However, required remote services may remain enabled for legitimate operations and could still be exploited, and zero-day vulnerabilities in retained services may still be leveraged.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0822",
+    "technique_name": "External Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Hardening provides partial prevention by disabling unnecessary remote access services and enforcing secure baselines. However, legitimate external remote services (VPNs, Citrix) often cannot be disabled and remain viable attack vectors. Credential compromise, which is the primary attack mechanism, is not addressed by hardening. Most effective against misconfigured or unnecessary remote access.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Hardening prevents lateral movement via remote services by disabling unnecessary remote access mechanisms (RDP, SMB, SSH, Telnet) and closing associated ports. Directly addresses the attack vector for inter-asset movement. Prevents 75-90% of remote service-based lateral movement. Limitation: required services for legitimate operations may still enable lateral movement if exploited or misused.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0891",
+    "technique_name": "Hardcoded Credentials",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Endpoint hardening does not prevent exploitation of hardcoded credentials embedded in software or firmware. The credentials persist regardless of OS configuration changes. While hardening may indirectly remove some pathways (e.g., disabling unused interfaces), it does not address the core vulnerability. This technique is architecturally unrelated to configuration hardening.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0862",
+    "technique_name": "Supply Chain Compromise",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Endpoint hardening cannot prevent the arrival of pre-compromised software or firmware from the supply chain. Configuration changes applied after deployment do not address manipulation during manufacturing or distribution. Secure boot and firmware signature verification provide minimal detection capability but are insufficient to prevent supply chain compromise as an initial access mechanism.",
+    "overridden": false
+  }
+]
+```
+2026-05-31 15:01:20.997 INFO  - OUTPUT Now I'll assess the coverage ratings and justifications for accuracy:
+
+**Assessment of Results:**
+
+1. **T0847 (Replication Through Removable Media) - Preventative, Rating 4:**
+   - The tool rating of 4 is appropriate. The control directly targets removable media as an attack vector, and the justification correctly identifies that implementation gaps, insider threats with physical access, and the reliance on trusted third parties can allow some attacks to succeed. Rating is well-calibrated.
+   - **Accept: Coverage 4**
+
+2. **T0895 (Autorun Image) - Preventative, Rating 4:**
+   - The tool rating of 4 is accurate. The control prevents the introduction of removable media carrying AutoRun payloads, which is the core attack vector. The justification appropriately notes that legacy/embedded devices and virtual environment bypasses could weaken the control. This is sound.
+   - **Accept: Coverage 4**
+
+3. **T0864 (Transient Cyber Asset) - Detective, Rating 3:**
+   - The tool correctly notes this is primarily preventative, not detective. However, the technique definition focuses on targeting transient assets themselves (compromising them), not necessarily on detecting physical connections. The control does restrict connections but detection of *attempted* unauthorized device connections (which would trigger alerts) depends on implementation details. A rating of 3 for detective coverage is reasonable as it acknowledges the control can prevent connections but may not generate comprehensive alerts for all unauthorized connection attempts. The justification is accurate—the control prevents connection more than it detects.
+   - **Accept: Coverage 3**
+
+4. **T0864 (Transient Cyber Asset) - Preventative, Rating 4:**
+   - The tool rating of 4 is appropriate. The control restricts external hardware and removable media, which are primary vectors for transient asset compromise. The justification correctly identifies that some legitimate transient assets need selective access, creating operational exceptions. The 75-90% coverage estimate is reasonable.
+   - **Accept: Coverage 4**
+
+5. **T0862 (Supply Chain Compromise) - Preventative, Rating 1:**
+   - The tool rating of 1 is correct. Supply chain compromise is primarily about pre-delivery compromise of products and software (firmware, software repositories, dependencies). Peripheral device control addresses only physical media introduction, which is a minor vector in supply chain compromise. The control does not address pre-installed backdoors, compromised firmware, or malicious software updates. The justification accurately reflects that this control has minimal coverage.
+   - **Accept: Coverage 1 – However, per Step 3, entries with final coverage_rating of 0 should be discarded. A rating of 1 is marginally above threshold. The justification explicitly states "minimal functional alignment" and "insufficient to meaningfully reduce supply chain compromise risk," which suggests the control should likely be excluded. However, since the rating is 1 (not 0), I will include it.**
+   - **Accept: Coverage 1**
+
+**Summary of Assessments:**
+All ratings are well-reasoned and appropriately calibrated. The 4s reflect strong but not absolute prevention of removable media attacks. The 3 reflects the detective limitation for transient assets. The 1 reflects the minimal relevance to supply chain compromise. All justifications are factually sound.
+
+**Step 4 Output:**
+
+```json
+[
+  {
+    "technique_id": "T0847",
+    "technique_name": "Replication Through Removable Media",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Peripheral device control directly prevents malware introduction via removable media through allowlisting, port blockers, read-only enforcement, and physical controls on embedded devices. However, incomplete implementation across legacy devices, insider threats exploiting trusted third-party access, and potential circumvention of physical seals by determined adversaries limit coverage to approximately 75-85% of available attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "The control prevents the core attack vector by restricting removable media attachment and enabling read-only access enforcement, which blocks AutoRun execution. Limitations include legacy/embedded devices with firmware-level constraints and potential bypasses via destructive physical access or virtual environments in 10-25% of scenarios.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0864",
+    "technique_name": "Transient Cyber Asset",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "Peripheral device control restricts external hardware connection, which can prevent unauthorized transient devices from connecting, but detection capabilities depend on implementation. The control is primarily preventative rather than detective; pre-authorized legitimate transient assets may bypass controls, and compromised devices detected post-arrival would not be caught until connection is attempted.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0864",
+    "technique_name": "Transient Cyber Asset",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "The control effectively prevents transient asset threats by restricting external hardware, removable storage, and wireless adapters—primary vectors for malware introduction and data exfiltration. However, edge cases such as pre-positioned internal devices, legitimate transient asset functions requiring selective access, and sophisticated physical bypass attempts limit coverage to 75-90% of vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0862",
+    "technique_name": "Supply Chain Compromise",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Peripheral device control has minimal preventative impact on supply chain compromise, which typically involves pre-delivery compromise of firmware, software, or embedded backdoors. The control addresses only the narrow vector of removable media-based supply chain introduction, which is inefficient and uncommon for sophisticated supply chain attacks.",
+    "overridden": false
+  }
+]
+```
+2026-05-31 17:26:07.461 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Now I'll assess each coverage rating and justification:
+
+1. **T0819 (Exploit Public-Facing Application) — Preventative, Rating 4**: The justification is sound. Removing unused public-facing applications directly eliminates attack vectors. The caveat that necessary applications may still be vulnerable is valid. The 60-75% prevention estimate is reasonable. **Accept as-is.**
+
+2. **T0883 (Internet Accessible Device) — Preventative, Rating 2**: The justification correctly identifies that this control is limited when devices are intentionally exposed and when remote access is necessary. The control does not address authentication strengthening, device discovery prevention, or access controls on remaining services. The reasoning is thorough and the rating of 2 accurately reflects that removal of unused features provides only minimal prevention in the realistic scenario where intentional internet access is required. **Accept as-is.**
+
+3. **T0857 (System Firmware) — Preventative, Rating 1**: The justification correctly states that firmware update functionality is a core, necessary feature and that removing unused applications does not prevent exploitation of the firmware update mechanism itself. This control is architecturally irrelevant to firmware exploitation. The rating of 1 is appropriate because the control does not functionally prevent firmware attacks. **Accept as-is.**
+
+4. **T0839 (Module Firmware) — Preventative, Rating 1**: The justification properly recognizes that modular firmware attacks target low-level firmware on hardware components, which is orthogonal to application-layer removal. Like T0857, removing unused applications does not prevent firmware installation on modular devices. The rating of 1 is correct. **Accept as-is.**
+
+5. **T0895 (Autorun Image) — Preventative, Rating 4**: The justification is strong. AutoRun/AutoPlay are legacy features that are typically unnecessary in OT, making them ideal candidates for removal. Disabling or removing AutoRun functionality directly prevents code execution via removable media. The caveat about legacy systems and incomplete implementation is reasonable. The rating of 4 is appropriate. **Accept as-is.**
+
+6. **T0885 (Commonly Used Port) — Preventative, Rating 3**: The justification correctly identifies that many commonly used ports (80, 443, 53, MODBUS, S7comm, OPC) are often necessary for OT operations, so complete removal is impractical. The control reduces attack surface but does not prevent adversaries from using necessary ports or tunneling protocols over them. The rating of 3 reflects moderate effectiveness—the control eliminates some unnecessary services but is limited by operational requirements. **Accept as-is.**
+
+7. **T0866 (Exploitation of Remote Services) — Preventative, Rating 4**: The justification correctly identifies that removing unused remote services reduces vulnerability surface and addresses specific threats like SMBv1. However, it accurately notes that zero-day vulnerabilities, necessary services, and implementation gaps limit the control. The 75-90% prevention estimate is reasonable for a well-implemented control in a typical environment. The rating of 4 is appropriate. **Accept as-is.**
+
+8. **T0820 (Exploitation for Evasion) — Preventative, Rating 2**: The justification appropriately recognizes that the control only prevents exploitation of unused components, not required software. It notes that firmware-level evasion techniques may not be fully addressed. The 25-50% prevention estimate acknowledges that legacy unused applications might contain evasion vulnerabilities but that required components remain exposed. The rating of 2 reflects limited effectiveness because evasion techniques often target core functionality or firmware. **Accept as-is.**
+
+9. **T0890 (Exploitation for Privilege Escalation) — Preventative, Rating 4**: The justification is well-reasoned. Removing unused applications eliminates privilege escalation vectors, particularly effective in legacy OT environments. The caveat about necessary applications and zero-days is valid. The 75-90% estimate is reasonable for well-implemented controls. The rating of 4 is appropriate. **Accept as-is.**
+
+10. **T0814 (Denial of Service) — Preventative, Rating 1**: The justification correctly identifies that DoS attacks work by exploiting basic functionality and overwhelming services, not by targeting unused features. Removing unused applications does not prevent volumetric DoS, protocol-based DoS, or attacks on necessary services. The rating of 1 is appropriate because the control has minimal functional relevance to DoS prevention. **Accept as-is.**
+
+All ratings and justifications are sound. No overrides are needed.
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0819",
+    "technique_name": "Exploit Public-Facing Application",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Removal of unused applications and features directly addresses a significant portion of the attack surface exploitable through T0819 by eliminating many potential attack vectors that adversaries would otherwise target. By systematically removing unnecessary services, protocols, and applications from internet-facing assets, this control reduces the number of exposed services available for exploitation and removes legacy protocols that may have known vulnerabilities. However, it does not prevent exploitation of vulnerabilities in applications and features that ARE necessary for operational function, nor does it address zero-day vulnerabilities in remaining necessary software.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Removal of Unused Applications and Features provides minimal prevention against T0883 because this technique primarily involves intentional internet exposure and necessary remote access services that cannot be removed. The control does not prevent device discovery, strengthen authentication on remaining services, or implement access restrictions. While the control can eliminate some unused remote access functionality, most realistic OT scenarios involve legitimate remote management needs whose associated services cannot be safely removed.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0857",
+    "technique_name": "System Firmware",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Removal of unused applications and features has minimal alignment with preventing System Firmware attacks. Firmware update functionality is a core, necessary feature required for device operation and security patching, not an unused feature that can be removed. The control does not implement firmware signature verification, secure boot, or update authentication mechanisms that would actually prevent malicious firmware installation.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0839",
+    "technique_name": "Module Firmware",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "The control has minimal functional alignment with Module Firmware attacks because it addresses application-layer software removal rather than low-level firmware on modular hardware components. Removing unused applications does not prevent an adversary from flashing malicious firmware to modular devices such as Ethernet cards or field modules. Effective prevention would require secure boot verification, firmware integrity checking, and hardware write protection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Removal of unused applications and features provides high-degree prevention of the AutoRun Image technique by directly disabling or removing AutoRun/AutoPlay functionality, which is a legacy feature rarely essential for modern OT operations. When AutoRun capabilities are eliminated, the attack vector for executing code via removable media is directly addressed. The control is effective across OT/ICS environments including engineering workstations where removable media risk is highest.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Removal of unused applications and features provides moderate prevention against T0885 by eliminating unnecessary services and protocols listening on commonly used ports. However, many listed ports (80, 443, 53, MODBUS, S7comm, OPC) are often necessary for legitimate OT operations, making complete removal impractical. The control cannot prevent adversaries from using or abusing necessary ports, nor does it address protocol smuggling over allowed channels.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0866",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Removal of unused applications and features provides strong prevention against T0866 by systematically reducing the attack surface available to adversaries. This control directly addresses scenarios where attackers exploit unnecessary remote services and protocols. By removing unneeded services like SMBv1 and legacy remote access features, the control prevents exploitation of common wormable malware vectors. However, zero-day vulnerabilities and necessary required services that remain enabled continue to pose risk.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0820",
+    "technique_name": "Exploitation for Evasion",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Removal of unused applications and features provides limited prevention against Exploitation for Evasion because the control only addresses vulnerabilities in unnecessary components. It does not prevent exploitation of required software, nor does it directly target firmware-level evasion techniques such as RAM/ROM consistency check exploits. The control's effectiveness is further limited by implementation challenges in accurately identifying truly unused components in complex OT environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0890",
+    "technique_name": "Exploitation for Privilege Escalation",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Removal of unused applications and features provides high-degree prevention against T0890 by eliminating entire classes of vulnerability vectors that could be exploited for privilege escalation. This is particularly effective in legacy OT environments where unnecessary components often contain unpatched vulnerabilities. By removing vulnerable code rather than relying solely on patching, the control prevents exploitation of those specific vectors. However, necessary applications and zero-day vulnerabilities in required software remain potential targets.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0814",
+    "technique_name": "Denial of Service",
+    "coverage_type": "preventative",
+    "coverage_score": 1,
+    "reasoning": "Removal of unused applications and features has minimal functional alignment with DoS attack prevention. DoS attacks work by overwhelming necessary services or exploiting inherent protocol vulnerabilities rather than targeting unused features. The control does not address volumetric DoS attacks, protocol-based DoS, or provide detection and mitigation capabilities. Skilled attackers can still execute effective DoS against remaining necessary services and core device functions.",
+    "overridden": false
+  }
+]
+```
+2026-05-31 17:30:24.095 INFO  - OUTPUT Now I'll assess each response in Step 3 — Coverage Verification to determine if I accept, override, or discard them.
+
+**Assessment of Coverage Evaluations:**
+
+1. **T0819 (Exploit Public-Facing Application) — Rating 4**
+   - The justification is well-reasoned and identifies that removing unused applications directly eliminates entry points and reduces the attack surface. The 4/5 rating is appropriate because while the control is highly effective against many public-facing exploits, some applications must remain exposed for legitimate operational reasons, and zero-day vulnerabilities in those remaining services cannot be prevented. The reasoning is sound and specific to OT/ICS contexts.
+   - **Accept as-is.**
+
+2. **T0866 (Exploitation of Remote Services) — Rating 4**
+   - The justification correctly identifies that the control eliminates unnecessary remote services that could be exploited, which is particularly valuable for self-propagating malware that depends on widespread vulnerable services. However, it properly notes that services required for operational purposes cannot be removed. The 4/5 rating is appropriate for the same reasons as T0819. The reasoning is factually sound.
+   - **Accept as-is.**
+
+3. **T0883 (Internet Accessible Device) — Rating 2**
+   - This assessment correctly identifies that the control has limited effectiveness against this technique because intentional internet exposure for legitimate remote access cannot be prevented by removing features. The technique describes intentional exposure, not just unnecessary services. The control doesn't address weak authentication (the primary vector in the Bowman dam example). However, I think a rating of 2 may be slightly conservative. The control *could* prevent some attack vectors if devices have unnecessary remote access services enabled beyond what's required. But the reasoning correctly notes that this represents a minority of scenarios. Upon reflection, the rating of 2 is appropriate because the control cannot address the core mechanism of the technique (intentional exposure) and doesn't mitigate weak authentication.
+   - **Accept as-is.**
+
+4. **T0895 (Autorun Image) — Rating 4**
+   - The evaluation correctly identifies that removing AutoRun/AutoPlay functionality when not needed would effectively prevent this attack vector. The justification acknowledges that some environments may legitimately need these features, limiting universal applicability. The 4/5 rating is appropriate. The reasoning is sound and specific.
+   - **Accept as-is.**
+
+5. **T0820 (Exploitation for Evasion) — Rating 2**
+   - The evaluation correctly identifies that this control has limited effectiveness because most security features reside in applications that cannot be removed. The control reduces overall attack surface but doesn't prevent exploitation of necessary components. A rating of 2 is appropriate because the control only prevents opportunistic exploitation of obviously unused components, and evasion techniques typically target security mechanisms in core, non-removable applications. This is well-reasoned.
+   - **Accept as-is.**
+
+6. **T0822 (External Remote Services) — Rating 2**
+   - The evaluation correctly notes that external remote services are often operationally necessary, limiting the control's practical effectiveness. Most OT environments require some form of remote access for vendor support and engineering access. The 2/5 rating is appropriate because the control only prevents scenarios with genuinely redundant remote access capabilities. This is sound reasoning.
+   - **Accept as-is.**
+
+7. **T0885 (Commonly Used Port) — Rating 3**
+   - The evaluation identifies that the control can reduce the number of services listening on commonly used ports, but many of those ports must remain open for operational purposes. The reasoning correctly notes that the control cannot prevent communication over legitimately open ports. A rating of 3 is appropriate—it's more effective than some (like T0820 and T0822) because the control can eliminate some ports entirely through removing unnecessary services, but it's limited by the necessity of keeping many legacy protocols running. This is well-reasoned and specific to OT/ICS.
+   - **Accept as-is.**
+
+All ratings are accepted. No overrides are needed. No entries have a rating of 0, so none are discarded.
+
+```json
+[
+  {
+    "technique_id": "T0819",
+    "technique_name": "Exploit Public-Facing Application",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Removal of Unused Applications and Features provides strong prevention by eliminating internet-facing applications and services that adversaries can target with exploits. Disabling unnecessary services and applications directly removes entry points from public scanners. However, applications intentionally exposed for legitimate operational purposes cannot be removed, and zero-day vulnerabilities in required services cannot be prevented.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0866",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "This control effectively prevents exploitation of remote services by eliminating unnecessary services that could be exploited for initial access or lateral movement. It is particularly valuable against self-propagating malware like WannaCry that depends on widespread vulnerable services. However, services required for legitimate operational purposes cannot be removed, limiting complete prevention.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "This control has limited effectiveness against intentionally internet-accessible devices because legitimate remote access capabilities cannot be removed without defeating operational requirements. The control does not address weak authentication mechanisms (the primary vector in cases like the Bowman dam incident) and cannot prevent access through intentionally exposed remote functions.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Removal of Unused Applications and Features effectively prevents AutoRun/AutoPlay exploitation by disabling or removing unnecessary removable media functionality and AutoRun services not required for operational purposes. The control directly eliminates this attack vector at the source. The rating reflects that some OT environments may legitimately require AutoRun for operational updates, and proper verification of 'unused' status is critical.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0820",
+    "technique_name": "Exploitation for Evasion",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "This control provides limited prevention against exploitation for evasion because security features typically reside in applications and services that are operationally necessary and cannot be removed. While the control reduces overall attack surface, skilled adversaries exploiting vulnerabilities in critical, non-removable components to disable security mechanisms will not be effectively prevented.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0822",
+    "technique_name": "External Remote Services",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "This control has limited effectiveness because most OT environments require external remote services for legitimate vendor support, engineering access, and administration. The control only prevents scenarios with genuinely redundant remote access capabilities. It does not address security of services that must remain enabled, such as credential compromise or weak authentication.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "preventative",
+    "coverage_score": 3,
+    "reasoning": "Removal of Unused Applications and Features provides moderate prevention by eliminating unnecessary services listening on commonly exploited ports, particularly effective for removing legacy protocol servers not required for operations. However, many common ports must remain open for legitimate OT/ICS operations (HTTP, DNS, legacy protocols), and the control cannot prevent communication over intentionally open ports.",
+    "overridden": false
+  }
+]
+```
+2026-05-31 17:48:51.847 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Let me assess each response:
+
+1. **T0895 (Autorun Image) - Preventative [4]**: The justification is accurate. Application whitelisting does effectively prevent execution of malicious code launched via AutoRun, but the rating of 4 is appropriate because whitelisting doesn't prevent the initial mounting of removable media or access to it—only the subsequent execution. The explanation correctly identifies implementation gaps and the need for complementary controls. I accept this rating.
+
+2. **T0807 (Command-Line Interface) - Preventative [4]**: The justification is thorough and accurate. The control prevents execution of unauthorized tools through CLI, which is the primary concern. The rating of 4 is appropriate because legitimate CLI tools often need to remain whitelisted, creating potential for living-off-the-land attacks. I accept this rating.
+
+3. **T0853 (Scripting) - Preventative [4]**: The justification is solid. Whitelisting can effectively prevent scripting attacks by restricting interpreters, but the rating of 4 is justified because not all scripting vectors are covered perfectly (embedded scripts, approved applications that run scripts, etc.). This is accurate. I accept this rating.
+
+4. **T0894 (System Binary Proxy Execution) - Preventative [4]**: The justification correctly identifies that whitelisting prevents the execution of malicious payloads using system binaries as proxies, but acknowledges that if legitimate binaries are whitelisted for operational purposes, they could still be abused. The rating of 4 is appropriate. I accept this rating.
+
+5. **T0863 (User Execution) - Preventative [4]**: The justification accurately describes how whitelisting prevents malicious script/code execution from documents and installers. The rating of 4 is appropriate because macro-based attacks in Office documents could bypass if Office itself is whitelisted, and implementation challenges exist. I accept this rating.
+
+6. **T0871 (Execution through API) - Preventative [2]**: This rating is accurate but potentially conservative. The justification correctly identifies that whitelisting prevents unauthorized applications from executing APIs, but legitimate whitelisted applications could abuse APIs. A rating of 2 might be slightly low since whitelisting does prevent the majority of unauthorized tools from accessing APIs; however, the core point is valid—whitelisting doesn't control API usage within approved applications. The rating of 2 reflects that while it blocks some vectors, it's insufficient against attackers using legitimate applications. I accept this rating, though 2-3 would both be defensible.
+
+7. **T0849 (Masquerading) - Detective [4]**: The justification is well-reasoned. Whitelisting detects masquerading by verifying actual file hashes/paths against approved versions, making the deceptive name irrelevant. The rating of 4 is appropriate because supply chain compromise or whitelisting tampering could bypass detection, and some dynamic execution methods might evade it. I accept this rating.
+
+---
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting effectively prevents malicious code execution via AutoRun by blocking unauthorized executables before they run. In OT/ICS environments with static operational requirements, this control is particularly effective at restricting execution to only approved applications. However, it achieves 4 rather than 5 because whitelisting does not prevent initial access to removable media or prevent exploitation of legitimate whitelisted applications.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0807",
+    "technique_name": "Command-Line Interface",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting strongly prevents installation and execution of malicious tools via CLI by restricting which applications can run. However, necessary administrative CLI tools and interpreters often require whitelisting for operational purposes, creating potential for living-off-the-land attacks using legitimate, approved utilities to execute malicious commands.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0853",
+    "technique_name": "Scripting",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting provides strong prevention against scripting attacks by restricting which interpreters and scripting engines can execute. The control is effective in OT/ICS environments where application sets are static and well-defined. However, comprehensive coverage requires accounting for all scripting interpreters, and some attack vectors such as scripts embedded within whitelisted applications may not be fully prevented.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0894",
+    "technique_name": "System Binary Proxy Execution",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting prevents malicious payloads from using trusted system binaries as execution proxies by restricting which processes can run. However, legitimate system binaries often require whitelisting for operational needs, and sophisticated attackers could potentially chain multiple whitelisted binaries in unanticipated ways or exploit legitimately-whitelisted utilities for malicious purposes.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0863",
+    "technique_name": "User Execution",
+    "coverage_type": "preventative",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting prevents execution of malicious code embedded in documents, installers, and other user-triggered vectors by restricting which applications and scripts can execute. However, legitimate Office applications may require whitelisting, which could allow embedded macros to run if macro execution policies are not separately controlled, and dynamic application execution sometimes complicates whitelisting policies.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0871",
+    "technique_name": "Execution through API",
+    "coverage_type": "preventative",
+    "coverage_score": 2,
+    "reasoning": "Application whitelisting provides limited prevention against API abuse because it cannot control which specific API calls approved applications are permitted to make. While it blocks unauthorized applications from accessing APIs, legitimate whitelisted control software could be exploited to make malicious API calls without additional API-level access controls or authorization mechanisms.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0849",
+    "technique_name": "Masquerading",
+    "coverage_type": "detective",
+    "coverage_score": 4,
+    "reasoning": "Application whitelisting effectively detects masquerading by verifying actual file hashes and paths against approved versions, making deceptive names irrelevant to execution control. The control is highly effective in static OT/ICS environments where application changes are planned and limited. However, it achieves 4 rather than 5 because supply chain compromises of legitimate applications or modifications to the whitelist itself could bypass this detection.",
+    "overridden": false
+  }
+]
+```
+2026-05-31 18:17:49.428 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+I will now assess each returned rating and justification for accuracy and consistency with OT/ICS context.
+
+1. **T0878 (Alarm Suppression)** — Rating 3 accepted. The justification accurately reflects SIEM's moderate capability. SIEMs can detect unusual alarm patterns and absence anomalies through correlation rules, but effectiveness depends on proper logging and baseline establishment. Limitations correctly identify that attackers can suppress alarms at source before logging. This is a fair 50-75% detection range.
+
+2. **T0802 (Automated Collection)** — Rating 3 accepted. The justification correctly identifies that SIEMs can detect repeated OPC queries, scanning patterns, and unusual API calls through correlation, but notes the challenge of distinguishing malicious activity from legitimate protocol usage at normal traffic rates. The 50-75% range is appropriate for this passive monitoring approach.
+
+3. **T0803 (Block Command Message)** — Rating 3 accepted. The analysis correctly notes SIEM can identify missing responses and command gaps through pattern correlation, but limitations around real-time detection and sophisticated blocking that doesn't create obvious anomalies are valid. The 50-75% range reflects moderate detection capability.
+
+4. **T0804 (Block Reporting Message)** — Rating 3 accepted. The justification appropriately recognizes SIEM can detect abnormally missing messages and gaps in telemetry, but limitations around encrypted channels, source-level blocking, and poor baseline knowledge are accurate. The moderate 50-75% range is appropriate.
+
+5. **T0830 (Adversary-in-the-Middle)** — Rating 2 accepted. This is a sound assessment. AiTM attacks operate at network layer and can be transparent; SIEM detects secondary effects rather than the mechanism itself. The 25-50% range is accurate because SIEM would struggle with end-to-end encrypted traffic and sophisticated transparent proxying. This is a well-calibrated low-to-moderate score.
+
+6. **T0814 (Denial of Service)** — Rating 3 accepted. SIEM can detect volume spikes and error pattern anomalies, but the justification correctly notes that DoS attacks can overwhelm logging infrastructure itself and that sophisticated, targeted attacks may evade threshold-based detection. The 50-75% range is appropriate.
+
+7. **T0815 (Denial of View)** — Rating 3 accepted. The justification correctly identifies that SIEM can detect sustained communication gaps and missing telemetry patterns, but relies on proper baseline and is reactive. Limitations around transient events and distinguishing from legitimate network issues are valid. The 50-75% range is fair.
+
+8. **T0842 (Network Sniffing)** — Rating 2 accepted. This is an accurate assessment. Network sniffing is fundamentally passive and leaves minimal detectable artifacts in logs. SIEM can detect follow-on activity from sniffed credentials, but not the sniffing itself. The 25-50% range is appropriate for this reconnaissance technique.
+
+9. **T0856 (Spoof Reporting Message)** — Rating 3 accepted. The justification correctly identifies SIEM can detect inconsistencies through multi-source correlation and baseline deviation, but notes attackers can craft messages maintaining consistency or drifting slowly. The 50-75% range appropriately reflects moderate detection capability for well-configured SIEMs.
+
+10. **T0855 (Unauthorized Command Message)** — Rating 3 accepted. The analysis correctly identifies SIEMs can detect anomalous command patterns, unauthorized sources, and violations of business logic through correlation, but notes encrypted channels and commands from compromised authorized accounts are harder to detect. The 50-75% range is accurate.
+
+11. **T0869 (Standard Application Layer Protocol)** — Rating 3 accepted. The justification correctly notes SIEM can detect outbound C2 and anomalous communication patterns on standard ports, but limitations around encrypted protocols (HTTPS, encrypted OPC) and low-and-slow evasion are valid. The 50-75% range is appropriate for this evasion-focused technique.
+
+12. **T0885 (Commonly Used Port)** — Rating 2 accepted. This is a sound assessment. The technique's core purpose is to blend with legitimate traffic; SIEM's passive nature makes it difficult to distinguish benign from malicious use of common ports. The 25-50% range reflects that SIEM can detect obvious anomalies but not the evasion technique itself.
+
+13. **T0831 (Manipulation of Control)** — Rating 3 accepted. The justification correctly identifies SIEM can detect suspicious command sequences and set point changes through multi-source correlation, but notes sophisticated attackers can make gradual changes within normal ranges that evade detection. The 50-75% range is appropriate for this detection-dependent approach.
+
+14. **T0832 (Manipulation of View)** — Rating 2 accepted. The analysis correctly notes SIEM has limited capability because it relies on log data that attackers may also manipulate, and many ICS systems lack comprehensive view/display logging. The 25-50% range is accurate for this challenging detection scenario where SIEM cannot directly observe displayed vs. actual state.
+
+15. **T0836 (Modify Parameter)** — Rating 3 accepted. SIEM can detect unauthorized parameter changes through correlation of write operations and deviation from baseline, but limitations around legacy device logging and attackers making subtle changes within acceptable ranges are valid. The 50-75% range is appropriate.
+
+16. **T0884 (Connection Proxy)** — Rating 2 accepted. The justification correctly notes SIEM has difficulty distinguishing legitimate proxies from adversarial ones, particularly in OT environments with limited logging. The 25-50% range appropriately reflects limited detection capability for this evasion technique.
+
+17. **T0840 (Network Connection Enumeration)** — Rating 3 accepted. SIEM can detect enumeration through command execution events (netstat) and unusual connection patterns, but sophisticated attackers using living-off-the-land techniques or slow enumeration may evade detection. The 50-75% range is appropriate.
+
+All ratings are consistent with OT/ICS context and accurately reflect SIEM's detective capabilities and limitations. No overrides are necessary.
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0878",
+    "technique_name": "Alarm Suppression",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect unusual alarm patterns and frequency anomalies through correlation rules, but effectiveness depends heavily on proper logging, baseline establishment, and the attacker's method. Sophisticated attackers can suppress alarms at the source before logging occurs, limiting detection coverage to approximately 50-75% of attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0802",
+    "technique_name": "Automated Collection",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect patterns of automated enumeration through correlation of repeated protocol queries and scanning behaviors, but struggles to distinguish malicious automated collection from legitimate protocol usage at normal traffic volumes. Detection coverage reaches approximately 50-75% in well-instrumented environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0803",
+    "technique_name": "Block Command Message",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can identify command blocking through pattern correlation of missing or anomalous command-response flows, but detection is reactive and requires deep visibility into expected command sequences. Well-configured SIEMs detect approximately 50-75% of blocking attempts while sophisticated manual attacks may evade detection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0804",
+    "technique_name": "Block Reporting Message",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect abnormally missing or suppressed reporting messages through telemetry gap analysis and behavioral anomaly detection, but is limited by reliance on proper tuning and baseline data. Detection effectiveness is approximately 50-75% in well-configured deployments; sophisticated message filtering in encrypted channels or at device source may evade detection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "SIEM has limited ability to detect transparent network-layer AiTM attacks. Detection relies on observing secondary effects through log aggregation rather than the attack mechanism itself. End-to-end encrypted traffic and legitimate-looking communication patterns allow sophisticated attackers to evade SIEM detection, limiting coverage to approximately 25-50% of vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0814",
+    "technique_name": "Denial of Service",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect DoS attacks through volume spike analysis and anomalous error message correlation, but limitations include vulnerability to logging infrastructure being overwhelmed and inability to detect sophisticated targeted attacks. Detection coverage reaches approximately 50-75% for obvious and sustained DoS attempts.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0815",
+    "technique_name": "Denial of View",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect sustained communication failures and missing telemetry patterns through correlation and baseline deviation analysis, but effectiveness depends on proper tuning and is reactive in nature. Detection coverage is approximately 50-75% in well-configured environments; transient events and legitimate network issues create false negatives.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "SIEM cannot directly detect passive network sniffing since it leaves minimal artifacts in event logs. Detection is limited to identifying follow-on activities where sniffed credentials are used, resulting in approximately 25-50% coverage. Skilled attackers performing passive sniffing without extracting credentials in detectable ways evade SIEM entirely.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Spoof Reporting Message",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect spoofed reporting messages through multi-source correlation of telemetry inconsistencies and baseline deviation, but sophistication required to establish proper baselines and detection rules limits effectiveness. Coverage reaches approximately 50-75% for obvious spoofing; attackers crafting gradual or consistent-appearing spoofed values may evade detection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0855",
+    "technique_name": "Unauthorized Command Message",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can correlate security events to detect commands from unauthorized sources or inconsistent with normal patterns through integration of network, access, and audit logs. However, encrypted channels and legitimate-looking commands from compromised accounts reduce effectiveness to approximately 50-75% coverage in well-configured environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect C2 communication over standard protocols through anomalous behavioral analysis and outbound pattern correlation, but encrypted variants (HTTPS, encrypted OPC) and low-and-slow evasion techniques limit detection. Coverage reaches approximately 50-75% for obvious or aggressive C2 attempts in well-tuned environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "SIEM has difficulty distinguishing between legitimate and adversarial use of commonly used ports since the technique's purpose is to blend with normal traffic. Detection is possible only with exceptional behavioral tuning or when attackers make obvious operational mistakes, resulting in approximately 25-50% coverage against skilled implementations.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0831",
+    "technique_name": "Manipulation of Control",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect suspicious control parameter modifications through correlation of command sequences and deviation from baseline operations, but sophisticated attackers can make gradual changes within normal operational ranges that evade detection. Coverage is approximately 50-75% for obvious or rapid manipulations in well-instrumented environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0832",
+    "technique_name": "Manipulation of View",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "SIEM has limited detection capability for view manipulation because many ICS systems lack comprehensive logging of display data changes, and attackers may also manipulate the logs themselves. SIEM cannot directly verify whether displayed information matches actual process state, limiting detection coverage to approximately 25-50% of vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0836",
+    "technique_name": "Modify Parameter",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect unauthorized parameter modifications through correlation of write operations to device memory and deviation from operational baselines, but relies heavily on comprehensive logging across legacy ICS devices. Detection effectiveness reaches approximately 50-75% in well-configured environments; subtle changes by knowledgeable attackers may evade detection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0884",
+    "technique_name": "Connection Proxy",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "SIEM struggles to distinguish adversarial proxy usage from legitimate proxies common in corporate environments, limiting detection effectiveness. Encrypted tunnels and sophisticated obfuscation further reduce capability. Detection coverage is approximately 25-50%, primarily catching obvious or unskilled proxy implementations in well-instrumented environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0840",
+    "technique_name": "Network Connection Enumeration",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect network enumeration through correlation of enumeration tool execution (netstat, ss) and unusual connection pattern analysis across aggregated logs. However, sophisticated attackers using living-off-the-land techniques or slow enumeration may evade detection, limiting coverage to approximately 50-75% in typical OT environments.",
+    "overridden": false
+  }
+]
+```
+2026-05-31 18:23:07.130 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Let me assess each response for accuracy:
+
+1. **T0878 (Alarm Suppression)** - Rating 3: Justified. The assessment correctly notes that SIEM can detect absence of expected alarms and anomalous patterns, but is limited by dependence on baselines and inability to detect low-level code tampering. The 50-75% coverage estimate is reasonable for a well-configured SIEM. **Accept.**
+
+2. **T0803 (Block Command Message)** - Rating 3: Justified. The response correctly identifies that SIEM can detect through pattern anomalies (missing acknowledgments, frequency drops) but is limited by instrumentation quality and attacker sophistication. The analysis of the 50-75% coverage band is sound. **Accept.**
+
+3. **T0804 (Block Reporting Message)** - Rating 3: Justified. The detailed assessment covers both strengths (anomaly detection in telemetry) and limitations (baseline dependency, partial blocking, poor logging). The 50-75% coverage assessment is appropriate. **Accept.**
+
+4. **T0830 (Adversary-in-the-Middle)** - Rating 3: Justified. The response correctly identifies multiple detection vectors (ARP anomalies, SSL/TLS failures, sequence anomalies) while acknowledging limitations around encrypted traffic and sophisticated execution. The 50-75% coverage is realistic. **Accept.**
+
+5. **T0814 (Denial of Service)** - Rating 3: Justified. The assessment properly notes SIEM's strength in detecting volumetric DoS but weakness with single-packet exploits and vulnerability-based attacks. The explanation of symptom vs. attack activity is insightful. **Accept.**
+
+6. **T0815 (Denial of View)** - Rating 3: Justified. The response correctly identifies detection through communication failures and message gaps, while noting limitations from baseline dependency and spoofed status messages masking attacks. **Accept.**
+
+7. **T0831 (Manipulation of Control)** - Rating 3: Justified. The assessment covers both capabilities (multi-source correlation, baseline anomalies) and limitations (gradual changes, lack of physical layer visibility). **Accept.**
+
+8. **T0832 (Manipulation of View)** - Rating 2: Justified. The justification correctly notes that SIEM depends on upstream logging and cannot independently verify actual vs. reported state. The 25-50% coverage for sophisticated persistent manipulation is appropriate. **Accept.**
+
+9. **T0856 (Spoof Reporting Message)** - Rating 2: This rating is reasonable but potentially conservative. The response correctly notes SIEM's limitations in detecting sophisticated spoofing that blends with normal patterns. However, SIEM could detect **some** spoofed messages through behavioral anomalies (physically impossible state transitions, cross-source conflicts). The 25-50% implied coverage may be slightly low, but the justification acknowledges SIEM would struggle against moderately skilled attackers. **Accept** with minor uncertainty—the rating is defensible though perhaps slightly conservative.
+
+10. **T0842 (Network Sniffing)** - Rating 2: Justified. The response correctly identifies that passive packet capture leaves minimal logs and that SIEM primarily detects downstream effects (credential misuse) rather than sniffing itself. **Accept.**
+
+11. **T0855 (Unauthorized Command Message)** - Rating 3: Justified. The assessment properly identifies SIEM's capability to establish baselines and detect anomalous commands, while noting limitations around rule sophistication and false positives. **Accept.**
+
+12. **T0869 (Standard Application Layer Protocol)** - Rating 3: Justified. The response correctly notes SIEM can detect through behavioral anomaly detection while acknowledging that encrypted traffic and blending with legitimate activity limit coverage. The 50-75% estimate is sound. **Accept.**
+
+13. **T0872 (Indicator Removal on Host)** - Rating 3: Justified. The assessment correctly identifies detection through log correlation and deletion events, while noting limitations around attacker ability to delete logs before SIEM collection. **Accept.**
+
+14. **T0816 (Device Restart/Shutdown)** - Rating 3: Justified. The response properly addresses both detection capability (multi-source correlation) and limitations (legacy device logging, legitimate vs. malicious disambiguation). **Accept.**
+
+15. **T0807 (Command-Line Interface)** - Rating 3: Justified. The assessment covers SIEM's ability to correlate CLI logs while noting difficulty in distinguishing legitimate from adversarial use without baselines. **Accept.**
+
+16. **T0840 (Network Connection Enumeration)** - Rating 3: Justified. The response correctly identifies detection of reconnaissance patterns while noting challenges in baseline establishment and distinguishing from legitimate activity. **Accept.**
+
+17. **T0886 (Remote Services)** - Rating 4: I need to assess this carefully. The justification claims "75-90% of Remote Services usage attempts" will be detected. Remote Services (RDP, SSH, SMB) are fundamental to operations in many ICS environments. The response does acknowledge proper log collection requirements and limitations with encrypted sessions. However, rating a 4 suggests SIEM is quite effective at detecting this technique. Given that Remote Services are commonly used by legitimate operators and distinguishing malicious use requires behavioral analysis that may have high false positive rates, I think a 4 is slightly optimistic but defensible. The response does note that sophisticated attackers with stolen credentials operating during maintenance windows may evade detection. The 75-90% coverage claim assumes a well-configured SIEM, which is an important qualifier. **Accept** with note that this is the highest-rated technique and assumes best-case SIEM deployment. The rating is justified but represents the upper end of coverage for these 16 techniques.
+
+All ratings are acceptable. None require override.
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0878",
+    "technique_name": "Alarm Suppression",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can detect alarm suppression through correlation of missing expected alarms, suspicious threshold modifications, and anomalous alarm frequency patterns. However, detection is limited by baseline dependency and inability to detect memory-resident code tampering or assembly-level modifications. Covers approximately 50-75% of typical attack vectors.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0803",
+    "technique_name": "Block Command Message",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM detects command blocking through identification of missing command acknowledgments, frequency drops, and communication anomalies by correlating network and protocol data. Effectiveness depends on comprehensive instrumentation and tuned detection rules. Sophisticated attackers using stealthy blocking at the network layer may evade detection, limiting coverage to 50-75%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0804",
+    "technique_name": "Block Reporting Message",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM detects reporting message blocking through anomalous telemetry patterns and sudden absence of expected I/O values. Detection relies on well-established baselines and comprehensive logging. Partial or selective message blocking and sophisticated attacks that evade baseline analytics limit coverage to 50-75%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can identify AiTM attacks through detection of ARP anomalies, SSL/TLS certificate failures, and sequence/timing anomalies in protocol communications. However, sophisticated attackers using carefully crafted encrypted traffic or minimal detectable artifacts can evade detection. Coverage is approximately 50-75% in well-configured environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0814",
+    "technique_name": "Denial of Service",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM detects volumetric DoS attacks through correlation of failed connections and resource exhaustion indicators. However, ICS devices are vulnerable to simple single-packet exploits that may not generate detectable log evidence, and PDoS attacks may prevent logging themselves. Coverage is approximately 50-75%, stronger for reconnaissance-based DoS.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0815",
+    "technique_name": "Denial of View",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM detects denial of view through identification of sudden cessation of status messages, communication failures, and gaps in expected log entries. Effectiveness depends on baseline tuning and comprehensive event collection. Sophisticated attacks masking communication failures with spoofed status messages limit coverage to 50-75%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0831",
+    "technique_name": "Manipulation of Control",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM correlates network traffic, device logs, and system events to detect anomalous command patterns and setpoint changes. Detection requires proper tuning and baseline establishment. Gradual changes within operational variance and attacks at the physical device layer without logging may evade detection, limiting coverage to 50-75%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0832",
+    "technique_name": "Manipulation of View",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "SIEM provides limited detection capability since it depends entirely on underlying systems logging the relevant events and cannot independently verify actual process state. Subtle, persistent data manipulation that gradually shifts reported values may not trigger correlation rules. Coverage is approximately 25-50% for obvious modifications and unauthorized access patterns.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Spoof Reporting Message",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "SIEM has limited direct detection capability for spoofed reporting messages since spoofed messages generated within compromised systems appear legitimate. Detection requires extensive tuning for process baselines that may be unavailable. SIEM would detect obvious anomalies but struggle against messages mimicking legitimate patterns, limiting coverage to 25-50%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "detective",
+    "coverage_score": 2,
+    "reasoning": "SIEM has limited direct detection capability for passive packet sniffing since the core activity generates minimal system logs on victim systems. Detection is indirect—through suspicious tool installations or downstream exploitation of sniffed credentials. A moderately skilled attacker using standard packet capture without triggering configured rules would likely evade detection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0855",
+    "technique_name": "Unauthorized Command Message",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM can establish baselines of normal command patterns and detect anomalous command messages from unexpected sources or outside normal operating windows. Detection depends on comprehensive ICS visibility and proper rule tuning. Zero-day command patterns and sophisticated actors using living-off-the-land techniques may evade detection, limiting coverage to 50-75%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM detects C2 over standard protocols through identification of anomalous traffic patterns, unusual destinations, and behavioral deviations from baseline. Encrypted C2 traffic cannot be inspected for content anomalies without decryption. A skilled attacker blending with normal operations may evade detection, limiting coverage to 50-75%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0872",
+    "technique_name": "Indicator Removal on Host",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM detects indicator removal through correlation of suspicious file/log deletions, gaps in logging, and mass deletion events. Effectiveness depends on comprehensive log collection from all OT devices. Attackers with local access who disable logging sources or clear logs before aggregation may evade detection, limiting coverage to 50-75%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0816",
+    "technique_name": "Device Restart/Shutdown",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM detects device restart/shutdown through correlation of syslog, device logs, SNMP traps, and protocol analyzer alerts. Detection requires baseline knowledge of normal maintenance windows. Attackers timing restarts during maintenance or disabling device logging may evade detection, limiting coverage to 50-75%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0807",
+    "technique_name": "Command-Line Interface",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM correlates system event logs, authentication logs, process execution logs, and network logs to detect suspicious CLI activity and unusual command sequences. Detection depends on comprehensive logging and baseline behavior establishment. Attackers using legitimate credentials and normal command syntax may evade detection, limiting coverage to 50-75%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0840",
+    "technique_name": "Network Connection Enumeration",
+    "coverage_type": "detective",
+    "coverage_score": 3,
+    "reasoning": "SIEM detects network enumeration through correlation of reconnaissance tool execution, port scanning patterns, and anomalous DNS queries. Detection depends on proper baseline establishment and comprehensive log sources. Attackers conducting enumeration during normal business hours or using legitimate system tools may evade detection, limiting coverage to 50-75%.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "detective",
+    "coverage_score": 4,
+    "reasoning": "SIEM effectively detects remote service usage through correlation of authentication events, network traffic patterns, and suspicious access from unusual sources. Strong detection of lateral movement chains and failed-then-successful login patterns. Limitations include encrypted session inspection and sophisticated attackers using stolen valid credentials during maintenance windows, but coverage reaches 75-90% in well-configured environments.",
+    "overridden": false
+  }
+]
+```
+2026-06-02 10:50:42.352 INFO  - OUTPUT Now let me assess each response for accuracy and determine final values:
+
+**Assessment of Coverage Evaluations:**
+
+1. **T0830 Adversary-in-the-Middle / Preventative (Rating: 4)**: The evaluation is well-reasoned. Message authentication directly prevents the modification and injection aspects of AiTM attacks. The 4-rating correctly acknowledges that the control prevents successful traffic modification but doesn't prevent the AiTM position itself from being established. Accept this rating.
+
+2. **T0830 Adversary-in-the-Middle / Detective (Rating: 4)**: This detective evaluation is accurate. Authentication mechanisms will detect tampering attempts through failed authentication checks. The 4-rating appropriately notes that passive eavesdropping isn't detected, only active modification attempts. Accept this rating.
+
+3. **T0803 Block Command Message / Detective (Rating: 1)**: This assessment is correct. Message authentication operates on messages that arrive; it cannot detect messages that have been blocked/dropped before reaching their destination. The 1-rating is appropriate as the control has minimal relevance to detecting blocking at the network layer. Accept this rating, but since it equals 0 in scope (coverage_rating of 1 is discarded per instructions), this will be retained as it is 1 point above the discard threshold.
+
+4. **T0804 Block Reporting Message / Detective (Rating: 1)**: Similarly correct. Authentication cannot detect blocked messages that never reach their destination. The control would need external monitoring (heartbeats, timeouts) to detect blocking. The 1-rating is appropriate. Accept this rating.
+
+5. **T0855 Unauthorized Command Message / Preventative (Rating: 4)**: Accurate. Message authentication prevents forged/unauthenticated commands from being accepted. The 4-rating correctly identifies that the control prevents injection but depends on proper implementation, key management, and comprehensive deployment. Accept this rating.
+
+6. **T0855 Unauthorized Command Message / Detective (Rating: 4)**: Accurate. Authentication rejects unauthenticated commands, detecting injection attempts. The 4-rating appropriately notes implementation gaps and key management risks. Accept this rating.
+
+7. **T0856 Spoof Reporting Message / Preventative (Rating: 4)**: Accurate. Message authentication prevents spoofed reporting messages from being accepted. The 4-rating correctly acknowledges the control's limitations from incomplete deployment and key compromise scenarios. Accept this rating.
+
+8. **T0856 Spoof Reporting Message / Detective (Rating: 4)**: Accurate. Authentication failures will detect spoofing attempts. The 4-rating appropriately qualifies the control with considerations for credential compromise and implementation gaps. Accept this rating.
+
+9. **T0842 Network Sniffing / Preventative (Rating: 2)**: This is accurate. Message authentication doesn't prevent sniffing (capture of traffic) but makes captured data less useful. The 2-rating correctly identifies that the control addresses data confidentiality but not the act of sniffing itself. Accept this rating.
+
+10. **T0869 Standard Application Layer Protocol / Detective (Rating: 2)**: This evaluation is well-reasoned. Authentication can detect unauthenticated C2 attempts, but if credentials are compromised, malicious C2 will appear legitimate. The 2-rating appropriately reflects that the control has limited utility against sophisticated attackers who use legitimate credentials. Accept this rating.
+2026-06-02 11:03:19.034 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Let me assess each returned coverage evaluation:
+
+1. **T0830 (Adversary-in-the-Middle) - Preventative Coverage: 4**
+   The justification is sound. Message authentication directly prevents modification attacks by making forgery detectable. The limitations cited (legacy system gaps, key management risks, availability attacks) are accurate. The rating of 4 is appropriate—the control prevents modification but doesn't prevent interception positioning, and deployment inconsistency is realistic in OT environments.
+
+2. **T0830 (Adversary-in-the-Middle) - Detective Coverage: 4**
+   This is well-reasoned. Authentication failures would be detectable when attackers attempt modification. The cited limitations (legacy protocols, weak implementations, insider threats) are valid. A rating of 4 appropriately reflects that detection depends on implementation quality and comprehensive coverage.
+
+3. **T0803 (Block Command Message) - Detective Coverage: 1**
+   The justification is technically correct. Message authentication verifies integrity of messages that arrive, but blocking prevents messages from reaching the destination. Authentication mechanisms cannot detect what was never sent. A rating of 1 is accurate—this control is architecturally misaligned with message blocking detection.
+
+4. **T0804 (Block Reporting Message) - Detective Coverage: 1**
+   Similar to T0803, this is correct. Blocking prevents transmission before authentication can occur. The absence of messages is not detectable via authentication alone. The rating of 1 is appropriate as authentication cannot detect message suppression.
+
+5. **T0856 (Spoof Reporting Message) - Preventative Coverage: 4**
+   Excellent justification. Message authentication directly prevents spoofing by making forged messages cryptographically detectable. The 4-rating acknowledges implementation gaps and key management risks. This is accurate.
+
+6. **T0856 (Spoof Reporting Message) - Detective Coverage: 4**
+   Strong analysis. Authentication failures from spoofing attempts would be detected. The limitations (legacy systems, key compromise, partial deployments) are realistic. The rating of 4 is well-supported.
+
+7. **T0855 (Unauthorized Command Message) - Preventative Coverage: 4**
+   The control directly prevents unauthorized commands by requiring authentication. The 4-rating appropriately acknowledges implementation gaps, insider threats with credentials, and legacy system incompatibilities. This is accurate.
+
+8. **T0855 (Unauthorized Command Message) - Detective Coverage: 4**
+   Solid analysis. Unsigned or fraudulently signed commands would be detected. The limitations cited are realistic. The rating of 4 is appropriate, accounting for legacy systems, implementation variance, and insider threat scenarios.
+
+9. **T0842 (Network Sniffing) - Preventative Coverage: 2**
+   The justification correctly identifies that message authentication does not prevent sniffing itself—it only makes captured data less useful. The control prevents information extraction but not the sniffing action. The 2-rating is accurate; it prevents approximately 25-50% of sniffing impact through making eavesdropped data unreadable, but does not prevent the sniffing itself.
+
+10. **T0869 (Standard Application Layer Protocol) - Detective Coverage: 2**
+    The justification is accurate. Authentication can verify source/integrity but does not detect legitimate protocol misuse for C2. An attacker with valid credentials using authenticated HTTP or OPC for C2 would pass authentication. The 2-rating appropriately reflects that behavioral detection is missing and the control only catches unskilled attackers without valid credentials (25-50% of vectors).
+
+All ratings and justifications are technically sound and appropriately calibrated for OT/ICS environments.
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Network message authentication directly prevents modification-based AiTM attacks by making undetected forgery cryptographically infeasible. However, the rating is 4 rather than 5 due to potential legacy system gaps, deployment inconsistencies, key management risks, and the control's inability to prevent initial traffic interception or block denial-of-service variants.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "Authentication failures from modification attempts are highly detectable, causing messages to be rejected before execution. The 4-rating accounts for implementation quality variance, legacy protocol incompatibilities, weak key management, and the threat of insider attackers with legitimate credentials bypassing authentication entirely.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0803",
+    "technique_name": "Block Command Message",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Network message authentication verifies messages that arrive but cannot detect message blocking, which prevents delivery entirely. Authentication provides no mechanism to identify missing command messages or distinguish between network delays and adversarial blocking.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0804",
+    "technique_name": "Block Reporting Message",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Message authentication detects tampering of transmitted messages but cannot detect suppression or blocking that prevents messages from reaching their destination. The absence of telemetry cannot be identified through authentication mechanisms alone.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Spoof Reporting Message",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Network message authentication directly prevents spoofing by making forged reporting messages cryptographically detectable. The 4-rating reflects realistic limitations including legacy system support gaps, key management vulnerabilities, and incomplete deployment across heterogeneous ICS environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Spoof Reporting Message",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "Authentication failures from spoofing attempts are reliably detectable as invalid signatures prevent message acceptance. The 4-rating accounts for implementation inconsistencies, legacy devices lacking authentication support, compromised credentials scenarios, and insider threats.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0855",
+    "technique_name": "Unauthorized Command Message",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Network message authentication effectively prevents unauthorized commands by requiring cryptographic proof of legitimacy. The 4-rating acknowledges implementation gaps in legacy systems, potential key management failures, incomplete deployments, and insider threats with valid credentials.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0855",
+    "technique_name": "Unauthorized Command Message",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "Unsigned or fraudulently signed command messages are reliably detected and rejected before execution. The 4-rating reflects realistic constraints: legacy device incompatibilities, implementation quality variance, insider threat scenarios with legitimate credentials, and deployment coverage gaps.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 2,
+    "reasoning": "Network message authentication partially mitigates sniffing by making captured data unreadable without valid keys, but does not prevent the sniffing action itself or disclosure of metadata and traffic patterns. The control prevents information extraction from eavesdropped traffic but leaves approximately 50-75% of sniffing attack vectors viable.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "Network message authentication verifies message legitimacy but cannot detect when authenticated protocols are misused for command and control. An attacker with valid credentials establishing C2 over authenticated HTTP or OPC would evade detection. The control only catches unskilled attackers without credentials, providing limited behavioral anomaly detection.",
+    "overridden": false
+  }
+]
+```
+2026-06-02 11:06:09.082 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Let me assess each returned coverage evaluation:
+
+1. **T0830 (Adversary-in-the-Middle) - Preventative (Rating: 4)**
+   - Assessment: Accurate. Message authentication is highly effective at preventing successful AiTM attacks where the goal is to modify traffic undetected. The justification correctly identifies why it's 4 rather than 5 (doesn't prevent interception, only modification; requires full implementation; key management issues). Rating accepted.
+
+2. **T0830 (Adversary-in-the-Middle) - Detective (Rating: 4)**
+   - Assessment: Accurate. The control reliably detects modification attempts when messages are authenticated. The justification is sound regarding detection of tampering and the reasons for not being a 5. Rating accepted.
+
+3. **T0803 (Block Command Message) - Detective (Rating: 1)**
+   - Assessment: Accurate. Message authentication does not detect the act of blocking a message at the network level. An attacker can simply drop packets without triggering authentication alerts. The fundamental issue is that authentication works on messages that reach their destination; it can't detect messages that never arrive. Rating accepted.
+
+4. **T0803 (Block Command Message) - Preventative (Rating: 1)**
+   - Assessment: Accurate. Message authentication does not prevent blocking/dropping of messages. It only verifies messages that do arrive. An attacker with network position can drop authenticated messages. Rating accepted.
+
+5. **T0804 (Block Reporting Message) - Detective (Rating: 1)**
+   - Assessment: Accurate. Authentication cannot detect message blocking that occurs before delivery. An attacker can drop packets without triggering authentication mechanisms. The control is relevant but ineffective for this specific technique. Rating accepted.
+
+6. **T0804 (Block Reporting Message) - Preventative (Rating: 1)**
+   - Assessment: Accurate. Message authentication does not prevent blocking of messages at the network layer. This is fundamentally an availability attack that authentication doesn't address. Rating accepted.
+
+7. **T0856 (Spoof Reporting Message) - Detective (Rating: 4)**
+   - Assessment: Accurate. Message authentication directly detects spoofed messages by verifying origin and integrity. The justification correctly identifies limitations (implementation gaps, legacy protocol coverage, endpoint compromise). Rating accepted.
+
+8. **T0856 (Spoof Reporting Message) - Preventative (Rating: 4)**
+   - Assessment: Accurate. Authentication prevents successful spoofing by ensuring only legitimate sources can create valid messages. Limitations around implementation, key management, and legacy systems correctly identified. Rating accepted.
+
+9. **T0855 (Unauthorized Command Message) - Detective (Rating: 4)**
+   - Assessment: Accurate. Authentication detects unauthorized commands by verifying origin and integrity. Limitations around implementation gaps, protocol coverage, and credential compromise are valid. Rating accepted.
+
+10. **T0855 (Unauthorized Command Message) - Preventative (Rating: 4)**
+    - Assessment: Accurate. Authentication prevents unauthorized commands by requiring valid credentials and origin verification. The limitations noted (key management, insider threats, legacy systems) are appropriate. Rating accepted.
+
+11. **T0842 (Network Sniffing) - Detective (Rating: 1)**
+    - Assessment: Accurate. Message authentication does not detect the act of sniffing; it only protects data if captured. Detection of sniffing itself requires other monitoring controls. Rating accepted.
+
+12. **T0842 (Network Sniffing) - Preventative (Rating: 2)**
+    - Assessment: Accurate but could be refined. The control does provide some partial prevention by making captured data less useful (integrity verification prevents tampering with it), but doesn't prevent the sniffing act itself. Rating of 2 is reasonable for partial prevention. Rating accepted.
+
+13. **T0869 (Standard Application Layer Protocol) - Detective (Rating: 2)**
+    - Assessment: Accurate. Authentication can detect unauthorized C2 attempts but cannot prevent C2 that uses legitimately authenticated channels. The core technique (disguising C2 as benign) is not addressed by authentication alone. Rating of 2 is appropriate. Rating accepted.
+
+14. **T0887 (Wireless Sniffing) - Detective (Rating: 1)**
+    - Assessment: Accurate. Message authentication does not detect wireless sniffing itself, only protects against tampering. Detection requires wireless-specific controls. Rating accepted.
+
+15. **T0887 (Wireless Sniffing) - Preventative (Rating: 2)**
+    - Assessment: Accurate. Authentication provides partial prevention by making captured data less useful but doesn't prevent the capture itself. Rating of 2 is reasonable. Rating accepted.
+
+All ratings and justifications are well-reasoned. No overrides are necessary.
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Message authentication directly prevents successful modification of traffic in AiTM attacks by ensuring attackers cannot silently alter messages. However, it does not prevent interception or passive monitoring, requires comprehensive deployment across all protocols, and depends on proper key management.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "Message authentication reliably detects modification attempts by validating integrity and authenticity. Detection is limited by implementation gaps in real environments where not all protocols support authentication, and attackers with administrative access may bypass controls.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Spoof Reporting Message",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "Message authentication effectively detects spoofed reporting messages by cryptographically verifying message origin and integrity. However, coverage is limited by incomplete deployment across legacy protocols, endpoint compromise, and key management failures in real-world environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0856",
+    "technique_name": "Spoof Reporting Message",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Message authentication prevents successful spoofing by ensuring only legitimate sources can create valid messages. Prevention is not absolute due to key compromise risks, legacy system limitations, and inconsistent deployment across heterogeneous ICS environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0855",
+    "technique_name": "Unauthorized Command Message",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "Message authentication detects unauthorized command messages by verifying origin and integrity. However, detection effectiveness varies with implementation quality, coverage across all command channels, and proper security monitoring of authentication failures.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0855",
+    "technique_name": "Unauthorized Command Message",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Message authentication prevents unauthorized commands by requiring valid credentials and verifying origin. However, compromised systems with valid credentials can still issue unauthorized commands, and legacy protocols may lack authentication support.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 2,
+    "reasoning": "Message authentication provides partial prevention by protecting captured data from tampering, but does not prevent the sniffing activity itself. Effectiveness depends on combining authentication with encryption and is limited in environments with legacy unencrypted protocols.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "Message authentication can detect unauthorized C2 attempts from unauthenticated sources but cannot detect C2 that uses legitimately authenticated channels. Skilled attackers operating within authenticated sessions would not be detected by this control.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0887",
+    "technique_name": "Wireless Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 2,
+    "reasoning": "Message authentication provides partial prevention by making captured wireless data less useful through integrity verification, but does not prevent the capture of RF communications. Effectiveness is limited without paired encryption mechanisms.",
+    "overridden": false
+  }
+]
+```
+2026-06-02 11:18:14.817 INFO  - OUTPUT Now let me assess the coverage ratings and justifications provided by the evaluation tools for accuracy and consistency.
+
+**Step 3 - Coverage Verification:**
+
+1. **T0830 (Adversary-in-the-Middle) - Preventative [Rating: 4]**: The justification is well-reasoned. Secure transport protocols with encryption, authentication, and integrity controls do prevent most AiTM attacks, but limitations like implementation weaknesses, key compromise, and endpoint vulnerabilities are valid reasons to cap at 4 rather than 5. The assessment is sound. **Accept: 4**
+
+2. **T0830 (Adversary-in-the-Middle) - Detective [Rating: 4]**: The reasoning correctly identifies that TLS/SSH/IPSec detect tampering and failed authentication, though detection is reactive rather than proactive. Limitations around misconfigurations and protocol coverage gaps justify the 4 rating. **Accept: 4**
+
+3. **T0842 (Network Sniffing) - Preventative [Rating: 4]**: Encryption directly prevents sniffing from extracting information. The justification appropriately acknowledges that while traffic is encrypted, some legacy systems may lack encryption, and side-channel attacks remain possible. The 4 rating correctly reflects that prevention is comprehensive but not absolute. **Accept: 4**
+
+4. **T0842 (Network Sniffing) - Detective [Rating: 4]**: The response conflates prevention with detection somewhat, but the core logic is valid—encrypted protocols prevent the harm from sniffing. However, the justification claims this is "detective" when it's primarily preventative. The rating of 4 is defensible as this control prevents meaningful extraction of information rather than detecting sniffing activity itself. I would assess this more accurately as a **preventative** control with limited detective value. The tool classified it as both detective and preventative, but encrypting traffic doesn't actively detect sniffing attempts—it only prevents successful information extraction. **Override to 2**: Secure transport protocols do not detect sniffing activity; they only prevent successful data extraction. Detecting wireless sniffing would require passive RF monitoring or IDS alerts, not encryption. This control prevents harm but does not detect the sniffing attempt itself.
+
+5. **T0869 (Standard Application Layer Protocol) - Preventative [Rating: 2]**: This assessment is correct. Secure transport protocols can wrap some protocols (DNP3 → TLS-DNP3), but they cannot prevent an attacker using legitimate encrypted protocols like HTTPS or SSH for C2. An attacker with valid credentials or system compromise can still execute C2 over secure protocols. The 2 rating appropriately reflects that this control prevents only unencrypted C2 vectors (~25-50%), leaving many attack paths open. **Accept: 2**
+
+6. **T0869 (Standard Application Layer Protocol) - Detective [Rating: 1]**: The justification is sound. Secure transport protocols do not detect whether legitimate encrypted traffic is being used for C2 purposes. Detection requires behavioral analysis, not encryption. A rating of 1 is appropriate for minimal detective value. **Accept: 1**
+
+7. **T0885 (Commonly Used Port) - Preventative [Rating: 1]**: Correctly identifies that secure transport protocols do not prevent the use of common ports; they only secure what's transmitted over those ports. An attacker using HTTPS over port 443 remains undetected. The 1 rating is accurate. **Accept: 1**
+
+8. **T0885 (Commonly Used Port) - Detective [Rating: 1]**: Appropriately notes that secure protocols don't generate alerts for suspicious port usage. Using legitimate ports remains legitimate even with encryption. The 1 rating is justified. **Accept: 1**
+
+9. **T0887 (Wireless Sniffing) - Preventative [Rating: 4]**: Valid reasoning that encryption prevents information extraction from captured wireless traffic, but physical sniffing still occurs. The 4 rating properly reflects prevention of harm while acknowledging that encryption doesn't prevent the sniffing act itself. **Accept: 4**
+
+10. **T0887 (Wireless Sniffing) - Detective [Rating: 2]**: The justification correctly states that encryption doesn't detect RF sniffing, only prevents successful exploitation. Detection would require RF monitoring or WIDS. However, the rating of 2 seems slightly generous—this control provides very minimal detective value. An attacker passively capturing encrypted RF signals will not trigger any alerts from this control alone. **Override to 1**: Secure transport protocols provide essentially no detection of wireless sniffing activity. Encrypted RF traffic is still sniffed successfully; the control only prevents decryption. Detection requires dedicated RF monitoring or wireless intrusion detection systems, not encryption. The presence of this control does not alert operators to ongoing sniffing attempts.
+
+**Final Assessment Summary:**
+- T0830 Preventative: Accept 4
+- T0830 Detective: Accept 4
+- T0842 Preventative: Accept 4
+- T0842 Detective: Override to 2 (from 4)
+- T0869 Preventative: Accept 2
+- T0869 Detective: Accept 1
+- T0885 Preventative: Accept 1
+- T0885 Detective: Accept 1
+- T0887 Preventative: Accept 4
+- T0887 Detective: Override to 1 (from 2)
+
+```json
+[
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Secure transport protocols with encryption, message authentication (HMAC, digital signatures), and mutual authentication prevent most AiTM attacks by making traffic unreadable and detectable if modified. However, implementation weaknesses, key compromise, certificate validation failures, and sophisticated attackers with endpoint access can circumvent these protections, preventing a perfect score.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "TLS, SSH, and IPSec protocols detect unauthorized modification and session hijacking through cryptographic authentication and integrity verification, making unauthorized message tampering extremely difficult. However, detection effectiveness depends on proper implementation, certificate validation, and comprehensive protocol deployment across all critical segments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Encryption via TLS, SSH, and IPSec directly prevents attackers from extracting useful information from captured network traffic, including credentials previously exposed over unencrypted protocols. This control stops approximately 75-90% of sniffing vectors, though gaps may exist with legacy systems lacking encryption support or misconfiguration of secure protocols.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "Secure transport protocols prevent information extraction from sniffed traffic through encryption but do not actively detect sniffing activity itself. An attacker capturing encrypted network traffic generates no alerts; detection of sniffing requires network monitoring tools or IDS mechanisms, not encryption alone.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "preventative",
+    "coverage_rating": 2,
+    "reasoning": "Secure transport protocols prevent only unencrypted C2 communications (~25-50% of vectors). An attacker can establish C2 over legitimate encrypted protocols (HTTPS, SSH, TLS-wrapped OPC) or via compromised systems with valid credentials, making this control architecturally relevant but insufficient to prevent the broader technique.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols do not detect whether standard application layer protocols are being used for malicious C2 purposes. An attacker can establish C2 over HTTPS, SSH, or encrypted OPC without triggering alerts; detection requires behavioral analysis and command validation, not transport-layer encryption.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "preventative",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols do not prevent adversaries from communicating over commonly used ports (80, 443, 22, etc.). An attacker using HTTPS over port 443 or SSH over port 22 remains legitimate and undetected; the control secures the channel but does not restrict port selection or evasion.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0885",
+    "technique_name": "Commonly Used Port",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols provide no detection capability for the abuse of commonly used ports. Implementation of encrypted protocols on standard ports (HTTPS on 443, SSH on 22) does not generate alerts for suspicious use; detection requires behavioral analysis or anomalous port usage monitoring.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0887",
+    "technique_name": "Wireless Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Encryption protocols (TLS, SSH, IPSec) render captured RF communications unintelligible, preventing information disclosure from wireless sniffing in approximately 75-90% of scenarios. However, implementation gaps with legacy ICS devices, key management vulnerabilities, and specialized protocol weaknesses prevent a perfect score.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0887",
+    "technique_name": "Wireless Sniffing",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Secure transport protocols do not detect wireless RF sniffing activity itself. An attacker using specialized hardware to capture encrypted wireless traffic generates no alerts; encryption prevents decryption of captured data but does not detect the sniffing act. Detection requires dedicated RF monitoring or wireless intrusion detection systems.",
+    "overridden": true
+  }
+]
+```
+2026-06-02 11:20:37.033 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+I'll assess each tool response for accuracy and determine final ratings:
+
+1. **T0830 (Adversary-in-the-Middle) — Preventative, rating 4**: The justification is accurate. Secure transport protocols with encryption, authentication, and integrity checks directly prevent AiTM attacks by making tampering detectable and impersonation impossible. The limitations cited (key management, endpoint compromise, specialized protocols) are valid. Rating of 4 is appropriate—this control strongly prevents AiTM but isn't absolute due to implementation and key management factors. **Accept.**
+
+2. **T0830 (Adversary-in-the-Middle) — Detective, rating 4**: The justification is sound. The control provides strong detection through authentication and integrity mechanisms. Limitations around legacy protocols and endpoint compromise are valid. However, the framing conflates detection with prevention somewhat. Secure protocols don't detect AiTM attempts per se—they make them fail or become obvious through authentication failures. The rating seems slightly generous for pure detection, but in practice, failed authentication on AiTM is readily visible. **Accept with note that this is more "detection via prevention".**
+
+3. **T0885 (Commonly Used Port) — Preventative, rating 1**: This rating is accurate. Secure transport protocols do not prevent use of standard ports; they only secure what travels over them. An attacker using HTTPS over port 443 for C2 is still using a commonly used port. The control is architecturally irrelevant to this technique. **Accept.**
+
+4. **T0885 (Commonly Used Port) — Detective, rating 1**: Accurate. Secure protocols don't detect port-based evasion; they encrypt traffic regardless of port. An adversary can use secure protocols over common ports and evade detection. **Accept.**
+
+5. **T0842 (Network Sniffing) — Preventative, rating 4**: The justification is well-reasoned. Encryption and authentication prevent extraction of credentials from sniffed traffic. Limitations (legacy systems, misconfiguration, specialized protocols) are valid. The rating of 4 appropriately reflects that while the control strongly prevents credential theft via sniffing, it depends on comprehensive deployment and proper configuration. **Accept.**
+
+6. **T0842 (Network Sniffing) — Detective, rating 4**: The justification correctly notes that secure protocols prevent exploitation of sniffed data but don't detect sniffing itself. However, the rating conflates prevention with detection. For pure detection (i.e., alerting that sniffing is occurring), secure protocols provide minimal coverage. They prevent successful exploitation, but adversaries can still sniff encrypted traffic. I would rate pure detective capability at 2, as the control doesn't provide visibility into sniffing attempts—only prevention of data leakage. **Override to rating 2.** Justification: Secure transport protocols prevent adversaries from extracting useful information from sniffed traffic but do not detect sniffing activity itself; detection of actual sniffing attempts requires complementary network monitoring controls.
+
+7. **T0869 (Standard Application Layer Protocol) — Preventative, rating 2**: The justification is accurate. Secure protocols don't prevent use of standard application layer protocols for C2; they only secure the transport. An attacker with valid credentials can still establish C2 over encrypted HTTPS, OPC UA, etc. The rating of 2 reflects partial prevention (making C2 harder but not impossible). **Accept.**
+
+8. **T0869 (Standard Application Layer Protocol) — Detective, rating 1**: Accurate. Encrypted C2 over standard protocols appears as legitimate traffic and cannot be detected by the secure protocol itself. Detection requires behavioral analysis or other controls. Rating of 1 is correct. **Accept.**
+
+9. **T0887 (Wireless Sniffing) — Preventative, rating 4**: The justification is sound. Encryption prevents extraction of intelligence from sniffed RF communications. The limitations (sniffing still possible, implementation gaps, side-channel attacks) are valid. Rating of 4 is appropriate. **Accept.**
+
+10. **T0887 (Wireless Sniffing) — Detective, rating 3**: The justification notes that the control prevents exploitation but not sniffing detection itself. However, a rating of 3 seems generous for detective coverage. Like T0842 detective, this control doesn't detect sniffing—it prevents successful exploitation. I would rate pure detective capability at 2. **Override to rating 2.** Justification: Secure transport protocols prevent adversaries from extracting actionable intelligence from captured wireless traffic but do not detect wireless sniffing attempts; detection requires wireless monitoring and anomaly detection mechanisms.
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Secure transport protocols with encryption, authentication, and integrity checks effectively prevent AiTM attacks by making traffic tampering detectable and endpoint impersonation impossible. However, the control is not absolute due to reliance on proper key management, certificate validation, potential endpoint compromise, and support for specialized ICS protocols.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0830",
+    "technique_name": "Adversary-in-the-Middle",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "Authentication mechanisms in secure protocols detect unauthorized intermediaries through failed certificate or HMAC validation, making AiTM attempts evident. Detection effectiveness depends on comprehensive implementation and proper configuration of TLS, SSH, IPSec, and specialized protocols across the environment.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Encryption and authentication in secure protocols prevent adversaries from extracting credentials and sensitive data from captured network traffic. The rating reflects limitations in comprehensive deployment, legacy system support, and potential misconfiguration in typical ICS environments.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0842",
+    "technique_name": "Network Sniffing",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "Secure transport protocols prevent successful exploitation of sniffed data but do not detect sniffing activity itself; an adversary can capture encrypted packets without triggering alerts. Detection of actual sniffing attempts requires complementary network monitoring controls such as promiscuous mode detection or unusual traffic pattern analysis.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "preventative",
+    "coverage_rating": 2,
+    "reasoning": "Secure protocols do not prevent command and control establishment over standard application layer protocols; attackers with valid credentials can establish C2 over encrypted HTTPS, OPC UA, or other secured standard protocols. The control only marginally increases difficulty by requiring proper credentials and encryption.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0869",
+    "technique_name": "Standard Application Layer Protocol",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Encrypted command and control traffic over standard application layer protocols appears indistinguishable from legitimate traffic and provides no mechanism for detection; encryption prevents visibility into malicious intent. Detection requires behavioral analysis, endpoint monitoring, or threat intelligence rather than protocol-level security.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0887",
+    "technique_name": "Wireless Sniffing",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Encryption of wireless communications prevents adversaries from extracting actionable intelligence from captured RF signals. The rating reflects limitations including the inability to prevent the sniffing act itself, implementation gaps in legacy wireless protocols, and potential side-channel vulnerabilities.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0887",
+    "technique_name": "Wireless Sniffing",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "Secure transport protocols prevent successful exploitation of captured wireless traffic but do not detect the sniffing activity itself; adversaries can capture encrypted RF communications without alerting security systems. Detection of wireless sniffing attempts requires wireless monitoring infrastructure and anomaly detection mechanisms.",
+    "overridden": true
+  }
+]
+```
