@@ -175,4 +175,59 @@ public class AssessmentService {
         assessment.setTechniquePriorities(priorityMap);
         return assessmentRepository.save(assessment);
     }
+
+    /**
+     * Calculates the marginal coverage gain achievable for each control-technique pair by
+     * increasing that control's maturity and scope to their maximum values (5, 5).
+     * <p>
+     * The gain for a single {@link com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage}
+     * entry is:
+     * <pre>
+     *   marginalGain = coverageRating × (1 − effectiveScalingFactor(scope, maturity))
+     * </pre>
+     * A control already at maximum deployment contributes a gain of zero. Controls with no
+     * technique coverage entries are omitted from the result. Where multiple coverage entries
+     * exist for the same control-technique pair (across different
+     * {@link com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType}s),
+     * their gains are summed into a single value. Diminishing returns from combining controls
+     * are not taken into account.
+     *
+     * @param dto the assessment whose saved control statuses provide the current maturity and scope baseline
+     * @return a map of each control to a map of technique → marginal gain score
+     */
+    @Transactional
+    public Map<Control, Map<Technique, Double>> calculateMarginalGains(AssessmentDTO dto) {
+        Map<UUID, ControlStatusDTO> statusLookup = new HashMap<>();
+        if (dto.getControlStatusMapping() != null) {
+            for (ControlStatusDTO statusDTO : dto.getControlStatusMapping()) {
+                if (!statusDTO.isBlank()) {
+                    statusLookup.put(statusDTO.getControlId(), statusDTO);
+                }
+            }
+        }
+
+        Map<Control, Map<Technique, Double>> result = new LinkedHashMap<>();
+
+        for (Control control : controlRepository.findAll()) {
+            if (control.getTechniqueCoverage().isEmpty()) {
+                continue;
+            }
+
+            ControlStatusDTO status = statusLookup.get(control.getId());
+            double scope = (status != null && status.getCoverageScope() != null) ? status.getCoverageScope() : 0.0;
+            double maturity = (status != null && status.getCoverageMaturity() != null) ? status.getCoverageMaturity() : 0.0;
+
+            double currentScalingFactor = CoverageCalculationService.effectiveScalingFactor(scope, maturity);
+
+            Map<Technique, Double> techniqueGains = new LinkedHashMap<>();
+            for (var coverage : control.getTechniqueCoverage()) {
+                double marginalGain = coverage.getCoverageRating() * (1.0 - currentScalingFactor);
+                techniqueGains.merge(coverage.getTechnique(), marginalGain, Double::sum);
+            }
+
+            result.put(control, techniqueGains);
+        }
+
+        return result;
+    }
 }

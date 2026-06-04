@@ -1,15 +1,22 @@
 package com.czintercity.icsec_app.assessment.controller;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.czintercity.icsec_app.assessment.dto.AssessmentDTO;
 import com.czintercity.icsec_app.assessment.dto.TechniquePrioritiesFormDTO;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
 import com.czintercity.icsec_app.assessment.repository.AssessmentRepository;
 import com.czintercity.icsec_app.assessment.service.AssessmentService;
+import com.czintercity.icsec_app.attack.entity.Technique;
 import com.czintercity.icsec_app.attack.service.AttackService;
+import com.czintercity.icsec_app.controls.entity.Control;
+import com.czintercity.icsec_app.topics.entity.Topic;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -98,6 +105,57 @@ public class AssessmentController {
         model.addAttribute("tacticsMap", attackService.getTacticsWithTechniques());
         model.addAttribute("existingPriorities", assessmentService.getTechniquePriorities(assessmentId));
         return "assessment/mitreAssessment";
+    }
+
+    /**
+     * Renders the marginal gains heatmap for the given assessment, showing how much additional
+     * technique coverage each control could contribute if raised to maximum maturity and scope.
+     * Controls are grouped by topic; each control's total gain is the sum of its per-technique
+     * marginal gains passed to the view as {@code groupedGains}.
+     */
+    @GetMapping("/assessment/{assessmentId}/marginal-gains")
+    public String viewMarginalGains(Model model, @PathVariable UUID assessmentId) {
+        Optional<Assessment> existing = assessmentRepository.findById(assessmentId);
+        if (existing.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
+        }
+        AssessmentDTO dto = new AssessmentDTO(existing.get());
+
+        Map<Control, Map<Technique, Double>> marginalGains = assessmentService.calculateMarginalGains(dto);
+
+        // Sum per-technique gains into a single total per control
+        Map<Control, Double> totalGains = new LinkedHashMap<>();
+        for (Map.Entry<Control, Map<Technique, Double>> entry : marginalGains.entrySet()) {
+            double total = entry.getValue().values().stream().mapToDouble(Double::doubleValue).sum();
+            totalGains.put(entry.getKey(), total);
+        }
+
+        // Sort controls by descending gain; position in this list is the global rank
+        List<Control> ranked = totalGains.entrySet().stream()
+                .sorted(Map.Entry.<Control, Double>comparingByValue().reversed())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        Map<UUID, Integer> rankMap = new LinkedHashMap<>();
+        for (int i = 0; i < ranked.size(); i++) {
+            rankMap.put(ranked.get(i).getId(), i + 1);
+        }
+
+        // Group by topic in rank order so controls within each topic section are also sorted
+        Map<Topic, Map<Control, Double>> groupedGains = new LinkedHashMap<>();
+        for (Control control : ranked) {
+            groupedGains.computeIfAbsent(control.getTopic(), t -> new LinkedHashMap<>())
+                        .put(control, totalGains.get(control));
+        }
+
+        Map<Control, Double> topFive = new LinkedHashMap<>();
+        ranked.stream().limit(5).forEach(c -> topFive.put(c, totalGains.get(c)));
+
+        model.addAttribute("assessment", dto);
+        model.addAttribute("groupedGains", groupedGains);
+        model.addAttribute("rankMap", rankMap);
+        model.addAttribute("topFive", topFive);
+        return "assessment/marginalGains";
     }
 
     /**

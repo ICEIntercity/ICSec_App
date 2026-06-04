@@ -113,8 +113,7 @@ public class CoverageCalculationService {
                 Short coverageRating = coverage.getCoverageRating();
                 CoverageType coverageType = coverage.getCoverageType();
 
-                // Effective coverage formula - exponents weight scope more heavily than maturity
-                double effectiveCoverageScore = (Math.pow(scope, 0.65) * Math.pow(maturity, 0.35) / 5) * coverageRating;
+                double effectiveCoverageScore = effectiveScalingFactor(scope, maturity) * coverageRating;
                 double effectiveFailureProbability = Math.max(0.0, 1 - (effectiveCoverageScore / 5));
 
                 for (Tactic tactic : technique.getTactics()) {
@@ -164,8 +163,7 @@ public class CoverageCalculationService {
             ControlStatus status = statusMap.get(coverage.getControl().getId());
 
             if (status != null && !status.isBlank()) {
-                double effectiveRating = (Math.pow(status.getCoverageScope(), 0.65)
-                        * Math.pow(status.getCoverageMaturity(), 0.35) / 5)
+                double effectiveRating = effectiveScalingFactor(status.getCoverageScope(), status.getCoverageMaturity())
                         * coverage.getCoverageRating();
                 if (!existingByType.containsKey(type)) {
                     existingByType.put(type, new ArrayList<>());
@@ -180,5 +178,21 @@ public class CoverageCalculationService {
         }
 
         return new TechniqueAssessmentDetailDTO(existingByType, additionalByType);
+    }
+
+    /**
+     * Computes the scaling factor applied to a control's coverage rating based on its
+     * deployment scope and implementation maturity.
+     * <p>
+     * Scope is weighted more heavily than maturity (exponents 0.65 vs 0.35). The result
+     * equals {@code 1.0} when both inputs are at their maximum value of 5, and {@code 0.0}
+     * when either input is 0.
+     *
+     * @param scope    the coverage scope score (0–5)
+     * @param maturity the coverage maturity score (0–5)
+     * @return a value in [0, 1] representing the fraction of the raw coverage rating that is effectively active
+     */
+    static double effectiveScalingFactor(double scope, double maturity) {
+        return (Math.pow(scope, 0.65) * Math.pow(maturity, 0.35)) / 5.0;
     }
 }
