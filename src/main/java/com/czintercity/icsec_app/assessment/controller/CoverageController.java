@@ -65,7 +65,7 @@ public class CoverageController {
      * @param coverageType name of the {@link com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType}
      *                     enum constant to use for scoring and colouring
      */
-    @GetMapping("/assessment/{assessmentId}/result")
+    @GetMapping("/assessment/{assessmentId}/coverage")
     public String assessmentResult(Model model, @PathVariable UUID assessmentId,
                                    @RequestParam(defaultValue = "PREVENTATIVE") String coverageType) {
         Optional<Assessment> existing = assessmentRepository.findById(assessmentId);
@@ -83,6 +83,7 @@ public class CoverageController {
         Map<UUID, Double> techniquePriorityScores = buildPriorityScoreMap(coverageDTO, selectedType);
 
         model.addAttribute("assessment", new AssessmentDTO(assessment));
+        model.addAttribute("assessmentComplete", assessment.getControlStatusMapping() != null && !assessment.getControlStatusMapping().isEmpty());
         model.addAttribute("coverageTypes", CoverageType.values());
         model.addAttribute("selectedCoverageType", selectedType);
         model.addAttribute("coverageTypeHex", selectedType.getHexColor());
@@ -104,7 +105,7 @@ public class CoverageController {
      * @param coverageType name of the {@link com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType}
      *                     enum constant selected by the user
      */
-    @GetMapping("/assessment/{assessmentId}/result/heatmap")
+    @GetMapping("/assessment/{assessmentId}/coverage/heatmap")
     public String assessmentResultHeatmap(Model model, @PathVariable UUID assessmentId,
                                           @RequestParam(defaultValue = "PREVENTATIVE") String coverageType) {
         Optional<Assessment> existing = assessmentRepository.findById(assessmentId);

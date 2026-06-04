@@ -70,6 +70,8 @@ public class AssessmentController {
 
         model.addAttribute("assessment", assessment);
         model.addAttribute("groupedStatusMap", assessmentService.buildDisplayMap(assessment));
+        model.addAttribute("savedAssessmentId", assessmentId);
+        model.addAttribute("assessmentComplete", assessment.getControlStatusMapping() != null && !assessment.getControlStatusMapping().isEmpty());
 
         return "assessment/assessmentView";
     }
@@ -104,6 +106,7 @@ public class AssessmentController {
         model.addAttribute("assessment", new AssessmentDTO(existing.get()));
         model.addAttribute("tacticsMap", attackService.getTacticsWithTechniques());
         model.addAttribute("existingPriorities", assessmentService.getTechniquePriorities(assessmentId));
+        model.addAttribute("assessmentComplete", existing.get().getControlStatusMapping() != null && !existing.get().getControlStatusMapping().isEmpty());
         return "assessment/mitreAssessment";
     }
 
@@ -155,6 +158,7 @@ public class AssessmentController {
         model.addAttribute("groupedGains", groupedGains);
         model.addAttribute("rankMap", rankMap);
         model.addAttribute("topFive", topFive);
+        model.addAttribute("assessmentComplete", existing.get().getControlStatusMapping() != null && !existing.get().getControlStatusMapping().isEmpty());
         return "assessment/marginalGains";
     }
 
@@ -171,7 +175,7 @@ public class AssessmentController {
                                           @org.springframework.web.bind.annotation.RequestParam(required = false) String redirectTo) {
         assessmentService.saveTechniquePriorities(assessmentId, formDTO.getPriorities());
         if ("result".equals(redirectTo)) {
-            return "redirect:/assessment/" + assessmentId + "/result";
+            return "redirect:/assessment/" + assessmentId + "/coverage";
         }
         return "redirect:/assessment/" + assessmentId + "/prioritize";
     }
