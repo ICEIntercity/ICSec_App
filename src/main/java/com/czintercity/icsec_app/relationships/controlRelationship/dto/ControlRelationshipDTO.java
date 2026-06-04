@@ -5,6 +5,11 @@ import com.czintercity.icsec_app.relationships.controlRelationship.ControlRelati
 
 import java.util.UUID;
 
+/**
+ * Data transfer object representing a directed relationship between two controls, used in form submission
+ * and Thymeleaf fragment rendering.
+ * Carries the source/target UUIDs, the relationship type, and display-friendly target name and code.
+ */
 public class ControlRelationshipDTO {
 
     private UUID sourceId;

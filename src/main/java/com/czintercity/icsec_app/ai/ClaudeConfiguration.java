@@ -7,6 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Spring configuration class that exposes the Anthropic SDK client and shared {@link com.fasterxml.jackson.databind.ObjectMapper}
+ * as application-scoped beans.
+ * The API key is read from the {@code claude.api_key} application property.
+ */
 @Configuration
 public class ClaudeConfiguration {
 

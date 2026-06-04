@@ -11,6 +11,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Abstract base entity for directed relationships between two {@link com.czintercity.icsec_app.controls.entity.Control}s.
+ * Stored in a single JPA table with a {@code relationship_type} discriminator column.
+ * Concrete subtypes (e.g. {@link Dependency}, {@link Synergy}) provide semantic names and visual properties.
+ */
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="relationship_type")

@@ -1,5 +1,10 @@
 package com.czintercity.icsec_app.relationships.controlRelationship;
 
+/**
+ * Enumeration of semantic relationship types that can exist between two security controls.
+ * Each constant carries a human-readable display label and a Bootstrap-compatible hex colour
+ * used for graph-edge and badge rendering.
+ */
 public enum ControlRelationshipType {
     DEPENDENCY("Dependency", "#6610f2"),   // Indigo
     SYNERGY("Synergy", "#20c997"),         // Teal

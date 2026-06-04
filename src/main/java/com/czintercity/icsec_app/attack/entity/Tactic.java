@@ -6,6 +6,10 @@ import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * JPA entity representing a MITRE ATT&amp;CK for ICS tactic (e.g. Initial Access, Execution).
+ * Each tactic groups a set of {@link Technique}s that share the same adversary goal.
+ */
 @Entity
 public class Tactic {
     @Id

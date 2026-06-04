@@ -6,6 +6,10 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
+/**
+ * A {@link ControlRelationship} where the source and target controls interfere with or undermine each other.
+ * The relationship is symmetric: "conflicts with" reads the same in both directions.
+ */
 @Entity
 @DiscriminatorValue("CONFLICT")
 public class Conflict extends ControlRelationship {

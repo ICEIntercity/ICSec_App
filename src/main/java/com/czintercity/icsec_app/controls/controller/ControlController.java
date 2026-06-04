@@ -27,6 +27,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
 
+/**
+ * Controller for listing, viewing, creating, editing, deleting, and importing {@link Control} entities.
+ * Also exposes an HTMX fragment endpoint for inline control details and a JSON import endpoint for
+ * AI-generated coverage.
+ */
 @Controller
 public class ControlController {
     private static final Logger log = LoggerFactory.getLogger(ControlController.class);
@@ -94,6 +99,7 @@ public class ControlController {
         }
     }
 
+    /** Returns the control detail Thymeleaf fragment for HTMX partial updates. */
     @GetMapping("/control/{id}/fragment")
     public String showControlFragment(@PathVariable UUID id, Model model) {
         log.trace("showControlFragment(id={}) called.", id);
@@ -105,6 +111,7 @@ public class ControlController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Control with id " + id + " not found");
     }
 
+    /** Renders the edit form pre-populated with an existing control's data. */
     @GetMapping("/control/edit/{id}")
     public String editControl(@PathVariable UUID id, Model model) {
         log.trace("EditControl called for id: {}", id);
@@ -119,6 +126,7 @@ public class ControlController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Control with id " + id + " not found");
     }
 
+    /** Validates and persists the control form, redirecting back to the edit view on success or failure. */
     @PostMapping("/control/edit")
     public String saveControl(@Valid @ModelAttribute("controlForm") EditControlForm controlForm, RedirectAttributes redirectAttributes, BindingResult result) {
 
@@ -152,6 +160,10 @@ public class ControlController {
         }
     }
 
+    /**
+     * Parses a pasted JSON string into a list of {@link TechniqueCoverage} records and returns the
+     * coverage table fragment for HTMX partial updates.
+     */
     @PostMapping("/control/import-coverage")
     public String importCoverageFromJson(@RequestParam String json, Model model) {
         Control control = new Control();
@@ -174,6 +186,10 @@ public class ControlController {
         return "fragments/ai :: coverageTable";
     }
 
+    /**
+     * Deletes the control with the given ID and triggers an HTMX client-side redirect to the control list.
+     * Returns 404 if the control does not exist.
+     */
     @DeleteMapping("control/delete/{id}")
     public ResponseEntity<Void> deleteControl(@PathVariable UUID id) {
         Optional<Control> target = controlRepository.findById(id);

@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Form-backing object for the create/edit control form.
+ * Carries validated user inputs and is converted to a {@link Control} entity by
+ * {@link com.czintercity.icsec_app.controls.ControlService#createOrUpdateFromForm(EditControlForm)}.
+ */
 public class EditControlForm {
 
     private UUID controlId;

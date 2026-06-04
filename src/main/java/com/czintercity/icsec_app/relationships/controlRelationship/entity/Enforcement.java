@@ -6,6 +6,9 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
+/**
+ * A {@link ControlRelationship} where the source control technically or administratively enforces the target control.
+ */
 @Entity
 @DiscriminatorValue("ENFORCEMENT")
 public class Enforcement extends ControlRelationship{

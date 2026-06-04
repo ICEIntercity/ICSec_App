@@ -1,5 +1,11 @@
 package com.czintercity.icsec_app.assessment.model;
 
+/**
+ * Value object holding the computed coverage statistics for a single technique within an assessment.
+ * Stores optimum and effective failure probabilities derived from control maturity and scope ratings,
+ * and the user-assigned priority weight.
+ * Coverage scores on the 0–5 scale are derived from the failure probabilities on demand.
+ */
 public class AssessmentValues {
     private static final short MAX_COVERAGE_SCORE = 5;
 

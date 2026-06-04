@@ -6,6 +6,9 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
+/**
+ * A {@link ControlRelationship} where the source control strengthens the effectiveness of the target control.
+ */
 @Entity
 @DiscriminatorValue("SYNERGY")
 public class Synergy extends ControlRelationship {

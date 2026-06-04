@@ -13,18 +13,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Controller providing HTMX fragment endpoints used by the control edit form.
+ * Handles dynamic addition and editing of technique coverage rows and control relationship rows
+ * without full page reloads.
+ */
 @Controller
 public class EditControlFormController {
 
     private final TechniqueRepository techniqueRepository;
     private final ControlRepository controlRepository;
 
-    public EditControlFormController(TechniqueRepository techniqueRepository, ControlRepository controlRepository, ControlRelationshipService controlRelationshipService) {
+    public EditControlFormController(TechniqueRepository techniqueRepository, ControlRepository controlRepository) {
         this.techniqueRepository = techniqueRepository;
         this.controlRepository = controlRepository;
     }
 
-    // Add this to EditControlFormController.java
+    /** Returns the modal fragment for adding a new control relationship to the edit form. */
     @GetMapping("/controlRelationship/add")
     public String newControlRelationshipModal(@RequestParam Integer arrayLength, Model model){
         model.addAttribute("controlRelationship", new ControlRelationshipDTO(ControlRelationshipType.DEPENDENCY));
@@ -35,6 +40,7 @@ public class EditControlFormController {
         return "fragments/controlRelationship :: controlRelationshipModal";
     }
 
+    /** Returns the modal fragment pre-filled for editing an existing control relationship at the given list index. */
     @GetMapping("/controlRelationship/edit")
     public String updateControlDependencyModal(@RequestParam Integer index, ControlRelationshipDTO dependency, Model model){
         model.addAttribute("controlRelationship", dependency);
@@ -43,8 +49,7 @@ public class EditControlFormController {
         return "fragments/controlRelationship :: controlRelationshipModal";
     }
 
-    // Snippet from EditControlFormController.java
-
+    /** Returns a rendered relationship row fragment after the user confirms a relationship in the modal. */
     @PostMapping("/controlRelationship/row")
     public String updateControlRelationshipRow(@RequestParam Integer index,
                                                @RequestParam ControlRelationshipType type,
@@ -52,7 +57,7 @@ public class EditControlFormController {
                                                Model model) {
 
         Optional<Control> targetControl = controlRepository.findById(targetId);
-        if(!targetControl.isPresent()) {
+        if(targetControl.isEmpty()) {
             throw new IllegalArgumentException("Target control doesn't exist.");
         }
 
@@ -71,6 +76,7 @@ public class EditControlFormController {
         return "fragments/controlRelationship :: controlRelationshipRow";
     }
 
+    /** Returns the modal fragment for adding a new technique coverage entry to the edit form. */
     @GetMapping("/techniqueCoverage/add")
     public String newTechniqueCoverageModal(@RequestParam Integer arrayLength, Model model){
         model.addAttribute("techniqueCoverage", new TechniqueCoverage());
@@ -80,6 +86,7 @@ public class EditControlFormController {
         return "fragments/techniqueCoverage :: techniqueCoverageModal";
     }
 
+    /** Returns the modal fragment pre-filled for editing an existing technique coverage entry at the given list index. */
     @GetMapping("/techniqueCoverage/edit")
     public String updateTechniqueCoverageModal(@RequestParam Integer index, TechniqueCoverage coverage, Model model){
         model.addAttribute("index", index);
@@ -88,6 +95,7 @@ public class EditControlFormController {
         return "fragments/techniqueCoverage :: techniqueCoverageModal";
     }
 
+    /** Returns a rendered technique coverage row fragment after the user confirms an entry in the modal. */
     @PostMapping("/techniqueCoverage/row")
     public String updateTechniqueCoverageRow(@RequestParam(required = false) Integer index, TechniqueCoverage coverage, Model model){
         model.addAttribute("index", index);
@@ -95,6 +103,7 @@ public class EditControlFormController {
         return "fragments/techniqueCoverage :: techniqueCoverageRow";
     }
 
+    /** Returns an empty reference row fragment for appending a new URL/reference entry to the edit form. */
     @GetMapping("/control/fragments/reference-row")
     public String getReferenceRow() {
         return "fragments/reference :: referenceRow";

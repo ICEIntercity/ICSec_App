@@ -15,6 +15,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Service responsible for creating typed {@link ControlRelationship} entities from
+ * {@link ControlRelationshipDTO} descriptors submitted in the control edit form.
+ * Enforces uniqueness constraints per relationship type and resolves source/target controls
+ * from the repository within a single transaction.
+ */
 @Service
 public class ControlRelationshipService {
 
@@ -66,6 +72,17 @@ public class ControlRelationshipService {
         return out;
     }
 
+    /**
+     * Persists a collection of outgoing relationships originating from the control identified by {@code sourceId}.
+     * Relationships of type {@code UNKNOWN} are silently skipped.
+     *
+     * @param relationships DTOs describing each relationship to create
+     * @param sourceId      ID of the source control; overrides {@link ControlRelationshipDTO#getSourceId()} when non-null
+     * @return list of persisted {@link ControlRelationship} entities
+     * @throws IllegalArgumentException       if {@code relationships} is null, or a target/source ID is missing
+     * @throws com.czintercity.icsec_app.runtime.exception.RecordNotFoundException      if the source or target control cannot be found
+     * @throws com.czintercity.icsec_app.runtime.exception.DuplicateRelationshipException if an identical relationship already exists
+     */
     @Transactional
     public List<ControlRelationship> createOutgoingRelationships(Iterable<ControlRelationshipDTO> relationships, UUID sourceId) {
         ArrayList<ControlRelationship> outgoingRelationships = new ArrayList<>();

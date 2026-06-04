@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * JPA entity representing a security control.
+ * Controls are grouped by {@link com.czintercity.icsec_app.topics.entity.Topic}, carry MITRE ATT&amp;CK
+ * technique coverage mappings, and can have typed relationships to other controls.
+ */
 @Entity
 public class Control {
     @Id

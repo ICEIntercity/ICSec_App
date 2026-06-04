@@ -6,6 +6,9 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
+/**
+ * A {@link ControlRelationship} where the source control validates or confirms that the target control is operating correctly.
+ */
 @Entity
 @DiscriminatorValue("VERIFICATION")
 public class Verification extends ControlRelationship {

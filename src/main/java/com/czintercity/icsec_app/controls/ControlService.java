@@ -16,6 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service responsible for persisting {@link Control} entities from user-submitted form data.
+ * Handles creation, update, and replacement of associated technique coverage records
+ * and outgoing control relationships within a single transaction.
+ */
 @Service
 public class ControlService {
     private static final Logger logger = LoggerFactory.getLogger(ControlService.class);
@@ -31,6 +36,14 @@ public class ControlService {
         this.controlRelationshipRepository = controlRelationshipRepository;
     }
 
+    /**
+     * Creates a new control or updates an existing one based on the provided form data.
+     * When updating, existing technique coverage and outgoing relationships are fully replaced.
+     *
+     * @param form validated form data submitted by the user
+     * @return the saved {@link Control} entity
+     * @throws IllegalArgumentException if the form references a non-existent control ID
+     */
     @Transactional
     public Control createOrUpdateFromForm(EditControlForm form){
         Control control;

@@ -17,6 +17,11 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Controller for listing, viewing, creating, editing, and deleting {@link Topic} entities.
+ * Topics cannot be deleted while they have assigned controls; such attempts are rejected with an
+ * inline HTMX error message rather than an HTTP error response.
+ */
 @Controller
 public class TopicController {
     private static final Logger log = LoggerFactory.getLogger(TopicController.class);
@@ -24,6 +29,7 @@ public class TopicController {
     @Autowired
     private TopicRepository topicRepository;
 
+    /** Renders the full list of topics. */
     @GetMapping("/topic/all")
     public String listTopics(Model model) {
         log.trace("listTopics called.");
@@ -33,6 +39,7 @@ public class TopicController {
     }
 
 
+    /** Renders the topic creation form with an empty {@link Topic}. */
     @GetMapping("/topic/new")
     public String newTopic(Model model) {
         log.trace("New topic invoked.");
@@ -40,6 +47,7 @@ public class TopicController {
         return "topic/topicForm";
     }
 
+    /** Renders the read-only topic detail view. */
     @GetMapping("/topic/{id}")
     public String showTopic(@PathVariable UUID id, Model model) {
         log.trace("Received request to show topic with id {}", id);
@@ -54,6 +62,7 @@ public class TopicController {
         }
     }
 
+    /** Renders the topic edit form pre-populated with the existing topic data. */
     @GetMapping("/topic/edit/{id}")
     public String editTopic(@PathVariable UUID id, Model model) {
         log.trace("Received request to edit topic with id {}", id);
@@ -68,6 +77,7 @@ public class TopicController {
         }
     }
 
+    /** Validates and persists the topic form, returning the form view with success or error feedback. */
     @PostMapping("/topic/edit")
     public String saveTopic(@Valid @ModelAttribute("topic") Topic received, BindingResult result, Model model) {
         log.trace("Saving topic {}", received);
@@ -90,6 +100,10 @@ public class TopicController {
         return "topic/topicForm";
     }
 
+    /**
+     * Deletes the topic with the given ID, or returns an inline HTMX error message if the topic
+     * still has assigned controls. On success, triggers a client-side redirect to the topic list.
+     */
     @DeleteMapping("/topic/delete/{id}")
     public ResponseEntity<String> deleteTopic(@PathVariable UUID id) {
         Optional<Topic> target = topicRepository.findById(id);

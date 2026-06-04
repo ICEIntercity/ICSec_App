@@ -8,6 +8,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * JPA entity representing a security domain topic (e.g. Network Security, Identity and Access Management).
+ * Topics group related {@link com.czintercity.icsec_app.controls.entity.Control}s and provide colour coding
+ * for the UI.
+ */
 @Entity
 public class Topic {
 

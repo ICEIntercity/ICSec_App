@@ -7,6 +7,10 @@ import java.util.UUID;
 import java.util.List;
 
 @Repository
+/**
+ * Spring Data repository for {@link Tactic} entities, keyed by {@link UUID}.
+ */
 public interface TacticRepository extends JpaRepository<Tactic, UUID> {
+    /** Returns all tactics whose name exactly matches {@code name}. */
     List<Tactic> findByName(String name);
 }

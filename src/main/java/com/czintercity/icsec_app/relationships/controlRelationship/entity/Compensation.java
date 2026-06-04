@@ -6,6 +6,9 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
+/**
+ * A {@link ControlRelationship} where the source control compensates for a weakness or gap in the target control.
+ */
 @Entity
 @DiscriminatorValue("COMPENSATION")
 public class Compensation extends ControlRelationship {

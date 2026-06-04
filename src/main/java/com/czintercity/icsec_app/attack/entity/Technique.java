@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * JPA entity representing a MITRE ATT&amp;CK for ICS technique.
+ * A technique belongs to one or more {@link Tactic}s and may be covered by multiple
+ * {@link com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage} records.
+ */
 @Entity
 public class Technique {
     @Id

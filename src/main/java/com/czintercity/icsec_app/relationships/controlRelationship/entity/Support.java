@@ -6,6 +6,9 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
+/**
+ * A {@link ControlRelationship} where the source control provides supporting capabilities to the target control.
+ */
 @Entity
 @DiscriminatorValue("SUPPORT")
 public class Support extends ControlRelationship {

@@ -28,6 +28,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Controller for viewing MITRE ATT&amp;CK for ICS tactics and techniques and reloading the database
+ * from the bundled CSV files.
+ */
 @Controller
 public class AttackController {
     private static final Logger log = LoggerFactory.getLogger(AttackController.class);
@@ -45,12 +49,14 @@ public class AttackController {
         this.techniqueCoverageRepository = techniqueCoverageRepository;
     }
 
+    /** Renders the full MITRE ATT&amp;CK technique list grouped by tactic. */
     @GetMapping("/attack/techniques")
     public String techniqueList(Model model) {
         model.addAttribute("tacticsMap", attackService.getTacticsWithTechniques());
         return "attack/techniqueList";
     }
 
+    /** Returns the technique detail fragment for HTMX partial updates, including coverage grouped by type. */
     @GetMapping("/attack/technique/{techniqueId}/detail")
     public String techniqueDetail(Model model, @PathVariable UUID techniqueId) {
         Technique technique = techniqueRepository.findById(techniqueId)
@@ -67,7 +73,14 @@ public class AttackController {
         return "fragments/attack :: techniqueDetail";
     }
 
+    /**
+     * Clears all existing tactic and technique records and reloads them from the classpath CSV files
+     * ({@code mitre_attack/ics-attack-tactics.csv} and {@code mitre_attack/ics-attack-techniques.csv}).
+     * Intended for administrative use after a MITRE ATT&amp;CK dataset update
+     */
+    // TODO: Add a proper file upload handler; don't reload from disk.
     @GetMapping("/attack/reload")
+    @Deprecated
     public ResponseEntity<String> reloadAttack(){
 
         log.info("Reloading MITRE ATT&CK Tactics from hardcoded file...");
