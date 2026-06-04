@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="assessmentStepper(assessmentId, currentStep, assessmentComplete, formId, continueRedirectTo)"
+     class="d-flex align-items-center justify-content-between py-3 mb-4 border-bottom">
+
+    <div class="d-flex align-items-center">
+
+        <a th:href="@{/assessment/{id}(id=${assessmentId})}"
+           class="d-flex align-items-center gap-2 text-decoration-none px-2">
+            <span class="rounded-circle d-flex align-items-center justify-content-center border"
+                  style="width:1.75rem;height:1.75rem;font-size:0.8rem;font-weight:600;"
+                  th:classappend="${currentStep == 1} ? ' border-primary bg-primary text-white' : ' border-secondary text-secondary'">1</span>
+            <span th:classappend="${currentStep == 1} ? ' text-primary fw-semibold' : ' text-secondary'">Assessment</span>
+        </a>
+
+        <span class="text-muted mx-1">›</span>
+
+        <a th:href="@{/assessment/{id}/prioritize(id=${assessmentId})}"
+           class="d-flex align-items-center gap-2 text-decoration-none px-2"
+           th:classappend="${!assessmentComplete} ? ' pe-none opacity-50' : ''">
+            <span class="rounded-circle d-flex align-items-center justify-content-center border"
+                  style="width:1.75rem;height:1.75rem;font-size:0.8rem;font-weight:600;"
+                  th:classappend="${currentStep == 2} ? ' border-primary bg-primary text-white' : ' border-secondary text-secondary'">2</span>
+            <span th:classappend="${currentStep == 2} ? ' text-primary fw-semibold' : ' text-secondary'">Prioritization</span>
+        </a>
+
+        <span class="text-muted mx-1">›</span>
+
+        <a th:href="@{/assessment/{id}/coverage(id=${assessmentId})}"
+           class="d-flex align-items-center gap-2 text-decoration-none px-2"
+           th:classappend="${!assessmentComplete} ? ' pe-none opacity-50' : ''">
+            <span class="rounded-circle d-flex align-items-center justify-content-center border"
+                  style="width:1.75rem;height:1.75rem;font-size:0.8rem;font-weight:600;"
+                  th:classappend="${currentStep == 3} ? ' border-primary bg-primary text-white' : ' border-secondary text-secondary'">3</span>
+            <span th:classappend="${currentStep == 3} ? ' text-primary fw-semibold' : ' text-secondary'">Coverage Report</span>
+        </a>
+
+        <span class="text-muted mx-1">›</span>
+
+        <a th:href="@{/assessment/{id}/marginal-gains(id=${assessmentId})}"
+           class="d-flex align-items-center gap-2 text-decoration-none px-2"
+           th:classappend="${!assessmentComplete} ? ' pe-none opacity-50' : ''">
+            <span class="rounded-circle d-flex align-items-center justify-content-center border"
+                  style="width:1.75rem;height:1.75rem;font-size:0.8rem;font-weight:600;"
+                  th:classappend="${currentStep == 4} ? ' border-primary bg-primary text-white' : ' border-secondary text-secondary'">4</span>
+            <span th:classappend="${currentStep == 4} ? ' text-primary fw-semibold' : ' text-secondary'">Marginal Gains</span>
+        </a>
+
+    </div>
+
+    <div class="d-flex gap-2 justify-content-end" th:if="${formId != null}">
+        <button type="reset" th:attr="form=${formId}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Revert changes
+        </button>
+        <button type="submit" th:attr="form=${formId}" class="btn btn-sm btn-primary">
+            <i class="bi bi-floppy me-1"></i>Save changes
+        </button>
+        <button type="submit" name="redirectTo" th:attr="form=${formId}" th:value="${continueRedirectTo}" class="btn btn-sm btn-success">
+            Save and continue <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+    </div>
+
+</div>
+</body>
+</html>
