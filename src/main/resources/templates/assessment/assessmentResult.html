@@ -13,6 +13,8 @@
         </div>
     </div>
 
+    <div th:replace="~{fragments/assessmentStepper :: assessmentStepper(${assessment.getId()}, 3, ${assessmentComplete})}"></div>
+
     <div class="d-flex align-items-center justify-content-between sticky-top bg-white border-bottom py-2 mb-4">
         <div>
             <h3 class="mb-0">MITRE Coverage Heatmap</h3>
@@ -28,7 +30,7 @@
             <div class="d-flex align-items-center gap-2" id="coverageTypeSelector">
                 <label class="form-label mb-0 small text-muted fw-semibold">Coverage type</label>
                 <select class="form-select form-select-sm" name="coverageType" style="width: auto;"
-                        th:attr="hx-get=@{/assessment/{id}/result/heatmap(id=${assessment.getId()})}"
+                        th:attr="hx-get=@{/assessment/{id}/coverage/heatmap(id=${assessment.getId()})}"
                         hx-target="#heatmap-container"
                         hx-trigger="change"
                         hx-include="this">
@@ -39,9 +41,6 @@
                     </option>
                 </select>
             </div>
-            <a th:href="@{/assessment/{id}/prioritize(id=${assessment.getId()})}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i>Prioritization
-            </a>
         </div>
     </div>
 

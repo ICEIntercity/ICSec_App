@@ -53,7 +53,7 @@
                            class="btn btn-sm btn-outline-primary">
                             <i class="bi bi-pencil me-1"></i>Edit assessment
                         </a>
-                        <a th:href="@{/assessment/{id}/result(id=${assessment.getId()})}"
+                        <a th:href="@{/assessment/{id}/coverage(id=${assessment.getId()})}"
                            th:classappend="${assessment.getControlStatusMapping() == null or assessment.getControlStatusMapping().isEmpty()} ? 'disabled'"
                            class="btn btn-sm btn-outline-success">
                             <i class="bi bi-bar-chart me-1"></i>View results

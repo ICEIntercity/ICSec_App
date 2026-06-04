@@ -84,6 +84,10 @@ document.getElementById('modalMaturity').addEventListener('change', function () 
         </div>
     </div>
 
+    <th:block th:if="${savedAssessmentId != null}">
+        <div th:replace="~{fragments/assessmentStepper :: assessmentStepper(${savedAssessmentId}, 1, ${assessmentComplete})}"></div>
+    </th:block>
+
     <div class="d-flex align-items-center justify-content-between sticky-top bg-white border-bottom py-2 mb-4">
         <h3 class="mb-0" th:text="${assessment.getName()} ?: 'New Assessment'">Assessment</h3>
         <div class="d-flex gap-2">
