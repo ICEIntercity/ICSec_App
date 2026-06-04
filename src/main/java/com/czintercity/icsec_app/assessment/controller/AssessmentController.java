@@ -1,6 +1,7 @@
 package com.czintercity.icsec_app.assessment.controller;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.czintercity.icsec_app.assessment.dto.AssessmentDTO;
 import com.czintercity.icsec_app.assessment.dto.TechniquePrioritiesFormDTO;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
@@ -35,12 +38,14 @@ public class AssessmentController {
     private final AssessmentRepository assessmentRepository;
     private final AssessmentService assessmentService;
     private final AttackService attackService;
+    private final ObjectMapper objectMapper;
 
     public AssessmentController(AssessmentRepository assessmentRepository, AssessmentService assessmentService,
-                                AttackService attackService) {
+                                AttackService attackService, ObjectMapper objectMapper) {
         this.assessmentRepository = assessmentRepository;
         this.assessmentService = assessmentService;
         this.attackService = attackService;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -154,10 +159,39 @@ public class AssessmentController {
         Map<Control, Double> topFive = new LinkedHashMap<>();
         ranked.stream().limit(5).forEach(c -> topFive.put(c, totalGains.get(c)));
 
+        // Build a JSON blob for the control detail modal so the template needs no th:inline="javascript"
+        Map<String, Object> controlModalData = new LinkedHashMap<>();
+        for (Map.Entry<Control, Map<Technique, Double>> cEntry : marginalGains.entrySet()) {
+            Control control = cEntry.getKey();
+            List<Map<String, Object>> techniques = new ArrayList<>();
+            for (Map.Entry<Technique, Double> tEntry : cEntry.getValue().entrySet()) {
+                Map<String, Object> tech = new LinkedHashMap<>();
+                tech.put("mitreId", tEntry.getKey().getMitreId());
+                tech.put("name", tEntry.getKey().getName());
+                tech.put("gain", tEntry.getValue());
+                techniques.add(tech);
+            }
+            Map<String, Object> info = new LinkedHashMap<>();
+            info.put("name", control.getName());
+            info.put("description", control.getDescription() != null ? control.getDescription() : "");
+            info.put("code", control.getCode());
+            info.put("topicName", control.getTopic().getName());
+            info.put("topicColor", control.getTopic().getColor() != null ? control.getTopic().getColor() : "#6c757d");
+            info.put("techniques", techniques);
+            controlModalData.put(control.getId().toString(), info);
+        }
+        String controlDataJson;
+        try {
+            controlDataJson = objectMapper.writeValueAsString(controlModalData);
+        } catch (JsonProcessingException e) {
+            controlDataJson = "{}";
+        }
+
         model.addAttribute("assessment", dto);
         model.addAttribute("groupedGains", groupedGains);
         model.addAttribute("rankMap", rankMap);
         model.addAttribute("topFive", topFive);
+        model.addAttribute("controlDataJson", controlDataJson);
         model.addAttribute("assessmentComplete", existing.get().getControlStatusMapping() != null && !existing.get().getControlStatusMapping().isEmpty());
         return "assessment/marginalGains";
     }
