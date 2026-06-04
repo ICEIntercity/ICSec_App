@@ -18,3 +18,6 @@
 2026-06-02 11:04:14.589 INFO  - INPUT  control='Network message authentication' (id=ae43c5b4-ff4a-4e1d-b423-2c076ca3dbff)
 2026-06-02 11:16:37.784 INFO  - INPUT  control='Secure transport protocols' (id=2e3229af-c0dd-4a4c-a1ee-78883cfc808f)
 2026-06-02 11:19:09.040 INFO  - INPUT  control='Secure transport protocols' (id=550ff63c-a5a2-4187-8952-1482849e8e7b)
+2026-06-02 14:12:23.706 INFO  - INPUT  control='Security acceptance testing' (id=1d8bbc37-e64a-4287-946a-3e6097047812)
+2026-06-02 14:43:48.338 INFO  - INPUT  control='Identity and access audit' (id=590c6bda-31c4-4f04-a1c5-a549388c51be)
+2026-06-03 14:46:48.828 INFO  - INPUT  control='Automated vulnerability scanning' (id=9c6d30b4-8fd3-4283-9cf4-e302d1ebc2ea)

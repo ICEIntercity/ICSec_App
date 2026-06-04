@@ -55,6 +55,7 @@ public class ControlController {
     public String listControls(Model model) {
         log.trace("listControls called.");
         model.addAttribute("topics", topicRepository.findAll());
+        model.addAttribute("totalControls", controlRepository.count());
         return "control/allControls";
     }
 

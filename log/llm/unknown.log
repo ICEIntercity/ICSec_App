@@ -2348,3 +2348,205 @@ I'll assess each tool response for accuracy and determine final ratings:
   }
 ]
 ```
+2026-06-02 14:13:51.278 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Let me assess each result against the control's actual capabilities:
+
+1. **T0820 (Exploitation for Evasion) - Detective, Rating 2**: The justification accurately notes that SAT is a one-time pre-deployment assessment that cannot detect ongoing exploitation. The rating of 2 is appropriate—SAT can identify some exploitable vulnerabilities during testing but provides no runtime detection of evasion techniques being employed against operational systems. **Accepted.**
+
+2. **T0857 (System Firmware) - Detective, Rating 2**: The explanation correctly identifies the timing gap and runtime attack detection limitations. SAT can detect firmware vulnerabilities and outdated versions during testing, but cannot detect post-deployment firmware manipulation. The rating of 2 is appropriate as it captures 25-50% of potential attack vectors (those at initial deployment). **Accepted.**
+
+3. **T0839 (Module Firmware) - Detective, Rating 2**: Similar to T0857, this correctly notes the pre-deployment vs. operational distinction. The assessment that SAT can catch compromised modular hardware at intake but not during operations is accurate. The rating of 2 properly reflects this partial coverage. **Accepted.**
+
+4. **T0814 (Denial of Service) - Detective, Rating 2**: The justification is sound—SAT can identify DoS-vulnerable configurations and code flaws during testing, but cannot detect active DoS attacks in production. The rating of 2 appropriately reflects this preventive-oriented control being used as a detective measure. **Accepted.**
+
+5. **T0888 (Remote System Information Discovery) - Detective, Rating 1**: The justification notes that SAT cannot detect reconnaissance activity on deployed systems and that discovery-specific testing is not typical. However, I would argue the rating could be slightly higher because SAT often includes baseline documentation of system configurations and roles. If an adversary's reconnaissance activity happens to occur during the SAT window (unlikely but possible), or if SAT explicitly tests for information disclosure vulnerabilities, there is minimal but non-zero potential. The current rating of 1 may be slightly harsh, but it is defensible given the very low likelihood of detecting ongoing reconnaissance. **Accept as-is (defensive rating is appropriate given low probability).**
+
+6. **T0812 (Default Credentials) - Detective, Rating 3**: The justification correctly identifies that SAT can check for default credentials during acceptance testing but has limitations regarding post-deployment systems and new hardware additions. A rating of 3 (50-75% coverage) is reasonable—SAT with proper procedures would reliably catch unchanged defaults on initial equipment but would not catch subsequent credential issues or post-deployment additions. **Accepted.**
+
+7. **T0891 (Hardcoded Credentials) - Detective, Rating 3**: The explanation accurately describes SAT's ability to identify hardcoded credentials through code review, static analysis, and firmware reverse engineering during testing phases, but notes limitations regarding sophistication, obfuscation, and operational detection. The rating of 3 is appropriate for a control that can detect obvious hardcoded credentials but may miss sophisticated implementations and provides no runtime monitoring. **Accepted.**
+
+8. **T0866 (Exploitation of Remote Services) - Detective, Rating 2**: The justification properly distinguishes between detecting vulnerable conditions (which SAT can do) and detecting active exploitation (which it cannot). The rating of 2 reflecting 25-50% coverage is appropriate for a pre-deployment vulnerability discovery control. **Accepted.**
+
+9. **T0890 (Exploitation for Privilege Escalation) - Detective, Rating 2**: Similar to T0866, this correctly notes SAT's ability to identify privilege escalation vulnerabilities during testing but inability to detect runtime exploitation. The rating of 2 is appropriate. **Accepted.**
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0820",
+    "technique_name": "Exploitation for Evasion",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "SAT can identify vulnerabilities exploitable for evasion during pre-deployment testing, but provides no detection of actual evasion exploitation attempts in operational environments. As a one-time assessment, it cannot detect post-deployment exploitation or zero-day vulnerabilities.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0857",
+    "technique_name": "System Firmware",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "SAT can detect outdated firmware, missing patches, and insecure firmware mechanisms before deployment, but cannot detect malicious firmware uploads or firmware attacks against operational systems. Limited to detection of deployment-phase vulnerabilities.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0839",
+    "technique_name": "Module Firmware",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "SAT can verify modular component firmware integrity during acceptance testing, preventing compromised hardware from reaching production. However, it provides no detection of firmware manipulation in operational systems or post-deployment module replacement attacks.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0814",
+    "technique_name": "Denial of Service",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "SAT can identify DoS vulnerabilities and improper error handling during testing phases, but cannot detect actual DoS attacks or exploitation attempts in production. Provides limited detection of underlying vulnerabilities rather than active attack detection.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0888",
+    "technique_name": "Remote System Information Discovery",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "SAT does not provide ongoing detection of reconnaissance activities on deployed systems. While SAT documents system configurations, it operates only during pre-deployment phases and cannot detect information discovery attempts during operations.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0812",
+    "technique_name": "Default Credentials",
+    "coverage_type": "detective",
+    "coverage_rating": 3,
+    "reasoning": "SAT with proper procedures can detect unchanged default credentials during acceptance testing through credential verification checks. However, coverage is limited to initial deployment; SAT cannot detect defaults introduced post-deployment or on equipment added after testing completion.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0891",
+    "technique_name": "Hardcoded Credentials",
+    "coverage_type": "detective",
+    "coverage_rating": 3,
+    "reasoning": "SAT can identify hardcoded credentials through code review, static analysis, and firmware analysis during testing phases. However, detection effectiveness depends on testing depth, and sophisticated obfuscation or credentials deeply embedded in specialized firmware may be missed.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0866",
+    "technique_name": "Exploitation of Remote Services",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "SAT can identify vulnerabilities in remote services during pre-deployment testing, but cannot detect actual exploitation attempts or zero-day exploits in operational environments. Detection limited to vulnerable conditions rather than active attacks.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0890",
+    "technique_name": "Exploitation for Privilege Escalation",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "SAT can identify privilege escalation vulnerabilities during acceptance testing through vulnerability scanning and analysis, but provides no detection of actual exploitation attempts during operations or post-deployment vulnerabilities.",
+    "overridden": false
+  }
+]
+```
+2026-06-02 14:45:12.483 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Let me assess each returned rating and justification:
+
+1. **T0859 Detective (rating: 2)**: The justification is well-reasoned and accurate. An identity and access audit can identify anomalous patterns in hindsight but lacks real-time detection of credential misuse. The rating of 2 reflects that the control is somewhat relevant but offers limited proactive detection. **Accept rating 2.**
+
+2. **T0859 Deterrent (rating: 2)**: The justification correctly identifies that audits operate on periodic schedules with gaps, and that the control addresses only a portion of attack vectors. A skilled attacker can steal and use credentials between audit cycles. The rating of 2 appropriately reflects this limited deterrent value. **Accept rating 2.**
+
+3. **T0812 Detective (rating: 2)**: The justification accurately notes that detection depends on auditors specifically recognizing default credentials during review, but acknowledges this is unreliable and periodic. The control is architecturally relevant but offers no systematic detection mechanism. **Accept rating 2.**
+
+4. **T0812 Deterrent (rating: 2)**: The justification correctly notes that audits can identify unchanged defaults and enforce least privilege, but are periodic rather than preventive. The mention of immutable defaults is accurate to the ICS context. **Accept rating 2.**
+
+5. **T0891 Detective (rating: 1)**: The justification is strong. Hardcoded credentials are not designed to be discovered by identity access audits—they are embedded in firmware and often unknown to operators. An audit would only incidentally detect them if anomalous access patterns emerged. A rating of 1 appropriately reflects that this control is architecturally misaligned with detecting hardcoded credential exploitation. **Accept rating 1, but will discard as per Step 3 instructions.**
+
+6. **T0891 Deterrent (rating: 1)**: The justification is accurate. Audits cannot change hardcoded credentials, and if credentials are truly hardcoded and unchangeable, the audit provides no meaningful deterrent. The rating of 1 is appropriate. **Accept rating 1, but will discard as per Step 3 instructions.**
+
+7. **T0892 Detective (rating: 1)**: The justification is reasonable. Audits are reactive and periodic, while credential changes may leave gaps between change and detection. Many ICS devices lack proper audit logging of credential modifications. The control would detect changes only if timing aligns closely with audits. However, I consider the rating slightly conservative—an audit that tracks credential baselines over time could detect unauthorized changes, giving modest detective value. **Override to rating 2**: A baseline-driven identity audit can detect unauthorized credential modifications if it compares current state against documented baseline, though with delay. This offers limited but non-trivial detection capability when audits track account and device credentials systematically.
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0859",
+    "technique_name": "Valid Accounts",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "Identity and access audit can identify anomalous account usage patterns during periodic reviews and detect credential overlap that enables lateral movement, but operates on a periodic schedule with gaps where active misuse occurs undetected. Real-time detection of legitimate-appearing commands sent via compromised accounts is not possible.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0859",
+    "technique_name": "Valid Accounts",
+    "coverage_type": "deterrent",
+    "coverage_rating": 2,
+    "reasoning": "Audits that identify unauthorized accounts, excessive permissions, and credential overlap provide limited deterrence only during the audit window. Skilled attackers can steal and exploit credentials between periodic reviews without detection, and the control does not prevent initial credential compromise.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0812",
+    "technique_name": "Default Credentials",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "Identity audits can identify accounts using default credentials if auditors specifically check for them, but detection is unreliable and periodic. Many immutable default credentials in ICS devices remain in use by design and are difficult to distinguish from legitimate activity during review.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0812",
+    "technique_name": "Default Credentials",
+    "coverage_type": "deterrent",
+    "coverage_rating": 2,
+    "reasoning": "Audits can identify unchanged defaults and enforce least privilege to limit their impact, but are periodic rather than preventive. Attackers can exploit defaults between audit cycles, and some ICS devices have immutable default credentials that audits cannot remediate.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0892",
+    "technique_name": "Change Credential",
+    "coverage_type": "detective",
+    "coverage_rating": 2,
+    "reasoning": "Identity and access audits can detect unauthorized credential modifications if they track and compare current credential baselines against documented baselines across devices and accounts. However, detection is delayed and reactive, occurring only at audit intervals, creating windows where malicious credential changes remain hidden from operators.",
+    "overridden": true
+  }
+]
+```
+2026-06-03 14:47:47.639 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Let me assess each response for accuracy and appropriateness:
+
+1. **T0888 (Remote System Information Discovery) - Detective (Rating: 1)**: The tool's assessment is generally accurate. While vulnerability scanners do perform some system probing similar to the technique, the control is not designed to detect adversary reconnaissance activities. The justification correctly notes that scanners are authorized, scheduled activities and wouldn't reliably detect covert API-based information gathering. The rating of 1 reflects minimal incidental detection capability, which is appropriate. The concern about ICS applicability is also valid. I accept this rating.
+
+2. **T0840 (Network Connection Enumeration) - Detective (Rating: 0)**: The tool correctly identifies that vulnerability scanning has no functional alignment with detecting network connection enumeration or sniffing behavior. This is architecturally sound—scanners target known vulnerabilities, not network behavior monitoring. A rating of 0 is appropriate and should be discarded per instructions.
+
+3. **T0846 (Remote System Discovery) - Detective (Rating: 0)**: The assessment is accurate. Vulnerability scanners are designed to identify security weaknesses in known/accessible systems, not to detect active reconnaissance or network enumeration attempts by adversaries. A rating of 0 is justified and should be discarded.
+
+4. **T0842 (Network Sniffing) - Detective (Rating: 0)**: The justification is correct—vulnerability scanners do not detect network sniffing or traffic capture activities. The control might identify unencrypted protocols that facilitate sniffing, but that's indirect defense-in-depth, not detection of the technique. A rating of 0 is appropriate and should be discarded.
+
+5. **T0814 (Denial of Service) - Detective (Rating: 1)**: The assessment is reasonable. The control can identify vulnerabilities exploitable for DoS attacks but does not detect active DoS execution. However, I would argue the rating could be slightly higher (2) because vulnerability scanning does provide some detective value by identifying exploitable weaknesses before attack, and this can alert defenders to at-risk assets. That said, the rating of 1 is conservative but defensible—the control does not directly detect DoS attacks in progress. I'll accept this as 1, as it reflects minimal direct detection capability.
+
+Final assessment:
+- Entries with rating 0 (T0840, T0846, T0842) are discarded per instructions.
+- T0888 and T0814 are retained with their original ratings of 1.
+
+```json
+[
+  {
+    "technique_id": "T0888",
+    "technique_name": "Remote System Information Discovery",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Automated vulnerability scanning provides minimal detection of adversary remote system information discovery. While scanners do probe systems to identify characteristics, this is authorized activity fundamentally different from covert reconnaissance. Scanners would not reliably detect targeted API calls or selective information gathering via automation protocols that characterize this technique.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0814",
+    "technique_name": "Denial of Service",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Automated vulnerability scanning provides minimal direct detection of active Denial of Service attacks. While the control can identify vulnerabilities potentially exploitable for DoS (resource consumption flaws), it does not detect volumetric attacks, malformed requests, or active exploitation in progress. Limited applicability in ICS environments further constrains its detective value.",
+    "overridden": false
+  }
+]
+```
