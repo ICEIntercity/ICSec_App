@@ -170,7 +170,8 @@
                     hx-target="#aiModalHolder"
                     data-bs-toggle="modal"
                     data-bs-target="#aiModal"
-                    hx-on::before-request="document.getElementById('aiModalHolder').innerHTML = document.getElementById('aiLoadingTemplate').innerHTML">
+                    hx-on::before-request="document.getElementById('aiModalHolder').innerHTML = document.getElementById('aiLoadingTemplate').innerHTML"
+                    hx-on::response-error="document.getElementById('aiModalHolder').innerHTML = document.getElementById('aiErrorTemplate').innerHTML">
                 <i class="bi bi-robot"></i> Generate coverage using AI
             </button>
 
@@ -187,6 +188,7 @@
                 </div>
             </div>
             <div th:replace="~{fragments/ai :: aiLoadingTemplate}"></div>
+            <div th:replace="~{fragments/ai :: aiErrorTemplate}"></div>
         </div>
         <hr>
         <h5>Relationships</h5>

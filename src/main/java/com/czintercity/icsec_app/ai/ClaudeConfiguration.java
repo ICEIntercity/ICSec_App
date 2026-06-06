@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class ClaudeConfiguration {
 
     @Bean
-    public AnthropicClient anthropicClient(@Value("${claude.api_key}") String apiKey){
+    public AnthropicClient anthropicClient(@Value("${claude.api_key:}") String apiKey){
         return AnthropicOkHttpClient.builder()
                 .apiKey(apiKey.strip()).
                 build();

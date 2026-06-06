@@ -1,0 +1,7 @@
+secrets.properties
+target/
+.git/
+*.iml
+log/
+.DS_Store
+src/.DS_Store

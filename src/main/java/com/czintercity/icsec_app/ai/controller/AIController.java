@@ -7,12 +7,15 @@ import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,12 +32,21 @@ public class AIController {
 
     private final CoverageAssessmentAgent coverageAssessmentAgent;
     private final AIService aiService;
+    private final boolean aiAvailable;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public AIController(CoverageAssessmentAgent coverageAssessmentAgent,
-                        AIService aiService) {
+                        AIService aiService,
+                        @Value("${claude.api_key:}") String claudeApiKey) {
         this.coverageAssessmentAgent = coverageAssessmentAgent;
         this.aiService = aiService;
+        this.aiAvailable = !claudeApiKey.isBlank();
+    }
+
+    private void requireAi() {
+        if (!aiAvailable) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI service is not configured");
+        }
     }
 
     /**
@@ -44,6 +56,7 @@ public class AIController {
      */
     @PostMapping("/ai/assess-coverage")
     public String assessControlCoverage(@RequestParam String name, @RequestParam String description, Model model) {
+        requireAi();
 
         // Create a transient control object to pass to existing logic
         Control control = new Control();

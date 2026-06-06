@@ -2,6 +2,22 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 
+<div th:fragment="aiErrorTemplate" id="aiErrorTemplate" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="modal-title mb-0"><i class="bi bi-exclamation-triangle-fill text-warning"></i> AI Unavailable</h5>
+            <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center p-4">
+            <p class="fw-bold mb-1">AI functionality is not available</p>
+            <p class="text-muted">An API key was not provided.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
 <div th:fragment="aiLoadingTemplate" id="aiLoadingTemplate" style="display:none;">
     <div class="modal-content">
         <div class="modal-body text-center p-5">
