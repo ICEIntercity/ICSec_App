@@ -7,14 +7,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
 /**
- * A {@link ControlRelationship} where the source control validates or confirms that the target control is operating correctly.
+ * A {@link ControlRelationship} where the source control duplicates or overlaps the protection provided by the target control.
  */
 @Entity
-@DiscriminatorValue("VERIFICATION")
-public class Verification extends ControlRelationship {
-    private static final String displayName = "Verification";
-    private static final String outboundName = "Verifies";
-    private static final String inboundName = "Verified by";
+@DiscriminatorValue("REDUNDANCY")
+public class Redundancy extends ControlRelationship {
+    private static final String displayName = "Redundancy";
+    private static final String outboundName = "Redundant with";
+    private static final String inboundName = "Covered by";
 
     @Override
     @Transient
@@ -37,10 +37,10 @@ public class Verification extends ControlRelationship {
     @Override
     @Transient
     public ControlRelationshipType getType() {
-        return ControlRelationshipType.VERIFICATION;
+        return ControlRelationshipType.REDUNDANCY;
     }
 
-    public Verification() {
+    public Redundancy() {
         super();
     }
 }

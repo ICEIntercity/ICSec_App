@@ -11,7 +11,7 @@ public enum ControlRelationshipType {
     ENFORCEMENT("Enforcement", "#d63384"), // Pink/Rose
     SUPPORT("Support", "#198754"),         // Success Green
     COMPENSATION("Compensation", "#fd7e14"),// Orange
-    VERIFICATION("Verification", "#ffc107"),// Warning Yellow
+    REDUNDANCY("Redundancy", "#ffc107"),    // Warning Yellow
     CONFLICT("Conflict", "#dc3545"),       // Danger Red
     UNKNOWN("Unknown", "#6c757d");         // Secondary Gray
 

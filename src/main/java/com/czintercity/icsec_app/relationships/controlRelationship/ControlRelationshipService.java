@@ -29,18 +29,18 @@ public class ControlRelationshipService {
     private final DependencyRepository dependencyRepository;
     private final SynergyRepository synergyRepository;
     private final SupportRepository supportRepository;
-    private final VerificationRepository verificationRepository;
+    private final RedundancyRepository redundancyRepository;
     private final EnforcementRepository enforcementRepository;
     private final CompensationRepository compensationRepository;
     private final ConflictRepository conflictRepository;
 
-    public ControlRelationshipService(ControlRepository controlRepository, ControlRelationshipRepository controlRelationshipRepository, DependencyRepository dependencyRepository, SynergyRepository synergyRepository, SupportRepository supportRepository, VerificationRepository verificationRepository, EnforcementRepository enforcementRepository, CompensationRepository compensationRepository, ConflictRepository conflictRepository) {
+    public ControlRelationshipService(ControlRepository controlRepository, ControlRelationshipRepository controlRelationshipRepository, DependencyRepository dependencyRepository, SynergyRepository synergyRepository, SupportRepository supportRepository, RedundancyRepository redundancyRepository, EnforcementRepository enforcementRepository, CompensationRepository compensationRepository, ConflictRepository conflictRepository) {
         this.controlRepository = controlRepository;
         this.controlRelationshipRepository = controlRelationshipRepository;
         this.dependencyRepository = dependencyRepository;
         this.synergyRepository = synergyRepository;
         this.supportRepository = supportRepository;
-        this.verificationRepository = verificationRepository;
+        this.redundancyRepository = redundancyRepository;
         this.enforcementRepository = enforcementRepository;
         this.compensationRepository = compensationRepository;
         this.conflictRepository = conflictRepository;
@@ -136,11 +136,11 @@ public class ControlRelationshipService {
                     }
                     toSave = new Support();
                     break;
-                case VERIFICATION:
-                    if(verificationRepository.existsBySource_IdAndTarget_Id(relationship.getSourceId(), relationship.getTargetId())){
-                        throw new DuplicateRelationshipException("Failed to save relationship: duplicate verification found.");
+                case REDUNDANCY:
+                    if(redundancyRepository.existsBySource_IdAndTarget_Id(relationship.getSourceId(), relationship.getTargetId())){
+                        throw new DuplicateRelationshipException("Failed to save relationship: duplicate redundancy found.");
                     }
-                    toSave = new Verification();
+                    toSave = new Redundancy();
                     break;
                 case ENFORCEMENT:
                     if(enforcementRepository.existsBySource_IdAndTarget_Id(relationship.getSourceId(), relationship.getTargetId())){
