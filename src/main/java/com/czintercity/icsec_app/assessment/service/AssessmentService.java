@@ -191,11 +191,7 @@ public class AssessmentService {
      * The residual failure probability for a technique and {@link CoverageType} is the product, over
      * all deployed controls, of each control's {@code max(0, 1 − effectiveScalingFactor × rating / 5)}
      * — the same compounding model used by {@link CoverageCalculationService#calculateMitreCoverage}.
-     * Raising a control replaces its factor in that product; the improvement is the resulting drop in
-     * residual probability, summed over all techniques and coverage types the control addresses.
-     * Because the metric is evaluated against the full deployed portfolio, the diminishing returns
-     * from techniques already well covered by other controls are accounted for.
-     * <p>
+
      * Each control is scored on raising its scope by one point and on raising its maturity by one
      * point (neither beyond the maximum of {@value #MAX_RATING}); the larger of the two is reported
      * along with the {@link ImprovementAdvice advice} for the dimension that produced it. Two edge

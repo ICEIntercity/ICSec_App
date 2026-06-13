@@ -16,7 +16,7 @@
 
     <div class="mb-5">
         <h4 class="fw-bold mb-3">Top 5 by Coverage Improvement</h4>
-        <div class="row row-cols-5 g-3">
+        <div class="row row-cols-5 g-3" id="topFiveGrid">
             <div class="col" th:each="entry : ${topFive}">
                 <div class="card border-0 shadow"
                      style="cursor:pointer"
@@ -61,7 +61,7 @@
             <h5 class="mb-0 fw-semibold" th:text="${topicEntry.key.getName()}"></h5>
         </div>
 
-        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2">
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2 detail-grid">
             <div class="col" th:each="controlEntry : ${topicEntry.value}">
                 <div class="card h-100 border-0 shadow-sm"
                      style="cursor:pointer"
@@ -147,6 +147,16 @@
             const ratio = maxGain > 0 ? gains[i] / maxGain : 0;
             card.style.backgroundColor = interpolateToWhite(card.dataset.topicColor, ratio);
         });
+
+        // equalizeCardHeights is provided globally by /js/utils.js.
+        function equalizeAllCards() {
+            equalizeCardHeights(document.querySelectorAll('#topFiveGrid .card'));
+            equalizeCardHeights(document.querySelectorAll('.detail-grid .card'));
+        }
+
+        equalizeAllCards();
+        window.addEventListener('load', equalizeAllCards);
+        window.addEventListener('resize', equalizeAllCards);
     </script>
 
     <div id="controlDataJson" hidden th:text="${controlDataJson}"></div>

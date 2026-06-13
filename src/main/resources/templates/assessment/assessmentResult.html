@@ -112,12 +112,19 @@
             document.querySelectorAll('.priority-score-badge').forEach(el => {
                 el.classList.toggle('d-none', isCoverage);
             });
+            // The priority badge changes card heights, so re-equalize after toggling.
+            equalizeAllCards();
         }
 
         function initTooltips() {
             document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
                 bootstrap.Tooltip.getOrCreateInstance(el);
             });
+        }
+
+        // equalizeCardHeights is provided globally by /js/utils.js.
+        function equalizeAllCards() {
+            equalizeCardHeights(document.querySelectorAll('#heatmap-container .card'));
         }
 
         document.querySelectorAll('input[name="viewMode"]').forEach(radio => {
@@ -128,10 +135,14 @@
             if (e.detail.target.id === 'heatmap-container') {
                 applyViewMode();
                 initTooltips();
+                equalizeAllCards();
             }
         });
 
         initTooltips();
+        equalizeAllCards();
+        window.addEventListener('load', equalizeAllCards);
+        window.addEventListener('resize', equalizeAllCards);
     </script>
 
 </div>
