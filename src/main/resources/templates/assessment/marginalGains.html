@@ -35,7 +35,10 @@
                         <p class="fw-semibold mb-1" style="font-size: 0.875rem; line-height: 1.3;"
                            th:text="${entry.key.getName()}">Control Name</p>
                         <small class="text-muted" th:text="${entry.key.getTopic().getName()}"></small>
-                        <div class="mt-auto pt-2">
+                        <div class="mt-auto pt-2 d-flex justify-content-between align-items-end gap-1">
+                            <span class="badge bg-primary-subtle text-primary-emphasis"
+                                  style="font-size: 0.65rem;"
+                                  th:text="${adviceMap.get(entry.key.getId())}">Increase coverage</span>
                             <small class="fw-bold opacity-75"
                                    th:text="${#numbers.formatDecimal(entry.value, 1, 'COMMA', 2, 'POINT')}">0.00</small>
                         </div>
@@ -76,7 +79,10 @@
                         </div>
                         <p class="fw-semibold mb-0" style="font-size: 0.8rem; line-height: 1.3;"
                            th:text="${controlEntry.key.getName()}">Control Name</p>
-                        <div class="mt-auto pt-2">
+                        <div class="mt-auto pt-2 d-flex justify-content-between align-items-end gap-1">
+                            <span class="badge bg-primary-subtle text-primary-emphasis"
+                                  style="font-size: 0.6rem;"
+                                  th:text="${adviceMap.get(controlEntry.key.getId())}">Increase coverage</span>
                             <small class="fw-bold opacity-75"
                                    th:text="${#numbers.formatDecimal(controlEntry.value, 1, 'COMMA', 2, 'POINT')}">0.00</small>
                         </div>
@@ -96,7 +102,10 @@
                             <span class="badge bg-secondary font-monospace" style="font-size:0.75rem;" id="modalControlCode"></span>
                             <h5 class="modal-title mb-0 fw-bold" id="controlDetailModalLabel"></h5>
                         </div>
-                        <small class="text-muted" id="modalTopicName"></small>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted" id="modalTopicName"></small>
+                            <span class="badge bg-primary-subtle text-primary-emphasis" id="modalAdvice"></span>
+                        </div>
                     </div>
                     <button type="button" class="btn-close ms-3" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -155,6 +164,7 @@
                 document.getElementById('modalControlCode').textContent = data.code;
                 document.getElementById('controlDetailModalLabel').textContent = data.name;
                 document.getElementById('modalTopicName').textContent = data.topicName;
+                document.getElementById('modalAdvice').textContent = data.advice;
                 document.getElementById('modalControlLink').href = '/control/' + id;
 
                 const descEl = document.getElementById('modalControlDescription');
@@ -169,11 +179,14 @@
                 techContainer.innerHTML = '';
                 const noGainsEl = document.getElementById('modalNoGains');
 
+                const adviceEl = document.getElementById('modalAdvice');
                 const gainfulTechniques = data.techniques.filter(t => t.gain > 0.001);
                 if (gainfulTechniques.length === 0) {
                     noGainsEl.classList.remove('d-none');
+                    adviceEl.classList.add('d-none');
                 } else {
                     noGainsEl.classList.add('d-none');
+                    adviceEl.classList.remove('d-none');
                     gainfulTechniques.forEach(t => {
                         const col = document.createElement('div');
                         col.className = 'col';

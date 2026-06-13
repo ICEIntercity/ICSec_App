@@ -9,8 +9,12 @@ import com.czintercity.icsec_app.assessment.repository.AssessmentRepository;
 import com.czintercity.icsec_app.assessment.repository.ControlStatusRepository;
 import com.czintercity.icsec_app.attack.entity.Technique;
 import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
+import com.czintercity.icsec_app.assessment.model.ImprovementAdvice;
+import com.czintercity.icsec_app.assessment.model.MarginalGain;
 import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.controls.repository.ControlRepository;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType;
+import com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage;
 import com.czintercity.icsec_app.topics.entity.Topic;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -176,27 +180,41 @@ public class AssessmentService {
         return assessmentRepository.save(assessment);
     }
 
+    /** The highest value any maturity or scope rating may reach. */
+    private static final double MAX_RATING = 5.0;
+
     /**
-     * Calculates the marginal coverage gain achievable for each control-technique pair by
-     * increasing that control's maturity and scope to their maximum values (5, 5).
+     * Calculates the marginal coverage gain achievable for each control, measured as the total
+     * reduction in residual failure probability (the risk faced) across every technique the control
+     * covers if one of its two deployment dimensions is raised by a single point.
      * <p>
-     * The gain for a single {@link com.czintercity.icsec_app.relationships.techniqueCoverage.entity.TechniqueCoverage}
-     * entry is:
-     * <pre>
-     *   marginalGain = coverageRating × (1 − effectiveScalingFactor(scope, maturity))
-     * </pre>
-     * A control already at maximum deployment contributes a gain of zero. Controls with no
-     * technique coverage entries are omitted from the result. Where multiple coverage entries
-     * exist for the same control-technique pair (across different
-     * {@link com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType}s),
-     * their gains are summed into a single value. Diminishing returns from combining controls
-     * are not taken into account.
+     * The residual failure probability for a technique and {@link CoverageType} is the product, over
+     * all deployed controls, of each control's {@code max(0, 1 − effectiveScalingFactor × rating / 5)}
+     * — the same compounding model used by {@link CoverageCalculationService#calculateMitreCoverage}.
+     * Raising a control replaces its factor in that product; the gain is the resulting drop in
+     * residual probability, summed over all techniques and coverage types the control addresses.
+     * Because the metric is evaluated against the full deployed portfolio, the diminishing returns
+     * from techniques already well covered by other controls are accounted for.
+     * <p>
+     * Each control is scored on raising its scope by one point and on raising its maturity by one
+     * point (neither beyond the maximum of {@value #MAX_RATING}); the larger of the two is reported
+     * along with the {@link ImprovementAdvice advice} for the dimension that produced it. Two edge
+     * cases override the comparison:
+     * <ul>
+     *   <li>A control at the maximum (5) on <em>both</em> dimensions yields a gain of zero and is
+     *       reported as {@link ImprovementAdvice#COMPLETED}.</li>
+     *   <li>A control undeployed (0) on <em>both</em> dimensions is scored on raising scope and
+     *       maturity together by one point, corresponding to a new deployment (reported as
+     *       {@link ImprovementAdvice#DEPLOY_NEW}), since raising either alone leaves the
+     *       multiplicative scaling factor at zero.</li>
+     * </ul>
+     * Controls with no technique coverage entries are omitted from the result.
      *
      * @param dto the assessment whose saved control statuses provide the current maturity and scope baseline
-     * @return a map of each control to a map of technique → marginal gain score
+     * @return a map of each covered control to its {@link MarginalGain}
      */
     @Transactional
-    public Map<Control, Map<Technique, Double>> calculateMarginalGains(AssessmentDTO dto) {
+    public Map<Control, MarginalGain> calculateMarginalGains(AssessmentDTO dto) {
         Map<UUID, ControlStatusDTO> statusLookup = new HashMap<>();
         if (dto.getControlStatusMapping() != null) {
             for (ControlStatusDTO statusDTO : dto.getControlStatusMapping()) {
@@ -206,9 +224,29 @@ public class AssessmentService {
             }
         }
 
-        Map<Control, Map<Technique, Double>> result = new LinkedHashMap<>();
+        Iterable<Control> allControls = controlRepository.findAll();
 
-        for (Control control : controlRepository.findAll()) {
+        // Baseline residual failure probability per technique per coverage type, compounded from the
+        // currently deployed controls. A technique/type touched by no deployed control stays at 1.0.
+        Map<Technique, Map<CoverageType, Double>> residual = new HashMap<>();
+        for (Control control : allControls) {
+            ControlStatusDTO status = statusLookup.get(control.getId());
+            if (status == null) {
+                continue;
+            }
+            double scope = status.getCoverageScope() != null ? status.getCoverageScope() : 0.0;
+            double maturity = status.getCoverageMaturity() != null ? status.getCoverageMaturity() : 0.0;
+            double factor = CoverageCalculationService.effectiveScalingFactor(scope, maturity);
+            for (TechniqueCoverage coverage : control.getTechniqueCoverage()) {
+                double failureProbability = Math.max(0.0, 1 - factor * coverage.getCoverageRating() / 5.0);
+                residual.computeIfAbsent(coverage.getTechnique(), t -> new EnumMap<>(CoverageType.class))
+                        .merge(coverage.getCoverageType(), failureProbability, (a, b) -> a * b);
+            }
+        }
+
+        Map<Control, MarginalGain> result = new LinkedHashMap<>();
+
+        for (Control control : allControls) {
             if (control.getTechniqueCoverage().isEmpty()) {
                 continue;
             }
@@ -217,17 +255,95 @@ public class AssessmentService {
             double scope = (status != null && status.getCoverageScope() != null) ? status.getCoverageScope() : 0.0;
             double maturity = (status != null && status.getCoverageMaturity() != null) ? status.getCoverageMaturity() : 0.0;
 
-            double currentScalingFactor = CoverageCalculationService.effectiveScalingFactor(scope, maturity);
+            ImprovementAdvice advice;
+            Map<Technique, Double> techniqueGains;
 
-            Map<Technique, Double> techniqueGains = new LinkedHashMap<>();
-            for (var coverage : control.getTechniqueCoverage()) {
-                double marginalGain = coverage.getCoverageRating() * (1.0 - currentScalingFactor);
-                techniqueGains.merge(coverage.getTechnique(), marginalGain, Double::sum);
+            if (scope >= MAX_RATING && maturity >= MAX_RATING) {
+                // Already maxed on both dimensions: no risk reduction is achievable.
+                advice = ImprovementAdvice.COMPLETED;
+                techniqueGains = new LinkedHashMap<>();
+            } else if (scope == 0.0 && maturity == 0.0) {
+                // Undeployed on both dimensions: raising only one leaves the scaling factor at zero,
+                // so a meaningful deployment raises scope and maturity together by one point.
+                advice = ImprovementAdvice.DEPLOY_NEW;
+                techniqueGains = riskReduction(control, scope, maturity, 1.0, 1.0, residual);
+            } else {
+                Map<Technique, Double> scopeGains =
+                        riskReduction(control, scope, maturity, Math.min(scope + 1, MAX_RATING), maturity, residual);
+                Map<Technique, Double> maturityGains =
+                        riskReduction(control, scope, maturity, scope, Math.min(maturity + 1, MAX_RATING), residual);
+
+                // Pick whichever dimension reduces the most total risk across the control's techniques.
+                if (sum(scopeGains) >= sum(maturityGains)) {
+                    advice = ImprovementAdvice.SCOPE;
+                    techniqueGains = scopeGains;
+                } else {
+                    advice = ImprovementAdvice.MATURITY;
+                    techniqueGains = maturityGains;
+                }
             }
 
-            result.put(control, techniqueGains);
+            result.put(control, new MarginalGain(sum(techniqueGains), advice, techniqueGains));
         }
 
         return result;
+    }
+
+    /**
+     * Computes the per-technique reduction in residual failure probability obtained by moving a single
+     * control from its current scope/maturity to a target scope/maturity, holding all other deployed
+     * controls fixed. For each technique and coverage type the control addresses, its current factor is
+     * divided out of the baseline residual and the target factor multiplied back in; the drop in
+     * residual probability is the risk reduced. Reductions are summed across coverage types per technique.
+     *
+     * @return a map of technique to the total risk reduction it gains; entries may be zero
+     */
+    private Map<Technique, Double> riskReduction(Control control, double currentScope, double currentMaturity,
+                                                 double targetScope, double targetMaturity,
+                                                 Map<Technique, Map<CoverageType, Double>> residual) {
+        double currentFactor = CoverageCalculationService.effectiveScalingFactor(currentScope, currentMaturity);
+        double targetFactor = CoverageCalculationService.effectiveScalingFactor(targetScope, targetMaturity);
+
+        // Aggregate this control's failure-probability factor per technique/type at both levels, in case
+        // it covers the same technique/type through more than one coverage entry.
+        Map<Technique, Map<CoverageType, double[]>> factors = new HashMap<>();
+        for (TechniqueCoverage coverage : control.getTechniqueCoverage()) {
+            double currentF = Math.max(0.0, 1 - currentFactor * coverage.getCoverageRating() / 5.0);
+            double targetF = Math.max(0.0, 1 - targetFactor * coverage.getCoverageRating() / 5.0);
+            double[] product = factors.computeIfAbsent(coverage.getTechnique(), t -> new EnumMap<>(CoverageType.class))
+                    .computeIfAbsent(coverage.getCoverageType(), t -> new double[]{1.0, 1.0});
+            product[0] *= currentF;
+            product[1] *= targetF;
+        }
+
+        Map<Technique, Double> gains = new LinkedHashMap<>();
+        for (Map.Entry<Technique, Map<CoverageType, double[]>> techEntry : factors.entrySet()) {
+            Map<CoverageType, Double> typeResidual = residual.get(techEntry.getKey());
+            double techReduction = 0.0;
+            for (Map.Entry<CoverageType, double[]> typeEntry : techEntry.getValue().entrySet()) {
+                double currentProduct = typeEntry.getValue()[0];
+                if (currentProduct <= 0.0) {
+                    // Control already drives this technique/type to zero failure probability; no further gain.
+                    continue;
+                }
+                double baseline = typeResidual != null ? typeResidual.getOrDefault(typeEntry.getKey(), 1.0) : 1.0;
+                double residualWithoutControl = baseline / currentProduct;
+                double reduction = baseline - residualWithoutControl * typeEntry.getValue()[1];
+                if (reduction > 0.0) {
+                    techReduction += reduction;
+                }
+            }
+            gains.put(techEntry.getKey(), techReduction);
+        }
+        return gains;
+    }
+
+    /** Sums the values of a per-technique gain map. */
+    private static double sum(Map<Technique, Double> gains) {
+        double total = 0.0;
+        for (double value : gains.values()) {
+            total += value;
+        }
+        return total;
     }
 }

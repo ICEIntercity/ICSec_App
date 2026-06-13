@@ -2,18 +2,19 @@ package com.czintercity.icsec_app.assessment.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.czintercity.icsec_app.assessment.dto.AssessmentDTO;
 import com.czintercity.icsec_app.assessment.dto.TechniquePrioritiesFormDTO;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
+import com.czintercity.icsec_app.assessment.model.MarginalGain;
 import com.czintercity.icsec_app.assessment.repository.AssessmentRepository;
 import com.czintercity.icsec_app.assessment.service.AssessmentService;
 import com.czintercity.icsec_app.attack.entity.Technique;
@@ -117,9 +118,10 @@ public class AssessmentController {
 
     /**
      * Renders the marginal gains heatmap for the given assessment, showing how much additional
-     * technique coverage each control could contribute if raised to maximum maturity and scope.
-     * Controls are grouped by topic; each control's total gain is the sum of its per-technique
-     * marginal gains passed to the view as {@code groupedGains}.
+     * technique coverage each control could contribute by raising whichever single dimension
+     * (scope or maturity) yields the greater gain. Controls are grouped by topic; each control's
+     * total gain is the sum of its per-technique marginal gains passed to the view as
+     * {@code groupedGains}, and {@code adviceMap} carries the recommended dimension per control.
      */
     @GetMapping("/assessment/{assessmentId}/marginal-gains")
     public String viewMarginalGains(Model model, @PathVariable UUID assessmentId) {
@@ -129,20 +131,27 @@ public class AssessmentController {
         }
         AssessmentDTO dto = new AssessmentDTO(existing.get());
 
-        Map<Control, Map<Technique, Double>> marginalGains = assessmentService.calculateMarginalGains(dto);
+        Map<Control, MarginalGain> marginalGains = assessmentService.calculateMarginalGains(dto);
 
-        // Sum per-technique gains into a single total per control
+        // Read the precomputed total gain per control
         Map<Control, Double> totalGains = new LinkedHashMap<>();
-        for (Map.Entry<Control, Map<Technique, Double>> entry : marginalGains.entrySet()) {
-            double total = entry.getValue().values().stream().mapToDouble(Double::doubleValue).sum();
-            totalGains.put(entry.getKey(), total);
+        for (Map.Entry<Control, MarginalGain> entry : marginalGains.entrySet()) {
+            totalGains.put(entry.getKey(), entry.getValue().totalGain());
         }
 
         // Sort controls by descending gain; position in this list is the global rank
-        List<Control> ranked = totalGains.entrySet().stream()
-                .sorted(Map.Entry.<Control, Double>comparingByValue().reversed())
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+        List<Map.Entry<Control, Double>> sortedEntries = new ArrayList<>(totalGains.entrySet());
+        sortedEntries.sort(new Comparator<Map.Entry<Control, Double>>() {
+            @Override
+            public int compare(Map.Entry<Control, Double> a, Map.Entry<Control, Double> b) {
+                return b.getValue().compareTo(a.getValue());
+            }
+        });
+
+        List<Control> ranked = new ArrayList<>();
+        for (Map.Entry<Control, Double> entry : sortedEntries) {
+            ranked.add(entry.getKey());
+        }
 
         Map<UUID, Integer> rankMap = new LinkedHashMap<>();
         for (int i = 0; i < ranked.size(); i++) {
@@ -152,19 +161,31 @@ public class AssessmentController {
         // Group by topic in rank order so controls within each topic section are also sorted
         Map<Topic, Map<Control, Double>> groupedGains = new LinkedHashMap<>();
         for (Control control : ranked) {
-            groupedGains.computeIfAbsent(control.getTopic(), t -> new LinkedHashMap<>())
-                        .put(control, totalGains.get(control));
+            Topic topic = control.getTopic();
+            if (!groupedGains.containsKey(topic)) {
+                groupedGains.put(topic, new LinkedHashMap<>());
+            }
+            groupedGains.get(topic).put(control, totalGains.get(control));
         }
 
         Map<Control, Double> topFive = new LinkedHashMap<>();
-        ranked.stream().limit(5).forEach(c -> topFive.put(c, totalGains.get(c)));
+        for (int i = 0; i < ranked.size() && i < 5; i++) {
+            topFive.put(ranked.get(i), totalGains.get(ranked.get(i)));
+        }
+
+        // Advice badge text (which dimension to raise) keyed by control id, for the cards
+        Map<UUID, String> adviceMap = new LinkedHashMap<>();
+        for (Map.Entry<Control, MarginalGain> entry : marginalGains.entrySet()) {
+            adviceMap.put(entry.getKey().getId(), entry.getValue().advice().getAdvice());
+        }
 
         // Build a JSON blob for the control detail modal so the template needs no th:inline="javascript"
         Map<String, Object> controlModalData = new LinkedHashMap<>();
-        for (Map.Entry<Control, Map<Technique, Double>> cEntry : marginalGains.entrySet()) {
+        for (Map.Entry<Control, MarginalGain> cEntry : marginalGains.entrySet()) {
             Control control = cEntry.getKey();
+            MarginalGain gain = cEntry.getValue();
             List<Map<String, Object>> techniques = new ArrayList<>();
-            for (Map.Entry<Technique, Double> tEntry : cEntry.getValue().entrySet()) {
+            for (Map.Entry<Technique, Double> tEntry : gain.techniqueGains().entrySet()) {
                 Map<String, Object> tech = new LinkedHashMap<>();
                 tech.put("mitreId", tEntry.getKey().getMitreId());
                 tech.put("name", tEntry.getKey().getName());
@@ -177,6 +198,7 @@ public class AssessmentController {
             info.put("code", control.getCode());
             info.put("topicName", control.getTopic().getName());
             info.put("topicColor", control.getTopic().getColor() != null ? control.getTopic().getColor() : "#6c757d");
+            info.put("advice", gain.advice().getAdvice());
             info.put("techniques", techniques);
             controlModalData.put(control.getId().toString(), info);
         }
@@ -190,6 +212,7 @@ public class AssessmentController {
         model.addAttribute("assessment", dto);
         model.addAttribute("groupedGains", groupedGains);
         model.addAttribute("rankMap", rankMap);
+        model.addAttribute("adviceMap", adviceMap);
         model.addAttribute("topFive", topFive);
         model.addAttribute("controlDataJson", controlDataJson);
         model.addAttribute("assessmentComplete", existing.get().getControlStatusMapping() != null && !existing.get().getControlStatusMapping().isEmpty());
