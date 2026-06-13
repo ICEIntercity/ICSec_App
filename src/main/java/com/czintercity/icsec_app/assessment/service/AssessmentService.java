@@ -10,7 +10,7 @@ import com.czintercity.icsec_app.assessment.repository.ControlStatusRepository;
 import com.czintercity.icsec_app.attack.entity.Technique;
 import com.czintercity.icsec_app.attack.repository.TechniqueRepository;
 import com.czintercity.icsec_app.assessment.model.ImprovementAdvice;
-import com.czintercity.icsec_app.assessment.model.MarginalGain;
+import com.czintercity.icsec_app.assessment.model.CoverageImprovement;
 import com.czintercity.icsec_app.controls.entity.Control;
 import com.czintercity.icsec_app.controls.repository.ControlRepository;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType;
@@ -184,14 +184,14 @@ public class AssessmentService {
     private static final double MAX_RATING = 5.0;
 
     /**
-     * Calculates the marginal coverage gain achievable for each control, measured as the total
+     * Calculates the coverage improvement achievable for each control, measured as the total
      * reduction in residual failure probability (the risk faced) across every technique the control
      * covers if one of its two deployment dimensions is raised by a single point.
      * <p>
      * The residual failure probability for a technique and {@link CoverageType} is the product, over
      * all deployed controls, of each control's {@code max(0, 1 − effectiveScalingFactor × rating / 5)}
      * — the same compounding model used by {@link CoverageCalculationService#calculateMitreCoverage}.
-     * Raising a control replaces its factor in that product; the gain is the resulting drop in
+     * Raising a control replaces its factor in that product; the improvement is the resulting drop in
      * residual probability, summed over all techniques and coverage types the control addresses.
      * Because the metric is evaluated against the full deployed portfolio, the diminishing returns
      * from techniques already well covered by other controls are accounted for.
@@ -201,7 +201,7 @@ public class AssessmentService {
      * along with the {@link ImprovementAdvice advice} for the dimension that produced it. Two edge
      * cases override the comparison:
      * <ul>
-     *   <li>A control at the maximum (5) on <em>both</em> dimensions yields a gain of zero and is
+     *   <li>A control at the maximum (5) on <em>both</em> dimensions yields an improvement of zero and is
      *       reported as {@link ImprovementAdvice#COMPLETED}.</li>
      *   <li>A control undeployed (0) on <em>both</em> dimensions is scored on raising scope and
      *       maturity together by one point, corresponding to a new deployment (reported as
@@ -211,10 +211,10 @@ public class AssessmentService {
      * Controls with no technique coverage entries are omitted from the result.
      *
      * @param dto the assessment whose saved control statuses provide the current maturity and scope baseline
-     * @return a map of each covered control to its {@link MarginalGain}
+     * @return a map of each covered control to its {@link CoverageImprovement}
      */
     @Transactional
-    public Map<Control, MarginalGain> calculateMarginalGains(AssessmentDTO dto) {
+    public Map<Control, CoverageImprovement> calculateCoverageImprovements(AssessmentDTO dto) {
         Map<UUID, ControlStatusDTO> statusLookup = new HashMap<>();
         if (dto.getControlStatusMapping() != null) {
             for (ControlStatusDTO statusDTO : dto.getControlStatusMapping()) {
@@ -244,7 +244,7 @@ public class AssessmentService {
             }
         }
 
-        Map<Control, MarginalGain> result = new LinkedHashMap<>();
+        Map<Control, CoverageImprovement> result = new LinkedHashMap<>();
 
         for (Control control : allControls) {
             if (control.getTechniqueCoverage().isEmpty()) {
@@ -256,34 +256,34 @@ public class AssessmentService {
             double maturity = (status != null && status.getCoverageMaturity() != null) ? status.getCoverageMaturity() : 0.0;
 
             ImprovementAdvice advice;
-            Map<Technique, Double> techniqueGains;
+            Map<Technique, Double> techniqueImprovements;
 
             if (scope >= MAX_RATING && maturity >= MAX_RATING) {
                 // Already maxed on both dimensions: no risk reduction is achievable.
                 advice = ImprovementAdvice.COMPLETED;
-                techniqueGains = new LinkedHashMap<>();
+                techniqueImprovements = new LinkedHashMap<>();
             } else if (scope == 0.0 && maturity == 0.0) {
                 // Undeployed on both dimensions: raising only one leaves the scaling factor at zero,
                 // so a meaningful deployment raises scope and maturity together by one point.
                 advice = ImprovementAdvice.DEPLOY_NEW;
-                techniqueGains = riskReduction(control, scope, maturity, 1.0, 1.0, residual);
+                techniqueImprovements = riskReduction(control, scope, maturity, 1.0, 1.0, residual);
             } else {
-                Map<Technique, Double> scopeGains =
+                Map<Technique, Double> scopeImprovements =
                         riskReduction(control, scope, maturity, Math.min(scope + 1, MAX_RATING), maturity, residual);
-                Map<Technique, Double> maturityGains =
+                Map<Technique, Double> maturityImprovements =
                         riskReduction(control, scope, maturity, scope, Math.min(maturity + 1, MAX_RATING), residual);
 
                 // Pick whichever dimension reduces the most total risk across the control's techniques.
-                if (sum(scopeGains) >= sum(maturityGains)) {
+                if (sum(scopeImprovements) >= sum(maturityImprovements)) {
                     advice = ImprovementAdvice.SCOPE;
-                    techniqueGains = scopeGains;
+                    techniqueImprovements = scopeImprovements;
                 } else {
                     advice = ImprovementAdvice.MATURITY;
-                    techniqueGains = maturityGains;
+                    techniqueImprovements = maturityImprovements;
                 }
             }
 
-            result.put(control, new MarginalGain(sum(techniqueGains), advice, techniqueGains));
+            result.put(control, new CoverageImprovement(sum(techniqueImprovements), advice, techniqueImprovements));
         }
 
         return result;

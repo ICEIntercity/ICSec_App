@@ -4,7 +4,7 @@ package com.czintercity.icsec_app.assessment.model;
  * Identifies which control deployment dimension yields the larger marginal coverage gain
  * when raised by a single step, and carries the human-readable advice shown in the UI badge.
  *
- * @see com.czintercity.icsec_app.assessment.service.AssessmentService#calculateMarginalGains
+ * @see com.czintercity.icsec_app.assessment.service.AssessmentService#calculateCoverageImprovements
  */
 public enum ImprovementAdvice {
     /** Raising the control's deployment scope gives the greater gain. */

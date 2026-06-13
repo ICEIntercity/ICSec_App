@@ -38,13 +38,13 @@
 
         <span class="text-muted mx-1">›</span>
 
-        <a th:href="@{/assessment/{id}/marginal-gains(id=${assessmentId})}"
+        <a th:href="@{/assessment/{id}/improvements(id=${assessmentId})}"
            class="d-flex align-items-center gap-2 text-decoration-none px-2"
            th:classappend="${!assessmentComplete} ? ' pe-none opacity-50' : ''">
             <span class="rounded-circle d-flex align-items-center justify-content-center border"
                   style="width:1.75rem;height:1.75rem;font-size:0.8rem;font-weight:600;"
                   th:classappend="${currentStep == 4} ? ' border-primary bg-primary text-white' : ' border-secondary text-secondary'">4</span>
-            <span th:classappend="${currentStep == 4} ? ' text-primary fw-semibold' : ' text-secondary'">Marginal Gains</span>
+            <span th:classappend="${currentStep == 4} ? ' text-primary fw-semibold' : ' text-secondary'">Improvements</span>
         </a>
 
     </div>

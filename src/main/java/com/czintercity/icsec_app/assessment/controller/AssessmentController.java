@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.czintercity.icsec_app.assessment.dto.AssessmentDTO;
 import com.czintercity.icsec_app.assessment.dto.TechniquePrioritiesFormDTO;
 import com.czintercity.icsec_app.assessment.entity.Assessment;
-import com.czintercity.icsec_app.assessment.model.MarginalGain;
+import com.czintercity.icsec_app.assessment.model.CoverageImprovement;
 import com.czintercity.icsec_app.assessment.repository.AssessmentRepository;
 import com.czintercity.icsec_app.assessment.service.AssessmentService;
 import com.czintercity.icsec_app.attack.entity.Technique;
@@ -117,29 +117,29 @@ public class AssessmentController {
     }
 
     /**
-     * Renders the marginal gains heatmap for the given assessment, showing how much additional
+     * Renders the coverage improvement heatmap for the given assessment, showing how much additional
      * technique coverage each control could contribute by raising whichever single dimension
-     * (scope or maturity) yields the greater gain. Controls are grouped by topic; each control's
-     * total gain is the sum of its per-technique marginal gains passed to the view as
+     * (scope or maturity) yields the greater improvement. Controls are grouped by topic; each control's
+     * total improvement is the sum of its per-technique improvements passed to the view as
      * {@code groupedGains}, and {@code adviceMap} carries the recommended dimension per control.
      */
-    @GetMapping("/assessment/{assessmentId}/marginal-gains")
-    public String viewMarginalGains(Model model, @PathVariable UUID assessmentId) {
+    @GetMapping("/assessment/{assessmentId}/improvements")
+    public String viewImprovements(Model model, @PathVariable UUID assessmentId) {
         Optional<Assessment> existing = assessmentRepository.findById(assessmentId);
         if (existing.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
         }
         AssessmentDTO dto = new AssessmentDTO(existing.get());
 
-        Map<Control, MarginalGain> marginalGains = assessmentService.calculateMarginalGains(dto);
+        Map<Control, CoverageImprovement> improvements = assessmentService.calculateCoverageImprovements(dto);
 
-        // Read the precomputed total gain per control
+        // Read the precomputed total improvement per control
         Map<Control, Double> totalGains = new LinkedHashMap<>();
-        for (Map.Entry<Control, MarginalGain> entry : marginalGains.entrySet()) {
-            totalGains.put(entry.getKey(), entry.getValue().totalGain());
+        for (Map.Entry<Control, CoverageImprovement> entry : improvements.entrySet()) {
+            totalGains.put(entry.getKey(), entry.getValue().totalImprovement());
         }
 
-        // Sort controls by descending gain; position in this list is the global rank
+        // Sort controls by descending improvement; position in this list is the global rank
         List<Map.Entry<Control, Double>> sortedEntries = new ArrayList<>(totalGains.entrySet());
         sortedEntries.sort(new Comparator<Map.Entry<Control, Double>>() {
             @Override
@@ -175,17 +175,17 @@ public class AssessmentController {
 
         // Advice badge text (which dimension to raise) keyed by control id, for the cards
         Map<UUID, String> adviceMap = new LinkedHashMap<>();
-        for (Map.Entry<Control, MarginalGain> entry : marginalGains.entrySet()) {
+        for (Map.Entry<Control, CoverageImprovement> entry : improvements.entrySet()) {
             adviceMap.put(entry.getKey().getId(), entry.getValue().advice().getAdvice());
         }
 
         // Build a JSON blob for the control detail modal so the template needs no th:inline="javascript"
         Map<String, Object> controlModalData = new LinkedHashMap<>();
-        for (Map.Entry<Control, MarginalGain> cEntry : marginalGains.entrySet()) {
+        for (Map.Entry<Control, CoverageImprovement> cEntry : improvements.entrySet()) {
             Control control = cEntry.getKey();
-            MarginalGain gain = cEntry.getValue();
+            CoverageImprovement improvement = cEntry.getValue();
             List<Map<String, Object>> techniques = new ArrayList<>();
-            for (Map.Entry<Technique, Double> tEntry : gain.techniqueGains().entrySet()) {
+            for (Map.Entry<Technique, Double> tEntry : improvement.techniqueImprovements().entrySet()) {
                 Map<String, Object> tech = new LinkedHashMap<>();
                 tech.put("mitreId", tEntry.getKey().getMitreId());
                 tech.put("name", tEntry.getKey().getName());
@@ -198,7 +198,7 @@ public class AssessmentController {
             info.put("code", control.getCode());
             info.put("topicName", control.getTopic().getName());
             info.put("topicColor", control.getTopic().getColor() != null ? control.getTopic().getColor() : "#6c757d");
-            info.put("advice", gain.advice().getAdvice());
+            info.put("advice", improvement.advice().getAdvice());
             info.put("techniques", techniques);
             controlModalData.put(control.getId().toString(), info);
         }
@@ -216,7 +216,7 @@ public class AssessmentController {
         model.addAttribute("topFive", topFive);
         model.addAttribute("controlDataJson", controlDataJson);
         model.addAttribute("assessmentComplete", existing.get().getControlStatusMapping() != null && !existing.get().getControlStatusMapping().isEmpty());
-        return "assessment/marginalGains";
+        return "assessment/improvements";
     }
 
     /**
