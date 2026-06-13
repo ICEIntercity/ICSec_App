@@ -67,40 +67,7 @@ public class CoverageCalculationService {
             throw new BlankAssessmentException("Missing assessment or control status mapping.");
         }
 
-        // Initialize a TacticAssessmentResult per tactic, with a blank TechniqueCoverageScore per technique
-        Map<Tactic, TacticAssessmentResult> tacticAssessmentResults = new HashMap<>();
-        for (Tactic tactic : tacticRepository.findAll()) {
-            TacticAssessmentResult tacticResult = new TacticAssessmentResult();
-            for (Technique technique : tactic.getTechniques()) {
-                // Initialize a blank technique assessment
-                TechniqueAssessmentResult techniqueResult = new TechniqueAssessmentResult();
-                Short techniquePriority = assessment.getTechniquePriorities().getOrDefault(technique, (short) 0);
-
-                // Initialize coverages for each type of coverage
-                for (CoverageType coverageType : CoverageType.values()) {
-
-                    // Load the result for coverage type (for easier access)
-                    AssessmentValues typeValues = techniqueResult.getAssessmentResults().get(coverageType);
-
-                    // Set weight for assessment
-                    typeValues.setPriority(techniquePriority);
-
-                    // Prepare for calculating the "optimum state" if all possible controls are applied.
-                    // Start with 1.0 value because if no controls are applied, p(Failure) = 1
-                    double optimumFailureProbability = 1.0;
-
-                    // Calculate optimum state
-                    for (TechniqueCoverage coverage : technique.getCoverages()) {
-                        if(coverage.getCoverageType() == coverageType) {
-                            optimumFailureProbability = optimumFailureProbability * ((double) (5 - coverage.getCoverageRating()) / 5);
-                        }
-                    }
-                    typeValues.setOptimumFailureProbability(optimumFailureProbability);
-                }
-                tacticResult.getTechniqueAssessmentResults().put(technique, techniqueResult);
-            }
-            tacticAssessmentResults.put(tactic, tacticResult);
-        }
+        Map<Tactic, TacticAssessmentResult> tacticAssessmentResults = initializeResults(assessment);
 
         // Multiply each technique's failure probability by the control's effective reduction
         for (ControlStatus controlStatus : assessment.getControlStatusMapping()) {
@@ -113,8 +80,7 @@ public class CoverageCalculationService {
                 Short coverageRating = coverage.getCoverageRating();
                 CoverageType coverageType = coverage.getCoverageType();
 
-                double effectiveCoverageScore = effectiveScalingFactor(scope, maturity) * coverageRating;
-                double effectiveFailureProbability = Math.max(0.0, 1 - (effectiveCoverageScore / 5));
+                double effectiveFailureProbability = failureProbability(effectiveScalingFactor(scope, maturity), coverageRating);
 
                 for (Tactic tactic : technique.getTactics()) {
                     TechniqueAssessmentResult techniqueResult = tacticAssessmentResults.get(tactic).getTechniqueAssessmentResults().get(technique);
@@ -165,15 +131,9 @@ public class CoverageCalculationService {
             if (status != null && !status.isBlank()) {
                 double effectiveRating = effectiveScalingFactor(status.getCoverageScope(), status.getCoverageMaturity())
                         * coverage.getCoverageRating();
-                if (!existingByType.containsKey(type)) {
-                    existingByType.put(type, new ArrayList<>());
-                }
-                existingByType.get(type).add(new ControlCoverageRowDTO(coverage, effectiveRating));
+                addRow(existingByType, type, new ControlCoverageRowDTO(coverage, effectiveRating));
             } else {
-                if (!additionalByType.containsKey(type)) {
-                    additionalByType.put(type, new ArrayList<>());
-                }
-                additionalByType.get(type).add(new ControlCoverageRowDTO(coverage, null));
+                addRow(additionalByType, type, new ControlCoverageRowDTO(coverage, null));
             }
         }
 
@@ -193,6 +153,75 @@ public class CoverageCalculationService {
      * @return a value in [0, 1] representing the fraction of the raw coverage rating that is effectively active
      */
     static double effectiveScalingFactor(double scope, double maturity) {
-        return (Math.pow(scope, 0.65) * Math.pow(maturity, 0.35)) / 5.0;
+        return (Math.pow(scope, 0.65) * Math.pow(maturity, 0.35)) / MAX_RATING;
+    }
+
+    /** The highest value any maturity, scope, or coverage rating may reach. */
+    public static final double MAX_RATING = 5.0;
+
+    /**
+     * Computes the residual failure probability contributed by a single control for one technique
+     * and coverage type, using the parallel-systems model {@code max(0, 1 − scalingFactor × rating / MAX_RATING)}.
+     * <p>
+     * Passing a {@code scalingFactor} of {@code 1.0} yields the "optimum" contribution, i.e. the value
+     * obtained when the control is fully deployed.
+     *
+     * @param scalingFactor  the effective scaling factor (typically from {@link #effectiveScalingFactor})
+     * @param coverageRating the control's raw coverage rating for the technique/type
+     * @return the residual failure probability in [0, 1]
+     */
+    static double failureProbability(double scalingFactor, double coverageRating) {
+        return Math.max(0.0, 1 - scalingFactor * coverageRating / MAX_RATING);
+    }
+
+    /**
+     * Builds the initial per-tactic, per-technique result structure with every technique's priority
+     * set and its optimum failure probability (the value reached when all covering controls are fully
+     * deployed) precomputed, before any actual control statuses are applied.
+     */
+    private Map<Tactic, TacticAssessmentResult> initializeResults(Assessment assessment) {
+        Map<Tactic, TacticAssessmentResult> tacticAssessmentResults = new HashMap<>();
+        for (Tactic tactic : tacticRepository.findAll()) {
+            TacticAssessmentResult tacticResult = new TacticAssessmentResult();
+            for (Technique technique : tactic.getTechniques()) {
+                TechniqueAssessmentResult techniqueResult = new TechniqueAssessmentResult();
+                Short techniquePriority = assessment.getTechniquePriorities().getOrDefault(technique, (short) 0);
+
+                for (CoverageType coverageType : CoverageType.values()) {
+                    AssessmentValues typeValues = techniqueResult.getAssessmentResults().get(coverageType);
+                    typeValues.setPriority(techniquePriority);
+                    typeValues.setOptimumFailureProbability(optimumFailureProbability(technique, coverageType));
+                }
+                tacticResult.getTechniqueAssessmentResults().put(technique, techniqueResult);
+            }
+            tacticAssessmentResults.put(tactic, tacticResult);
+        }
+        return tacticAssessmentResults;
+    }
+
+    /**
+     * Computes the failure probability for a technique and coverage type assuming every control that
+     * covers it is fully deployed. Starts at {@code 1.0} (no controls applied) and compounds each
+     * matching coverage's optimum contribution multiplicatively.
+     */
+    private static double optimumFailureProbability(Technique technique, CoverageType coverageType) {
+        double optimum = 1.0;
+        for (TechniqueCoverage coverage : technique.getCoverages()) {
+            if (coverage.getCoverageType() == coverageType) {
+                optimum = optimum * failureProbability(1.0, coverage.getCoverageRating());
+            }
+        }
+        return optimum;
+    }
+
+    /** Appends a coverage row to the list for the given type, creating the list on first use. */
+    private static void addRow(Map<CoverageType, List<ControlCoverageRowDTO>> rowsByType,
+                               CoverageType type, ControlCoverageRowDTO row) {
+        List<ControlCoverageRowDTO> rows = rowsByType.get(type);
+        if (rows == null) {
+            rows = new ArrayList<>();
+            rowsByType.put(type, rows);
+        }
+        rows.add(row);
     }
 }

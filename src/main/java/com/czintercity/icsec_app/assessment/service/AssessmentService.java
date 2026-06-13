@@ -23,6 +23,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
+import static com.czintercity.icsec_app.assessment.service.CoverageCalculationService.MAX_RATING;
+import static com.czintercity.icsec_app.assessment.service.CoverageCalculationService.failureProbability;
+
 /**
  * Core service for creating, loading, and persisting {@link Assessment} records.
  * <p>
@@ -51,12 +54,7 @@ public class AssessmentService {
      * @return a Map containing all available controls and the status of each
      */
     public Map<Control, ControlStatusDTO> buildControlStatusMap(AssessmentDTO dto) {
-        Map<UUID, ControlStatusDTO> lookup = new HashMap<>();
-        if (dto.getControlStatusMapping() != null) {
-            for (ControlStatusDTO statusDTO : dto.getControlStatusMapping()) {
-                lookup.put(statusDTO.getControlId(), statusDTO);
-            }
-        }
+        Map<UUID, ControlStatusDTO> lookup = indexStatuses(dto, false);
 
         Map<Control, ControlStatusDTO> out = new HashMap<>();
         for (Control control : controlRepository.findAll()) {
@@ -146,8 +144,7 @@ public class AssessmentService {
      */
     @Transactional
     public Map<UUID, Short> getTechniquePriorities(UUID assessmentId) {
-        Assessment assessment = assessmentRepository.findById(assessmentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found"));
+        Assessment assessment = requireAssessment(assessmentId);
         Map<UUID, Short> priorities = new HashMap<>();
         if (assessment.getTechniquePriorities() != null) {
             for (Map.Entry<Technique, Short> entry : assessment.getTechniquePriorities().entrySet()) {
@@ -166,8 +163,7 @@ public class AssessmentService {
      */
     @Transactional
     public Assessment saveTechniquePriorities(UUID assessmentId, List<TechniquePriorityDTO> priorities) {
-        Assessment assessment = assessmentRepository.findById(assessmentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found"));
+        Assessment assessment = requireAssessment(assessmentId);
         Map<Technique, Short> priorityMap = new HashMap<>();
         if (priorities != null) {
             for (TechniquePriorityDTO dto : priorities) {
@@ -180,20 +176,20 @@ public class AssessmentService {
         return assessmentRepository.save(assessment);
     }
 
-    /** The highest value any maturity or scope rating may reach. */
-    private static final double MAX_RATING = 5.0;
-
     /**
      * Calculates the coverage improvement achievable for each control, measured as the total
-     * reduction in residual failure probability (the risk faced) across every technique the control
-     * covers if one of its two deployment dimensions is raised by a single point.
+     * priority-weighted reduction in residual failure probability (the risk faced) across every technique
+     * the control covers if one of its two deployment dimensions is raised by a single point. Each
+     * technique's reduction is weighted by its assigned priority, mirroring the coverage view's
+     * {@code weightedPriority = failureProbabilityDelta × priority}; techniques with no assigned
+     * priority contribute nothing.
      * <p>
      * The residual failure probability for a technique and {@link CoverageType} is the product, over
      * all deployed controls, of each control's {@code max(0, 1 − effectiveScalingFactor × rating / 5)}
      * — the same compounding model used by {@link CoverageCalculationService#calculateMitreCoverage}.
 
      * Each control is scored on raising its scope by one point and on raising its maturity by one
-     * point (neither beyond the maximum of {@value #MAX_RATING}); the larger of the two is reported
+     * point (neither beyond the maximum of {@value CoverageCalculationService#MAX_RATING}); the larger of the two is reported
      * along with the {@link ImprovementAdvice advice} for the dimension that produced it. Two edge
      * cases override the comparison:
      * <ul>
@@ -211,14 +207,8 @@ public class AssessmentService {
      */
     @Transactional
     public Map<Control, CoverageImprovement> calculateCoverageImprovements(AssessmentDTO dto) {
-        Map<UUID, ControlStatusDTO> statusLookup = new HashMap<>();
-        if (dto.getControlStatusMapping() != null) {
-            for (ControlStatusDTO statusDTO : dto.getControlStatusMapping()) {
-                if (!statusDTO.isBlank()) {
-                    statusLookup.put(statusDTO.getControlId(), statusDTO);
-                }
-            }
-        }
+        Map<UUID, ControlStatusDTO> statusLookup = indexStatuses(dto, true);
+        Map<UUID, Short> priorities = getTechniquePriorities(dto.getId());
 
         Iterable<Control> allControls = controlRepository.findAll();
 
@@ -230,13 +220,14 @@ public class AssessmentService {
             if (status == null) {
                 continue;
             }
-            double scope = status.getCoverageScope() != null ? status.getCoverageScope() : 0.0;
-            double maturity = status.getCoverageMaturity() != null ? status.getCoverageMaturity() : 0.0;
+            double scope = scopeOf(status);
+            double maturity = maturityOf(status);
             double factor = CoverageCalculationService.effectiveScalingFactor(scope, maturity);
+
             for (TechniqueCoverage coverage : control.getTechniqueCoverage()) {
-                double failureProbability = Math.max(0.0, 1 - factor * coverage.getCoverageRating() / 5.0);
+                double failureProb = failureProbability(factor, coverage.getCoverageRating());
                 residual.computeIfAbsent(coverage.getTechnique(), t -> new EnumMap<>(CoverageType.class))
-                        .merge(coverage.getCoverageType(), failureProbability, (a, b) -> a * b);
+                        .merge(coverage.getCoverageType(), failureProb, (a, b) -> a * b);
             }
         }
 
@@ -248,8 +239,8 @@ public class AssessmentService {
             }
 
             ControlStatusDTO status = statusLookup.get(control.getId());
-            double scope = (status != null && status.getCoverageScope() != null) ? status.getCoverageScope() : 0.0;
-            double maturity = (status != null && status.getCoverageMaturity() != null) ? status.getCoverageMaturity() : 0.0;
+            double scope = scopeOf(status);
+            double maturity = maturityOf(status);
 
             ImprovementAdvice advice;
             Map<Technique, Double> techniqueImprovements;
@@ -262,12 +253,20 @@ public class AssessmentService {
                 // Undeployed on both dimensions: raising only one leaves the scaling factor at zero,
                 // so a meaningful deployment raises scope and maturity together by one point.
                 advice = ImprovementAdvice.DEPLOY_NEW;
-                techniqueImprovements = riskReduction(control, scope, maturity, 1.0, 1.0, residual);
+                techniqueImprovements = riskReduction(control, scope, maturity, 1.0, 1.0, residual, priorities);
+            } else if (scope >= MAX_RATING) {
+                // Scope already maxed: the only achievable improvement is raising maturity.
+                advice = ImprovementAdvice.MATURITY;
+                techniqueImprovements = riskReduction(control, scope, maturity, scope, Math.min(maturity + 1, MAX_RATING), residual, priorities);
+            } else if (maturity >= MAX_RATING) {
+                // Maturity already maxed: the only achievable improvement is raising scope.
+                advice = ImprovementAdvice.SCOPE;
+                techniqueImprovements = riskReduction(control, scope, maturity, Math.min(scope + 1, MAX_RATING), maturity, residual, priorities);
             } else {
                 Map<Technique, Double> scopeImprovements =
-                        riskReduction(control, scope, maturity, Math.min(scope + 1, MAX_RATING), maturity, residual);
+                        riskReduction(control, scope, maturity, Math.min(scope + 1, MAX_RATING), maturity, residual, priorities);
                 Map<Technique, Double> maturityImprovements =
-                        riskReduction(control, scope, maturity, scope, Math.min(maturity + 1, MAX_RATING), residual);
+                        riskReduction(control, scope, maturity, scope, Math.min(maturity + 1, MAX_RATING), residual, priorities);
 
                 // Pick whichever dimension reduces the most total risk across the control's techniques.
                 if (sum(scopeImprovements) >= sum(maturityImprovements)) {
@@ -287,16 +286,15 @@ public class AssessmentService {
 
     /**
      * Computes the per-technique reduction in residual failure probability obtained by moving a single
-     * control from its current scope/maturity to a target scope/maturity, holding all other deployed
-     * controls fixed. For each technique and coverage type the control addresses, its current factor is
-     * divided out of the baseline residual and the target factor multiplied back in; the drop in
-     * residual probability is the risk reduced. Reductions are summed across coverage types per technique.
+     * control from its current scope/maturity to a target scope/maturity.
      *
-     * @return a map of technique to the total risk reduction it gains; entries may be zero
+     * @param priorities technique ID to priority weight (0–5); missing entries are treated as 0
+     * @return a map of technique to the total priority-weighted risk reduction it gains; entries may be zero
      */
     private Map<Technique, Double> riskReduction(Control control, double currentScope, double currentMaturity,
                                                  double targetScope, double targetMaturity,
-                                                 Map<Technique, Map<CoverageType, Double>> residual) {
+                                                 Map<Technique, Map<CoverageType, Double>> residual,
+                                                 Map<UUID, Short> priorities) {
         double currentFactor = CoverageCalculationService.effectiveScalingFactor(currentScope, currentMaturity);
         double targetFactor = CoverageCalculationService.effectiveScalingFactor(targetScope, targetMaturity);
 
@@ -304,10 +302,15 @@ public class AssessmentService {
         // it covers the same technique/type through more than one coverage entry.
         Map<Technique, Map<CoverageType, double[]>> factors = new HashMap<>();
         for (TechniqueCoverage coverage : control.getTechniqueCoverage()) {
-            double currentF = Math.max(0.0, 1 - currentFactor * coverage.getCoverageRating() / 5.0);
-            double targetF = Math.max(0.0, 1 - targetFactor * coverage.getCoverageRating() / 5.0);
-            double[] product = factors.computeIfAbsent(coverage.getTechnique(), t -> new EnumMap<>(CoverageType.class))
-                    .computeIfAbsent(coverage.getCoverageType(), t -> new double[]{1.0, 1.0});
+            double currentF = failureProbability(currentFactor, coverage.getCoverageRating());
+            double targetF = failureProbability(targetFactor, coverage.getCoverageRating());
+
+            Map<CoverageType, double[]> typeFactors = factors.get(coverage.getTechnique());
+            if (typeFactors == null) {
+                typeFactors = new EnumMap<>(CoverageType.class);
+                factors.put(coverage.getTechnique(), typeFactors);
+            }
+            double[] product = typeFactors.computeIfAbsent(coverage.getCoverageType(), _ -> new double[]{1.0, 1.0});
             product[0] *= currentF;
             product[1] *= targetF;
         }
@@ -319,7 +322,7 @@ public class AssessmentService {
             for (Map.Entry<CoverageType, double[]> typeEntry : techEntry.getValue().entrySet()) {
                 double currentProduct = typeEntry.getValue()[0];
                 if (currentProduct <= 0.0) {
-                    // Control already drives this technique/type to zero failure probability; no further gain.
+                    // Control already drives this technique/type to zero failure probability.
                     continue;
                 }
                 double baseline = typeResidual != null ? typeResidual.getOrDefault(typeEntry.getKey(), 1.0) : 1.0;
@@ -329,7 +332,9 @@ public class AssessmentService {
                     techReduction += reduction;
                 }
             }
-            gains.put(techEntry.getKey(), techReduction);
+            // Weight the reduction by the technique's priority (un-prioritised techniques weigh 0).
+            short priority = priorities.getOrDefault(techEntry.getKey().getId(), (short) 0);
+            gains.put(techEntry.getKey(), techReduction * priority);
         }
         return gains;
     }
@@ -341,5 +346,51 @@ public class AssessmentService {
             total += value;
         }
         return total;
+    }
+
+    /**
+     * Loads an {@link Assessment} by ID or throws a {@code 404} if none exists.
+     */
+    private Assessment requireAssessment(UUID assessmentId) {
+        Optional<Assessment> existing = assessmentRepository.findById(assessmentId);
+        if (existing.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
+        }
+        return existing.get();
+    }
+
+    /**
+     * Flattens a DTO's control-status collection into a map keyed by control ID.
+     *
+     * @param dto       the assessment whose statuses are indexed
+     * @param skipBlank when {@code true}, blank statuses (see {@link ControlStatusDTO#isBlank()}) are omitted
+     * @return a map of control ID to its status; empty if the DTO has no statuses
+     */
+    private Map<UUID, ControlStatusDTO> indexStatuses(AssessmentDTO dto, boolean skipBlank) {
+        Map<UUID, ControlStatusDTO> lookup = new HashMap<>();
+        if (dto.getControlStatusMapping() != null) {
+            for (ControlStatusDTO statusDTO : dto.getControlStatusMapping()) {
+                if (!skipBlank || !statusDTO.isBlank()) {
+                    lookup.put(statusDTO.getControlId(), statusDTO);
+                }
+            }
+        }
+        return lookup;
+    }
+
+    /** Returns the status's coverage scope, treating a missing status or null value as 0. */
+    private static double scopeOf(ControlStatusDTO status) {
+        if (status != null && status.getCoverageScope() != null) {
+            return status.getCoverageScope();
+        }
+        return 0.0;
+    }
+
+    /** Returns the status's coverage maturity, treating a missing status or null value as 0. */
+    private static double maturityOf(ControlStatusDTO status) {
+        if (status != null && status.getCoverageMaturity() != null) {
+            return status.getCoverageMaturity();
+        }
+        return 0.0;
     }
 }
