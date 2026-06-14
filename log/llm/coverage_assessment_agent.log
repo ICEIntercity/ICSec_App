@@ -21,3 +21,6 @@
 2026-06-02 14:12:23.706 INFO  - INPUT  control='Security acceptance testing' (id=1d8bbc37-e64a-4287-946a-3e6097047812)
 2026-06-02 14:43:48.338 INFO  - INPUT  control='Identity and access audit' (id=590c6bda-31c4-4f04-a1c5-a549388c51be)
 2026-06-03 14:46:48.828 INFO  - INPUT  control='Automated vulnerability scanning' (id=9c6d30b4-8fd3-4283-9cf4-e302d1ebc2ea)
+2026-06-14 11:44:07.960 INFO  - INPUT  control='Session locking' (id=9c3aaf40-f465-435c-8b82-8a02b0f16c1b)
+2026-06-14 11:47:25.796 INFO  - INPUT  control='Session locking' (id=ec30e810-457d-4d57-8ab1-d85ece7e122d)
+2026-06-14 12:36:25.123 INFO  - INPUT  control='Secure boot' (id=1e62d7f8-4405-4bc1-9382-d88ce838746e)

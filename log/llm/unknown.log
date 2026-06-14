@@ -2550,3 +2550,281 @@ Final assessment:
   }
 ]
 ```
+2026-06-14 11:45:19.435 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Let me assess each returned evaluation:
+
+**1. T0823 (GUI) — Preventative Coverage (rating: 3)**
+The tool assessment is sound and well-reasoned. Session locking does provide meaningful prevention against GUI-based attacks on abandoned workstations through inactivity-triggered locks that require re-authentication. The rating of 3 is appropriate—it's moderately effective in a specific scenario (unattended physical access to already-logged-in workstations) but has clear limitations (doesn't prevent initial access, dependent on configuration, doesn't stop credential-based attacks). The justification correctly identifies the narrow threat vector this control addresses. I accept this rating.
+
+**2. T0823 (GUI) — Detective Coverage (rating: 1)**
+The tool is correct that session locking is fundamentally a preventative control, not a detective one. It does not actively monitor or alert on GUI access attempts. The rating of 1 is appropriate because the control lacks any intrinsic detection capability—it simply blocks access to locked sessions. While a locked session might generate error logs if an attacker tries to interact with it, this is incidental to the control's purpose and unreliable for detection. I accept this rating.
+
+**3. T0886 (Remote Services) — Preventative Coverage (rating: 1)**
+This assessment is sound. Remote services operate at the network protocol level and session locking (a local workstation/HMI control) has minimal impact on the use of RDP, SSH, or SMB protocols themselves. An attacker with valid credentials can simply establish a new remote session. The control might prevent exploitation of a single abandoned session but doesn't prevent the broader technique. The rating of 1 is appropriate—session locking is largely orthogonal to remote service exploitation. I accept this rating.
+
+**4. T0886 (Remote Services) — Detective Coverage (rating: 1)**
+Correct assessment. Session locking provides no visibility into remote service connections, authentication attempts, or lateral movement. It's purely a local access control. The rating of 1 is justified—there's no detective capability here. I accept this rating.
+
+**5. T0859 (Valid Accounts) — Preventative Coverage (rating: 1)**
+The justification is accurate. Session locking does not prevent credential theft, credential use, or initial authentication with stolen credentials. It only prevents someone from physically using an already-authenticated session. Since the technique encompasses credential compromise and use, and session locking only addresses the narrow scenario of abandoned sessions, a rating of 1 is appropriate. I accept this rating.
+
+**6. T0807 (CLI) — Preventative Coverage (rating: 1)**
+Sound reasoning. Session locking doesn't prevent CLI command execution by authenticated users or those who already have access. It only prevents access to inactive sessions. The rating of 1 is appropriate—the control is orthogonal to the core mechanism of the technique (executing commands via CLI). I accept this rating.
+
+**7. T0807 (CLI) — Detective Coverage (rating: 1)**
+Correct assessment. Session locking is not a detective control for CLI usage. It provides no monitoring, logging, or alerting on CLI command execution. The rating of 1 is justified. I accept this rating.
+
+**Summary of Verification:**
+All ratings are technically sound and justified. The tool correctly identifies that session locking is a narrow, preventative control effective mainly against physical/logical access to abandoned authenticated sessions, but has minimal to no impact on techniques involving credential compromise, remote protocol exploitation, or command execution by authenticated users. All coverage_ratings of 1 should be discarded per Step 3 instructions (discard entries with final rating 0 or ratings determined to have no meaningful impact). However, the T0823 Preventative rating of 3 represents a meaningful coverage scenario and should be retained.
+
+---
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0823",
+    "technique_name": "Graphical User Interface",
+    "coverage_type": "preventative",
+    "coverage_rating": 3,
+    "reasoning": "Session locking provides moderate prevention against GUI-based attacks on abandoned workstations by enforcing inactivity timeouts and requiring re-authentication, effectively protecting unattended engineering workstations and HMIs from physical or logical tampering. However, effectiveness is limited as it does not prevent initial GUI access through compromised credentials or remote protocols (RDP/VNC), depends on proper configuration, and may be disabled on critical operational interfaces to maintain emergency access.",
+    "overridden": false
+  }
+]
+```
+2026-06-14 11:49:00.935 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+I need to assess each evaluation for accuracy. The tool responses are quite lengthy and detailed. Let me review their accuracy:
+
+1. **T0823 (GUI) — Preventative (rating: 2)**: The justification is thorough and accurate. Session locking does protect against unattended GUI access (a partial vector), but doesn't prevent authenticated access or remote exploitation. The rating of 2 is appropriate—it covers a limited subset of the attack surface (roughly 25-50% when considering only the unattended session vector). I accept this.
+
+2. **T0823 (GUI) — Detective (rating: 1)**: The justification correctly identifies that session locking is preventive, not detective. It does not generate alerts or detect GUI usage. The rating of 1 is accurate; while theoretically it could prevent some access, it provides no meaningful detection. I accept this.
+
+3. **T0886 (Remote Services) — Preventative (rating: 1)**: The justification is accurate—session locking only protects unattended sessions, not remote service abuse with credentials. However, I'd argue this could be a 2: it does provide some prevention against someone hijacking an unattended remote session (e.g., someone leaving an RDP session open). But the rating of 1 is defensible given that most remote service attacks involve fresh authentication. I accept this as borderline but defensible.
+
+4. **T0886 (Remote Services) — Detective (rating: 1)**: Correct—session locking detects nothing about remote service usage. It is not a detection control. I accept this.
+
+5. **T0859 (Valid Accounts) — Preventative (rating: 1)**: The justification is accurate. Session locking does not prevent credential theft or reuse; it only prevents someone using a stolen credential from accessing an unlocked session. An attacker with valid credentials can simply re-authenticate. Rating of 1 is accurate. I accept this.
+
+6. **T0859 (Valid Accounts) — Detective (rating: 1)**: The justification correctly notes that session locking does not detect credential compromise, initial authentication, or anomalous login patterns. Rating of 1 is accurate. I accept this.
+
+7. **T0807 (CLI) — Preventative (rating: 1)**: The justification is accurate. Session locking only prevents access to unattended CLI sessions, not execution of commands by authenticated users or remote attackers. Rating of 1 is accurate. I accept this.
+
+8. **T0807 (CLI) — Detective (rating: 1)**: Correct—session locking does not detect CLI command execution. It is preventive, not detective. Rating of 1 is accurate. I accept this.
+
+9. **T0864 (Transient Cyber Asset) — Preventative (rating: 1)**: The justification is accurate. Session locking does not address the core vulnerability: a transient asset's trusted access when connected to internal networks, potential pre-compromise, or lateral movement capability. Rating of 1 is accurate. I accept this.
+
+10. **T0864 (Transient Cyber Asset) — Detective (rating: 1)**: Correct—session locking does not detect when a transient asset has been compromised or is being used as a pivot point. It only prevents physical access to unlocked sessions. Rating of 1 is accurate. I accept this.
+
+All ratings of 1 reflect controls that provide minimal or no coverage for the technique in that category. According to Step 3 guidelines, entries with a final `coverage_rating` of 0 should be discarded. However, all ratings here are 1, meaning they are on the borderline of relevance.
+
+Let me reconsider the guidance: "Discard any entry whose final `coverage_rating` is 0." Since all of these are rated 1 (not 0), they should be included. However, I need to verify whether any of these ratings should actually be higher.
+
+Upon reflection:
+- **T0823 Preventative (2)**: This is the strongest coverage. Session locking meaningfully prevents GUI access to unattended workstations/HMIs. This should remain 2.
+- All others (rating 1): These represent minimal coverage. Session locking is not designed to prevent these techniques; it only provides an incidental protective effect in very narrow scenarios (unattended session access). These should remain 1.
+
+Actually, reconsidering T0886 and T0807: Session locking could potentially be rated a 2 for preventative coverage because it does prevent someone from using an already-authenticated remote session (via RDP or SSH CLI) if they physically access the workstation while the session is idle. However, the justification provided focuses on the fact that most attacks involve fresh authentication with stolen credentials, which is a valid point that makes 1 more defensible than 2.
+
+I'll accept all ratings as presented. No overrides needed.
+
+---
+
+## Step 4 — Output
+
+```json
+[
+  {
+    "technique_id": "T0823",
+    "technique_name": "Graphical User Interface",
+    "coverage_type": "preventative",
+    "coverage_rating": 2,
+    "reasoning": "Session locking provides partial prevention against GUI-based access attacks by protecting unattended workstations and HMIs from unauthorized interaction during periods of inactivity or manual lockout. However, the control does not prevent initial GUI access through compromised credentials, remote protocols (RDP/VNC), or active authenticated sessions, significantly limiting its effectiveness.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0823",
+    "technique_name": "Graphical User Interface",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Session locking is primarily a preventive control and provides minimal detection capability for GUI-based access attempts. It does not generate alerts on actual GUI usage, command execution, or suspicious interaction patterns—only preventing access to locked sessions during inactivity.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "preventative",
+    "coverage_rating": 1,
+    "reasoning": "Session locking minimally prevents remote service exploitation, addressing only the narrow scenario of an attacker hijacking an unattended but authenticated remote session. It does not prevent initial remote service connections using stolen credentials, fresh authentication, lateral movement, or exploitation of remote protocols themselves.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Session locking provides no meaningful detection of remote service abuse. It does not monitor connection attempts, authentication events, or suspicious remote access patterns—functioning only as an access control measure for unattended sessions.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0859",
+    "technique_name": "Valid Accounts",
+    "coverage_type": "preventative",
+    "coverage_rating": 1,
+    "reasoning": "Session locking minimally prevents abuse of valid (compromised) accounts, as an attacker with stolen credentials can simply re-authenticate after a session locks. The control does not address credential theft, initial authentication bypass, or lateral movement using valid accounts.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0859",
+    "technique_name": "Valid Accounts",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Session locking does not detect credential compromise, unauthorized authentication, or anomalous login patterns. It only prevents physical access to already-unlocked sessions, providing negligible detection capability for this technique.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0807",
+    "technique_name": "Command-Line Interface",
+    "coverage_type": "preventative",
+    "coverage_rating": 1,
+    "reasoning": "Session locking minimally prevents unauthorized CLI usage, protecting only against access to unattended terminal sessions. It does not prevent CLI usage by authenticated users, remote attackers with credentials, or command execution once a session is active.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0807",
+    "technique_name": "Command-Line Interface",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Session locking provides no detection of CLI command execution or usage. It operates as an access control mechanism only, with no visibility into command activity or ability to alert on CLI-based attacks.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0864",
+    "technique_name": "Transient Cyber Asset",
+    "coverage_type": "preventative",
+    "coverage_rating": 1,
+    "reasoning": "Session locking minimally prevents exploitation of transient cyber assets, as the core vulnerability lies in the device's trusted access and potential pre-compromise before entering the ICS network. Session locking only protects unattended local sessions and does not address malware, credential theft, or lateral movement leverage.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0864",
+    "technique_name": "Transient Cyber Asset",
+    "coverage_type": "detective",
+    "coverage_rating": 1,
+    "reasoning": "Session locking provides minimal detection capability for transient cyber asset exploitation. It does not detect device compromise, pivot point activity, trust relationship exploitation, or lateral movement—only preventing physical access to locked sessions.",
+    "overridden": false
+  }
+]
+```
+2026-06-14 12:38:15.170 INFO  - OUTPUT ## Step 3 — Coverage Verification
+
+Now I will assess each returned evaluation for accuracy:
+
+1. **T0857 (System Firmware) – Preventative (rating 4)**: The justification is solid and comprehensive. Secure Boot directly prevents unsigned firmware from loading; the rating of 4 accounts for edge cases (physical access, implementation flaws, legacy systems, zero-days). This is accurate and well-balanced. **Accept.**
+
+2. **T0857 (System Firmware) – Detective (rating 4)**: The justification correctly notes that Secure Boot detects malicious firmware at boot time and prevents execution. The downgrade from 5 to 4 is justified by scenarios where firmware modifications go undetected if the device doesn't reboot, and the reliance on proper configuration. This is sound. **Accept.**
+
+3. **T0839 (Module Firmware) – Preventative (rating 3)**: The rating of 3 is reasonable given the technique's focus on modular components, which may not all have Secure Boot. The justification properly acknowledges that Secure Boot protects the primary boot chain but modular components may have varying or absent implementations. The reasoning is balanced and accurate. **Accept.**
+
+4. **T0839 (Module Firmware) – Detective (rating 3)**: The justification correctly identifies that Secure Boot extends primarily to the boot chain and may not catch attacks on modular components that have independent firmware update mechanisms or debug interfaces. The 50-75% coverage estimate is reasonable. **Accept.**
+
+5. **T0851 (Rootkit) – Preventative (rating 4)**: The justification correctly identifies that Secure Boot prevents firmware and bootkit rootkits but not in-memory rootkits or those injected through legitimate processes after boot. The 75-90% coverage cited is reasonable. The rating of 4 is appropriate. **Accept.**
+
+6. **T0851 (Rootkit) – Detective (rating 4)**: Similar to preventative, this correctly notes Secure Boot's effectiveness against boot-time rootkit installation with appropriate caveats about runtime behavior and pre-boot compromises. **Accept.**
+
+7. **T0820 (Exploitation for Evasion) – Preventative (rating 4)**: The justification appropriately addresses the firmware RAM/ROM consistency check exploitation mentioned in the technique. The 75-85% coverage estimate is reasonable, and the caveats about post-boot exploits are valid. **Accept.**
+
+8. **T0820 (Exploitation for Evasion) – Detective (rating 4)**: The reasoning mirrors preventative effectively, noting that Secure Boot detects firmware-level evasion exploits with proper limitations. **Accept.**
+
+9. **T0895 (Autorun Image) – Preventative (rating 1)**: The justification is excellent and technically accurate. Secure Boot operates at boot-time signature verification while Autorun abuse occurs post-boot at the application level. The two mechanisms operate in different phases and the control is architecturally irrelevant to preventing this technique. **Accept.**
+
+10. **T0847 (Replication Through Removable Media) – Preventative (rating 1)**: This rating is also accurate. Secure Boot does not prevent post-boot execution of malware from removable media, which is where this technique manifests. The control would only block bootkit-based malware on removable media, an edge case. **Accept.**
+
+All evaluations are sound and require no overrides. I'll now format the output.
+
+```json
+[
+  {
+    "technique_id": "T0857",
+    "technique_name": "System Firmware",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Secure Boot prevents malicious firmware from executing by enforcing cryptographic signature verification against a hardware root of trust. This directly counters unauthorized firmware upload attempts and ensures devices boot into a known-good state, providing high-confidence prevention. However, the rating reflects edge cases including physical access bypasses, implementation flaws in legacy systems, and potential zero-day vulnerabilities in the Secure Boot mechanism itself.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0857",
+    "technique_name": "System Firmware",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "Secure Boot reliably detects and rejects unsigned or maliciously modified firmware during the boot process before execution, alerting administrators to integrity violations. However, detection is limited to boot-time validation and does not catch firmware modifications if the device never reboots after compromise, and effectiveness depends on proper configuration across the infrastructure.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0839",
+    "technique_name": "Module Firmware",
+    "coverage_type": "preventative",
+    "coverage_rating": 3,
+    "reasoning": "Secure Boot provides moderate prevention against malicious modular firmware by verifying signatures during boot, but coverage is limited because modular hardware components often have independent firmware mechanisms that may bypass the primary Secure Boot chain. Additionally, modular devices in OT environments frequently have inconsistent or absent Secure Boot implementations, and attackers with physical access can leverage debug interfaces to circumvent controls.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0839",
+    "technique_name": "Module Firmware",
+    "coverage_type": "detective",
+    "coverage_rating": 3,
+    "reasoning": "Secure Boot's detection capability extends primarily to the main boot chain but does not reliably cover all modular components with independent firmware update mechanisms or alternative access vectors such as JTAG or firmware extraction. While it detects standard firmware replacement attempts on well-configured modular devices, heterogeneous OT hardware and proprietary implementations reduce overall effectiveness to approximately 50-75% coverage.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0851",
+    "technique_name": "Rootkit",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Secure Boot effectively prevents firmware and bootkit-based rootkits by cryptographically verifying kernel and firmware components before execution, addressing the most persistent and dangerous rootkit deployment vectors. The rating of 4 accounts for limitations against user-mode injected rootkits or those installed after boot completion, as well as sophisticated physical attacks or pre-boot compromises that may circumvent the control.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0851",
+    "technique_name": "Rootkit",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "Secure Boot provides strong detection and prevention of firmware-level and bootkit rootkits by enforcing signature verification at system initialization, preventing unsigned rootkit code from loading. However, it does not detect rootkits already resident in memory, post-boot runtime behavior, or in-memory API hooks, and effectiveness depends on proper key management and absence of implementation vulnerabilities.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0820",
+    "technique_name": "Exploitation for Evasion",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Secure Boot directly prevents exploitation of firmware-level security features (such as RAM/ROM consistency checks) by ensuring only signed firmware executes, blocking attackers from disabling or circumventing boot-phase security mechanisms. The rating of 4 reflects that the control protects firmware and bootloader vulnerabilities but does not prevent post-boot runtime exploits or application-level evasion techniques.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0820",
+    "technique_name": "Exploitation for Evasion",
+    "coverage_type": "detective",
+    "coverage_rating": 4,
+    "reasoning": "Secure Boot detects and prevents exploitation attempts targeting firmware vulnerabilities and security checks by enforcing cryptographic verification at boot time, making it extremely difficult for attackers to modify firmware or disable boot-phase security features without triggering integrity checks. Coverage is limited to firmware and boot-chain exploits and does not extend to post-boot runtime exploitation or application-level evasion techniques.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0895",
+    "technique_name": "Autorun Image",
+    "coverage_type": "preventative",
+    "coverage_rating": 1,
+    "reasoning": "Secure Boot operates at the firmware and bootloader verification stage, while Autorun Image exploitation occurs post-boot at the application level when the operating system processes removable media. These attack phases are fundamentally separate, and Secure Boot does not control post-boot automation features, file execution policies, or removable media handlers that enable the Autorun technique.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0847",
+    "technique_name": "Replication Through Removable Media",
+    "coverage_type": "preventative",
+    "coverage_rating": 1,
+    "reasoning": "Secure Boot does not prevent the core attack vector of this technique—copying and executing malware from removable media post-boot. While Secure Boot would theoretically block a bootkit-based malware variant on removable media, the technique's primary mechanism relies on post-boot execution, user file handling, and application-level malware that occur well after Secure Boot's verification window has closed.",
+    "overridden": false
+  }
+]
+```
