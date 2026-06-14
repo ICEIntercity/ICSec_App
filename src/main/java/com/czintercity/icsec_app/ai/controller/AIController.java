@@ -1,6 +1,7 @@
 package com.czintercity.icsec_app.ai.controller;
 
 import com.czintercity.icsec_app.ai.agent.CoverageAssessmentAgent;
+import com.czintercity.icsec_app.ai.agent.CoverageCriticAgent;
 import com.czintercity.icsec_app.ai.service.AIService;
 import com.czintercity.icsec_app.ai.utils.AIUtils;
 import com.czintercity.icsec_app.controls.entity.Control;
@@ -24,21 +25,25 @@ import java.util.Optional;
 
 /**
  * Controller exposing AI-powered coverage assessment endpoints.
- * Delegates to {@link com.czintercity.icsec_app.ai.agent.CoverageAssessmentAgent} for inference and falls back
- * to a secondary extractor agent when direct JSON parsing fails.
+ * Delegates to {@link com.czintercity.icsec_app.ai.agent.CoverageAssessmentAgent} for inference,
+ * has the {@link com.czintercity.icsec_app.ai.agent.CoverageCriticAgent} review that output, and falls
+ * back to a secondary extractor agent when direct JSON parsing fails.
  */
 @Controller
 public class AIController {
 
     private final CoverageAssessmentAgent coverageAssessmentAgent;
+    private final CoverageCriticAgent coverageCriticAgent;
     private final AIService aiService;
     private final boolean aiAvailable;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public AIController(CoverageAssessmentAgent coverageAssessmentAgent,
+                        CoverageCriticAgent coverageCriticAgent,
                         AIService aiService,
                         @Value("${claude.api_key:}") String claudeApiKey) {
         this.coverageAssessmentAgent = coverageAssessmentAgent;
+        this.coverageCriticAgent = coverageCriticAgent;
         this.aiService = aiService;
         this.aiAvailable = !claudeApiKey.isBlank();
     }
@@ -66,7 +71,8 @@ public class AIController {
         log.info("Starting AI assessment from ephemeral control object `{}`", name);
 
         String agentJson = coverageAssessmentAgent.clank(control);
-        List<TechniqueCoverage> coverages = extractAndParse(agentJson, control);
+        String reviewedJson = coverageCriticAgent.clank(control, agentJson);
+        List<TechniqueCoverage> coverages = extractAndParse(reviewedJson, control);
 
         model.addAttribute("coverageList", coverages);
         model.addAttribute("controlName", name);
