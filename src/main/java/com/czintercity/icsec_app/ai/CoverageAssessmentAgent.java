@@ -186,8 +186,11 @@ public class CoverageAssessmentAgent {
 
     private Message callClaude(List<MessageParam> history) {
         MessageCreateParams params = MessageCreateParams.builder()
-                .model(Model.CLAUDE_HAIKU_4_5)
+                .model(Model.CLAUDE_SONNET_4_6)
                 .maxTokens(8192)
+                .outputConfig(OutputConfig.builder()
+                        .effort(OutputConfig.Effort.MEDIUM)
+                        .build())
                 .system(SYSTEM_PROMPT)
                 .messages(history)
                 .tools(registeredTools)
