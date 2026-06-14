@@ -1,6 +1,6 @@
 package com.czintercity.icsec_app.ai.controller;
 
-import com.czintercity.icsec_app.ai.CoverageAssessmentAgent;
+import com.czintercity.icsec_app.ai.agent.CoverageAssessmentAgent;
 import com.czintercity.icsec_app.ai.service.AIService;
 import com.czintercity.icsec_app.ai.utils.AIUtils;
 import com.czintercity.icsec_app.controls.entity.Control;
@@ -24,7 +24,7 @@ import java.util.Optional;
 
 /**
  * Controller exposing AI-powered coverage assessment endpoints.
- * Delegates to {@link com.czintercity.icsec_app.ai.CoverageAssessmentAgent} for inference and falls back
+ * Delegates to {@link com.czintercity.icsec_app.ai.agent.CoverageAssessmentAgent} for inference and falls back
  * to a secondary extractor agent when direct JSON parsing fails.
  */
 @Controller

@@ -1,4 +1,4 @@
-package com.czintercity.icsec_app.ai;
+package com.czintercity.icsec_app.ai.agent;
 
 import com.anthropic.client.AnthropicClient;
 import com.anthropic.models.messages.*;
