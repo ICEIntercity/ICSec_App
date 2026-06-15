@@ -9,6 +9,10 @@
   <div class="my-2 container">
     <a class="btn btn-dark mg" th:href="@{/control/all}">< Back</a>
     <a class="btn btn-primary mg" th:href="@{/control/edit/{id}(id = ${control.getId()})}">Edit control</a>
+    <a class="btn btn-outline-secondary mg"
+       th:href="@{/export/control/{id}/pdf(id = ${control.getId()})}">
+      <i class="bi bi-file-earmark-pdf"></i> Export PDF
+    </a>
     <button class="btn btn-danger mg"
             th:attr="hx-delete=@{/control/delete/{id}(id=${control.getId()})}"
             hx-confirm="Are you sure you want to delete this control?"
