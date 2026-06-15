@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${data.getName()}">Assessment</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.8cm 1.6cm;
+        }
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            color: #212529;
+            font-size: 10.5pt;
+            line-height: 1.4;
+        }
+        h1 {
+            font-size: 20pt;
+            margin: 0 0 0.2em 0;
+        }
+        h2 {
+            font-size: 14pt;
+            margin: 1.4em 0 0.5em 0;
+            border-bottom: 2px solid #212529;
+            padding-bottom: 0.2em;
+            page-break-after: avoid;
+        }
+        h3 {
+            font-size: 11pt;
+            margin: 1em 0 0.4em 0;
+            page-break-after: avoid;
+        }
+        p { margin: 0 0 0.6em 0; }
+        .meta { color: #6c757d; font-size: 9.5pt; margin-bottom: 0.4em; }
+        .description { white-space: pre-wrap; margin-bottom: 0.6em; }
+        .muted { color: #6c757d; font-style: italic; }
+        .section { page-break-inside: auto; }
+        .pill {
+            display: inline-block;
+            padding: 0.15em 0.6em;
+            border-radius: 0.375rem;
+            font-size: 9pt;
+            font-weight: 600;
+            color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0.6em;
+            font-size: 9.5pt;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 0.3em 0.5em;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f1f3f5;
+            font-weight: 700;
+        }
+        td.num, th.num { text-align: right; width: 12%; white-space: nowrap; }
+        td.code, th.code { white-space: nowrap; width: 14%; font-family: "Courier New", monospace; }
+        td.rank, th.rank { text-align: right; width: 6%; }
+        tr { page-break-inside: avoid; }
+    </style>
+</head>
+<body>
+    <h1 th:text="${data.getName()}">Assessment name</h1>
+    <p class="meta" th:text="'Generated on ' + ${data.getGeneratedOn()}">Generated on</p>
+    <p class="description" th:if="${data.getDescription()}" th:text="${data.getDescription()}">Description</p>
+
+    <!-- 1. Control assessment -->
+    <div class="section">
+        <h2>Control Assessment</h2>
+        <p th:if="${data.getControlAssessment().isEmpty()}" class="muted">No controls have been assessed.</p>
+        <div th:each="group : ${data.getControlAssessment()}">
+            <h3>
+                <span class="pill" th:style="'background-color:' + ${group.getTopicColor()}"
+                      th:text="${group.getTopicName()}">Topic</span>
+            </h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="code">Code</th>
+                        <th>Control</th>
+                        <th class="num">Maturity</th>
+                        <th class="num">Scope</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="row : ${group.getControls()}">
+                        <td class="code" th:text="${row.getCode()}">CODE</td>
+                        <td th:text="${row.getName()}">Name</td>
+                        <td class="num" th:text="${row.getMaturity()}">0</td>
+                        <td class="num" th:text="${row.getScope()}">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2. Technique priorities -->
+    <div class="section">
+        <h2>Technique Priorities</h2>
+        <p th:if="${data.getTechniquePriorities().isEmpty()}" class="muted">No technique priorities have been assigned.</p>
+        <table th:unless="${data.getTechniquePriorities().isEmpty()}">
+            <thead>
+                <tr>
+                    <th>Technique</th>
+                    <th class="num">Priority</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="row : ${data.getTechniquePriorities()}">
+                    <td th:text="${row.getLabel()}">Technique</td>
+                    <td class="num" th:text="${row.getPriority()}">0</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 3. Technique prioritisation (coverage per type) -->
+    <div class="section">
+        <h2>Technique Prioritisation</h2>
+        <p th:if="${data.getCoverageSections().isEmpty()}" class="muted">No coverage data available.</p>
+        <div th:each="section : ${data.getCoverageSections()}">
+            <h3>
+                <span class="pill" th:style="'background-color:' + ${section.getTypeColor()}"
+                      th:text="${section.getTypeName()} + ' coverage'">Type</span>
+            </h3>
+            <div th:each="tactic : ${section.getTactics()}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th th:text="${tactic.getTacticName()}">Tactic</th>
+                            <th class="num">Effective</th>
+                            <th class="num">Optimum</th>
+                            <th class="num">Weighted priority</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="row : ${tactic.getTechniques()}">
+                            <td th:text="${row.getLabel()}">Technique</td>
+                            <td class="num" th:text="${row.getEffectiveScore()}">0.00</td>
+                            <td class="num" th:text="${row.getOptimumScore()}">0.00</td>
+                            <td class="num" th:text="${row.getWeightedPriority()}">0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Control priorities -->
+    <div class="section">
+        <h2>Control Priorities</h2>
+        <p th:if="${data.getControlPriorities().isEmpty()}" class="muted">No control priorities available.</p>
+        <table th:unless="${data.getControlPriorities().isEmpty()}">
+            <thead>
+                <tr>
+                    <th class="rank">#</th>
+                    <th class="code">Code</th>
+                    <th>Control</th>
+                    <th>Topic</th>
+                    <th>Recommendation</th>
+                    <th class="num">Risk reduction</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="row : ${data.getControlPriorities()}">
+                    <td class="rank" th:text="${row.getRank()}">1</td>
+                    <td class="code" th:text="${row.getCode()}">CODE</td>
+                    <td th:text="${row.getName()}">Name</td>
+                    <td>
+                        <span class="pill" th:style="'background-color:' + ${row.getTopicColor()}"
+                              th:text="${row.getTopicName()}">Topic</span>
+                    </td>
+                    <td th:text="${row.getAdvice()}">Advice</td>
+                    <td class="num" th:text="${row.getImprovement()}">0.00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.czintercity.icsec_app.export.controller;
 
 import com.czintercity.icsec_app.export.dto.ExportDto;
+import com.czintercity.icsec_app.export.service.AssessmentPdfService;
 import com.czintercity.icsec_app.export.service.ControlPdfService;
 import com.czintercity.icsec_app.export.service.ExportService;
 import org.slf4j.Logger;
@@ -27,10 +28,13 @@ public class ExportController {
 
     private final ExportService exportService;
     private final ControlPdfService controlPdfService;
+    private final AssessmentPdfService assessmentPdfService;
 
-    public ExportController(ExportService exportService, ControlPdfService controlPdfService) {
+    public ExportController(ExportService exportService, ControlPdfService controlPdfService,
+                            AssessmentPdfService assessmentPdfService) {
         this.exportService = exportService;
         this.controlPdfService = controlPdfService;
+        this.assessmentPdfService = assessmentPdfService;
     }
 
     /**
@@ -90,5 +94,30 @@ public class ExportController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .body(zip);
+    }
+
+    /**
+     * Exports a completed assessment as a single PDF report covering every element of the assessment:
+     * the control assessment, the assigned technique priorities, the technique prioritisation (coverage)
+     * for all coverage types, and the control priorities.
+     *
+     * @param id the id of the assessment to export
+     * @return the rendered PDF as a downloadable attachment
+     */
+    @GetMapping(value = "/export/assessment/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> exportAssessmentPdf(@PathVariable UUID id) {
+        log.trace("exportAssessmentPdf(id={}) called.", id);
+        byte[] pdf;
+        try {
+            pdf = assessmentPdfService.renderAssessmentPdf(id);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+
+        String filename = "assessment-" + id + ".pdf";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }
