@@ -69,7 +69,13 @@ public class CoverageCalculationService {
 
         Map<Tactic, TacticAssessmentResult> tacticAssessmentResults = initializeResults(assessment);
 
-        // Multiply each technique's failure probability by the control's effective reduction
+        // We use a tracker to store the lowest failure probability (P_min) for each coverage area
+        Map<AssessmentValues, Double> minFailureProbTracker = new HashMap<>();
+
+        // Hardcoded Beta-Factor (10% Common Cause Failure probability)
+        final double BETA = 0.10;
+
+        // PASS 1: Calculate the independent product and track the minimum failure probability
         for (ControlStatus controlStatus : assessment.getControlStatusMapping()) {
             Control control = controlStatus.getControl();
             Short scope = controlStatus.getCoverageScope();
@@ -86,9 +92,32 @@ public class CoverageCalculationService {
                     TechniqueAssessmentResult techniqueResult = tacticAssessmentResults.get(tactic).getTechniqueAssessmentResults().get(technique);
                     AssessmentValues values = techniqueResult.getAssessmentResults().get(coverageType);
 
-                    // Recalculate failure probability (using parallel systems failure probability formula)
+                    // 1. Update the running product (Independent probability: Π P_i)
                     double currentFailureProbability = values.getEffectiveFailureProbability();
                     values.setEffectiveFailureProbability(currentFailureProbability * effectiveFailureProbability);
+
+                    // 2. Track the minimum failure probability (P_min) for the beta-factor formula
+                    double currentMin = minFailureProbTracker.getOrDefault(values, 1.0);
+                    minFailureProbTracker.put(values, Math.min(currentMin, effectiveFailureProbability));
+                }
+            }
+        }
+
+        // PASS 2: Apply the Beta-Factor formula to calculate the true system failure probability
+        for (TacticAssessmentResult tacticResult : tacticAssessmentResults.values()) {
+            for (TechniqueAssessmentResult techResult : tacticResult.getTechniqueAssessmentResults().values()) {
+                for (AssessmentValues values : techResult.getAssessmentResults().values()) {
+
+                    // Only apply the beta-factor if this technique was actually touched by overlapping controls
+                    if (minFailureProbTracker.containsKey(values)) {
+                        double independentProduct = values.getEffectiveFailureProbability();
+                        double minProb = minFailureProbTracker.get(values);
+
+                        // The core Reliability Engineering Beta-Factor calculation
+                        double betaAdjustedProbability = ((1.0 - BETA) * independentProduct) + (BETA * minProb);
+
+                        values.setEffectiveFailureProbability(betaAdjustedProbability);
+                    }
                 }
             }
         }
