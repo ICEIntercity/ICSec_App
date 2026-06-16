@@ -19,8 +19,9 @@ import com.czintercity.icsec_app.export.dto.AssessmentPdfData;
 import com.czintercity.icsec_app.export.dto.AssessmentPdfData.ControlAssessmentRow;
 import com.czintercity.icsec_app.export.dto.AssessmentPdfData.ControlPriorityRow;
 import com.czintercity.icsec_app.export.dto.AssessmentPdfData.CoverageSection;
-import com.czintercity.icsec_app.export.dto.AssessmentPdfData.CoverageTacticGroup;
 import com.czintercity.icsec_app.export.dto.AssessmentPdfData.CoverageTechniqueRow;
+import com.czintercity.icsec_app.export.dto.AssessmentPdfData.HeatmapTacticGroup;
+import com.czintercity.icsec_app.export.dto.AssessmentPdfData.HeatmapTechniqueCell;
 import com.czintercity.icsec_app.export.dto.AssessmentPdfData.TechniquePriorityRow;
 import com.czintercity.icsec_app.export.dto.AssessmentPdfData.TopicControlGroup;
 import com.czintercity.icsec_app.relationships.techniqueCoverage.CoverageType;
@@ -40,6 +41,7 @@ import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -161,14 +163,18 @@ public class AssessmentPdfService {
 
         List<CoverageSection> sections = new ArrayList<>();
         for (CoverageType type : CoverageType.values()) {
-            List<CoverageTacticGroup> tacticGroups = new ArrayList<>();
+            List<HeatmapTacticGroup> heatmapGroups = new ArrayList<>();
+            // One entry per technique: a technique can sit under several tactics, but its figures are
+            // identical across them, so they are recorded once and the tactic names accumulated.
+            Map<Technique, TechniqueAggregate> aggregates = new LinkedHashMap<>();
 
             for (Map.Entry<Tactic, List<Technique>> tacticEntry : tacticsMap.entrySet()) {
-                TacticAssessmentResult tacticResult = scores.get(tacticEntry.getKey());
+                Tactic tactic = tacticEntry.getKey();
+                TacticAssessmentResult tacticResult = scores.get(tactic);
                 if (tacticResult == null) {
                     continue;
                 }
-                List<CoverageTechniqueRow> techniqueRows = new ArrayList<>();
+                List<HeatmapTechniqueCell> heatmapCells = new ArrayList<>();
                 for (Technique technique : tacticEntry.getValue()) {
                     TechniqueAssessmentResult techniqueResult = tacticResult.getTechniqueAssessmentResults().get(technique);
                     if (techniqueResult == null) {
@@ -179,20 +185,45 @@ public class AssessmentPdfService {
                     double optimum = values.getOptimumCoverageScore();
                     double weighted = values.getWeightedPriority();
 
-                    // Skip techniques no control addresses for this type and that carry no weighted priority.
+                    // Heatmap mirrors the on-screen coverage view: every technique with a result,
+                    // tinted by its effective coverage on the same fixed 0–5 scale.
+                    heatmapCells.add(new HeatmapTechniqueCell(technique.getMitreId(), technique.getName(),
+                            format(effective), type.tintColor(effective)));
+
+                    // Skip techniques no control addresses for this type and that carry no priority rating.
                     if (optimum <= EPSILON && weighted <= EPSILON) {
                         continue;
                     }
-                    techniqueRows.add(new CoverageTechniqueRow(technique.getDisplayLabel(),
-                            format(effective), format(optimum), format(weighted)));
+                    TechniqueAggregate aggregate = aggregates.get(technique);
+                    if (aggregate == null) {
+                        aggregate = new TechniqueAggregate(technique.getDisplayLabel(), effective, optimum, weighted);
+                        aggregates.put(technique, aggregate);
+                    }
+                    aggregate.addTactic(tactic.getName());
                 }
-                if (!techniqueRows.isEmpty()) {
-                    tacticGroups.add(new CoverageTacticGroup(tacticEntry.getKey().getName(), techniqueRows));
+                if (!heatmapCells.isEmpty()) {
+                    heatmapGroups.add(new HeatmapTacticGroup(tactic.getMitreId(), tactic.getName(), heatmapCells));
                 }
             }
 
-            if (!tacticGroups.isEmpty()) {
-                sections.add(new CoverageSection(type.getDisplayValue(), type.getHexColor(), tacticGroups));
+            // Flatten the per-technique aggregates into rows ordered by priority rating, highest first.
+            List<CoverageTechniqueRow> techniqueRows = new ArrayList<>();
+            List<Double> rowWeights = new ArrayList<>(); // parallel to techniqueRows, for sorting
+            for (TechniqueAggregate aggregate : aggregates.values()) {
+                CoverageTechniqueRow row = new CoverageTechniqueRow(aggregate.getLabel(), aggregate.getTacticNames(),
+                        format(aggregate.getEffective()), format(aggregate.getOptimum()), format(aggregate.getWeighted()));
+                double weighted = aggregate.getWeighted();
+                int insertAt = 0;
+                while (insertAt < rowWeights.size() && rowWeights.get(insertAt) >= weighted) {
+                    insertAt++;
+                }
+                techniqueRows.add(insertAt, row);
+                rowWeights.add(insertAt, weighted);
+            }
+
+            if (!heatmapGroups.isEmpty() || !techniqueRows.isEmpty()) {
+                sections.add(new CoverageSection(type.getDisplayValue(), type.getHexColor(),
+                        heatmapGroups, techniqueRows));
             }
         }
         return sections;
@@ -252,5 +283,38 @@ public class AssessmentPdfService {
     /** Formats a 0–5 score to two decimal places. */
     private static String format(double value) {
         return String.format(java.util.Locale.US, "%.2f", value);
+    }
+
+    /**
+     * Accumulates a single technique's coverage figures — identical across the tactics it belongs to —
+     * together with the names of those tactics, so the prioritisation table shows one row per technique.
+     */
+    private static class TechniqueAggregate {
+        private final String label;
+        private final double effective;
+        private final double optimum;
+        private final double weighted;
+        private final List<String> tacticNames = new ArrayList<>();
+
+        private TechniqueAggregate(String label, double effective, double optimum, double weighted) {
+            this.label = label;
+            this.effective = effective;
+            this.optimum = optimum;
+            this.weighted = weighted;
+        }
+
+        private void addTactic(String tacticName) {
+            tacticNames.add(tacticName);
+        }
+
+        private String getLabel() { return label; }
+        private double getEffective() { return effective; }
+        private double getOptimum() { return optimum; }
+        private double getWeighted() { return weighted; }
+
+        /** The accumulated tactic names, one per line, for display in a single table cell. */
+        private String getTacticNames() {
+            return String.join("\n", tacticNames);
+        }
     }
 }

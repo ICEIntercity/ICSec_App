@@ -41,4 +41,28 @@ public enum CoverageType {
     public String getHexColor() {
         return hexColor;
     }
+
+    /**
+     * Computes a CSS {@code rgb()} colour that is a linear tint of this type's base colour, used to
+     * shade the coverage heatmap cards. A score of 0 produces white; a score of 5 produces the
+     * unmodified base colour.
+     *
+     * @param score coverage score in the range [0, 5]
+     * @return CSS colour string in the form {@code rgb(r,g,b)}
+     */
+    public String tintColor(double score) {
+        int r = Integer.parseInt(hexColor.substring(1, 3), 16);
+        int g = Integer.parseInt(hexColor.substring(3, 5), 16);
+        int b = Integer.parseInt(hexColor.substring(5, 7), 16);
+
+        double t = score / 5.0;
+        if (t < 0.0) t = 0.0;
+        if (t > 1.0) t = 1.0;
+
+        int tr = (int) Math.round(255 + (r - 255) * t);
+        int tg = (int) Math.round(255 + (g - 255) * t);
+        int tb = (int) Math.round(255 + (b - 255) * t);
+
+        return String.format("rgb(%d,%d,%d)", tr, tg, tb);
+    }
 }

@@ -35,8 +35,14 @@ import java.util.UUID;
  *   effectiveCoverageScore = (scope^0.65 × maturity^0.35 / 5) × coverageRating
  *   effectiveFailureProbability = max(0, 1 − effectiveCoverageScore / 5)
  * </pre>
- * Multiple controls compound multiplicatively: each one further reduces the
- * probability that remains after the previous controls have been applied.
+ * Multiple controls covering the same technique are combined with a Beta-Factor model
+ * drawn from reliability engineering, which accounts for common-cause failures rather
+ * than assuming the controls fail independently. First the independent product of every
+ * control's failure probability is taken (Π P_i); then it is blended with the single
+ * lowest failure probability (P_min) using a fixed common-cause factor β:
+ * <pre>
+ *   effectiveFailureProbability = (1 − β) × Π P_i + β × P_min
+ * </pre>
  */
 @Service
 public class CoverageCalculationService {
@@ -52,10 +58,17 @@ public class CoverageCalculationService {
      * {@link AssessmentResultDTO}.
      * <p>
      * All tactics and techniques are initialised with a failure probability of {@code 1.0}.
-     * Each {@link ControlStatus} in the assessment is then applied: for every
-     * {@link TechniqueCoverage} relationship on the control, the residual failure
-     * probability for the corresponding technique and coverage type is multiplied by
-     * the control's effective failure probability.
+     * The calculation then runs in two passes:
+     * <ol>
+     *   <li><strong>Pass 1</strong> applies each {@link ControlStatus}: for every
+     *       {@link TechniqueCoverage} relationship on the control, the residual failure
+     *       probability for the corresponding technique and coverage type is multiplied by
+     *       the control's effective failure probability (the independent product Π P_i),
+     *       while the lowest contributing probability (P_min) is tracked per coverage area.</li>
+     *   <li><strong>Pass 2</strong> applies the Beta-Factor formula
+     *       {@code (1 − β) × Π P_i + β × P_min} to every coverage area touched by a control,
+     *       adjusting the independent product for common-cause failures.</li>
+     * </ol>
      *
      * @param assessment the assessment whose control statuses drive the calculation
      * @return a {@link AssessmentResultDTO} containing per-technique scores for every tactic

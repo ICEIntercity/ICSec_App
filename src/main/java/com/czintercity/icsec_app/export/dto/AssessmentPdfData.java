@@ -93,52 +93,83 @@ public class AssessmentPdfData {
         public int getPriority() { return priority; }
     }
 
-    /** All technique prioritisation rows for a single coverage type, grouped by tactic. */
+    /** All technique prioritisation rows for a single coverage type, ranked by priority rating. */
     public static class CoverageSection {
         private final String typeName;
         private final String typeColor;
-        private final List<CoverageTacticGroup> tactics;
+        private final List<HeatmapTacticGroup> heatmap;
+        private final List<CoverageTechniqueRow> techniques;
 
-        public CoverageSection(String typeName, String typeColor, List<CoverageTacticGroup> tactics) {
+        public CoverageSection(String typeName, String typeColor, List<HeatmapTacticGroup> heatmap,
+                               List<CoverageTechniqueRow> techniques) {
             this.typeName = typeName;
             this.typeColor = typeColor;
-            this.tactics = tactics;
+            this.heatmap = heatmap;
+            this.techniques = techniques;
         }
 
         public String getTypeName() { return typeName; }
         public String getTypeColor() { return typeColor; }
-        public List<CoverageTacticGroup> getTactics() { return tactics; }
+        public List<HeatmapTacticGroup> getHeatmap() { return heatmap; }
+        public List<CoverageTechniqueRow> getTechniques() { return techniques; }
     }
 
-    /** A tactic and its techniques' coverage scores for one coverage type. */
-    public static class CoverageTacticGroup {
+    /** A tactic and its techniques as coloured heatmap cells, mirroring the on-screen coverage heatmap. */
+    public static class HeatmapTacticGroup {
+        private final String tacticMitreId;
         private final String tacticName;
-        private final List<CoverageTechniqueRow> techniques;
+        private final List<HeatmapTechniqueCell> techniques;
 
-        public CoverageTacticGroup(String tacticName, List<CoverageTechniqueRow> techniques) {
+        public HeatmapTacticGroup(String tacticMitreId, String tacticName, List<HeatmapTechniqueCell> techniques) {
+            this.tacticMitreId = tacticMitreId;
             this.tacticName = tacticName;
             this.techniques = techniques;
         }
 
+        public String getTacticMitreId() { return tacticMitreId; }
         public String getTacticName() { return tacticName; }
-        public List<CoverageTechniqueRow> getTechniques() { return techniques; }
+        public List<HeatmapTechniqueCell> getTechniques() { return techniques; }
     }
 
-    /** A technique's effective coverage, achievable optimum, and weighted priority for one coverage type. */
+    /** A single heatmap cell: a technique tinted by its effective coverage for the section's coverage type. */
+    public static class HeatmapTechniqueCell {
+        private final String mitreId;
+        private final String name;
+        private final String score;
+        private final String color;
+
+        public HeatmapTechniqueCell(String mitreId, String name, String score, String color) {
+            this.mitreId = mitreId;
+            this.name = name;
+            this.score = score;
+            this.color = color;
+        }
+
+        public String getMitreId() { return mitreId; }
+        public String getName() { return name; }
+        public String getScore() { return score; }
+        public String getColor() { return color; }
+    }
+
+    /** A technique's tactic, effective coverage, achievable maximum, and priority rating for one coverage type. */
     public static class CoverageTechniqueRow {
         private final String label;
+        private final String tacticName;
         private final String effectiveScore;
         private final String optimumScore;
         private final String weightedPriority;
 
-        public CoverageTechniqueRow(String label, String effectiveScore, String optimumScore, String weightedPriority) {
+        public CoverageTechniqueRow(String label, String tacticName, String effectiveScore, String optimumScore,
+                                    String weightedPriority) {
             this.label = label;
+            this.tacticName = tacticName;
             this.effectiveScore = effectiveScore;
             this.optimumScore = optimumScore;
             this.weightedPriority = weightedPriority;
         }
 
         public String getLabel() { return label; }
+        public String getTacticName() { return tacticName; }
         public String getEffectiveScore() { return effectiveScore; }
         public String getOptimumScore() { return optimumScore; }
         public String getWeightedPriority() { return weightedPriority; }

@@ -62,7 +62,39 @@
         td.num, th.num { text-align: right; width: 12%; white-space: nowrap; }
         td.code, th.code { white-space: nowrap; width: 14%; font-family: "Courier New", monospace; }
         td.rank, th.rank { text-align: right; width: 6%; }
+        td.tactics { white-space: pre-line; }
         tr { page-break-inside: avoid; }
+        .heat-tactic { margin-bottom: 0.7em; page-break-inside: avoid; }
+        .heat-tactic-title { font-size: 9.5pt; font-weight: 700; margin: 0 0 0.3em 0; }
+        .heat-tactic-title .mitre {
+            font-family: "Courier New", monospace;
+            font-size: 8.5pt;
+            background-color: #212529;
+            color: #fff;
+            padding: 0.1em 0.4em;
+            border-radius: 0.3em;
+            margin-right: 0.4em;
+        }
+        .heat-cell {
+            display: inline-block;
+            width: 23%;
+            box-sizing: border-box;
+            vertical-align: top;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 0.35em 0.45em;
+            margin: 0 0.6% 0.5% 0;
+            font-size: 8pt;
+            line-height: 1.25;
+        }
+        .heat-cell .mitre {
+            font-family: "Courier New", monospace;
+            font-size: 7.5pt;
+            font-weight: 700;
+            color: #b02a37;
+        }
+        .heat-cell .name { display: block; margin: 0.2em 0; }
+        .heat-cell .score { font-weight: 700; opacity: 0.85; }
     </style>
 </head>
 <body>
@@ -129,26 +161,41 @@
                 <span class="pill" th:style="'background-color:' + ${section.getTypeColor()}"
                       th:text="${section.getTypeName()} + ' coverage'">Type</span>
             </h3>
-            <div th:each="tactic : ${section.getTactics()}">
-                <table>
-                    <thead>
-                        <tr>
-                            <th th:text="${tactic.getTacticName()}">Tactic</th>
-                            <th class="num">Effective</th>
-                            <th class="num">Optimum</th>
-                            <th class="num">Weighted priority</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="row : ${tactic.getTechniques()}">
-                            <td th:text="${row.getLabel()}">Technique</td>
-                            <td class="num" th:text="${row.getEffectiveScore()}">0.00</td>
-                            <td class="num" th:text="${row.getOptimumScore()}">0.00</td>
-                            <td class="num" th:text="${row.getWeightedPriority()}">0.00</td>
-                        </tr>
-                    </tbody>
-                </table>
+
+            <!-- Coverage heatmap: techniques tinted by effective coverage, mirroring the on-screen view. -->
+            <div th:each="heatTactic : ${section.getHeatmap()}" class="heat-tactic">
+                <p class="heat-tactic-title">
+                    <span class="mitre" th:text="${heatTactic.getTacticMitreId()}">TA0001</span>
+                    <span th:text="${heatTactic.getTacticName()}">Tactic</span>
+                </p>
+                <div><span class="heat-cell" th:each="cell : ${heatTactic.getTechniques()}"
+                           th:style="'background-color:' + ${cell.getColor()}">
+                    <span class="mitre" th:text="${cell.getMitreId()}">T0001</span>
+                    <span class="name" th:text="${cell.getName()}">Technique</span>
+                    <span class="score" th:text="${cell.getScore()} + ' / 5'">0.00 / 5</span>
+                </span></div>
             </div>
+
+            <table th:unless="${section.getTechniques().isEmpty()}">
+                <thead>
+                    <tr>
+                        <th>Technique</th>
+                        <th>Tactic</th>
+                        <th class="num">Effective coverage</th>
+                        <th class="num">Maximum coverage</th>
+                        <th class="num">Priority rating</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="row : ${section.getTechniques()}">
+                        <td th:text="${row.getLabel()}">Technique</td>
+                        <td class="tactics" th:text="${row.getTacticName()}">Tactic</td>
+                        <td class="num" th:text="${row.getEffectiveScore()}">0.00</td>
+                        <td class="num" th:text="${row.getOptimumScore()}">0.00</td>
+                        <td class="num" th:text="${row.getWeightedPriority()}">0.00</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 

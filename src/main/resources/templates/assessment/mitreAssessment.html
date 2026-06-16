@@ -9,7 +9,8 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll("[data-technique-card]").forEach(function (card, index) {
+            const cards = document.querySelectorAll("[data-technique-card]");
+            cards.forEach(function (card, index) {
                 card.querySelector("[data-field='techniqueId']").name = `priorities[${index}].techniqueId`;
                 card.querySelector("[data-field='priority']").name = `priorities[${index}].priority`;
             });
@@ -23,13 +24,30 @@
                 'Very high priority'
             ];
 
-            document.querySelectorAll("[data-field='priority']").forEach(function (select) {
+            function techniqueIdOf(select) {
+                return select.closest('[data-technique-card]').querySelector("[data-field='techniqueId']").value;
+            }
+
+            function updateHint(select) {
                 const hint = select.closest('[data-technique-card]').querySelector('[data-priority-hint]');
-                function updateHint() {
-                    if (hint) hint.textContent = priorityLabels[select.value];
-                }
-                select.addEventListener('change', updateHint);
-                updateHint();
+                if (hint) hint.textContent = priorityLabels[select.value];
+            }
+
+            document.querySelectorAll("[data-field='priority']").forEach(function (select) {
+                select.addEventListener('change', function () {
+                    // A technique can appear under multiple tactics, so it is rendered as several
+                    // cards. Keep every card for the same technique in sync so the rating stays
+                    // consistent across the assessment regardless of which card was edited.
+                    const techniqueId = techniqueIdOf(select);
+                    document.querySelectorAll("[data-field='priority']").forEach(function (peer) {
+                        if (peer !== select && techniqueIdOf(peer) === techniqueId) {
+                            peer.value = select.value;
+                            updateHint(peer);
+                        }
+                    });
+                    updateHint(select);
+                });
+                updateHint(select);
             });
         });
     </script>

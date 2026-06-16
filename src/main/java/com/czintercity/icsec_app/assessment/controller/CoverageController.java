@@ -206,12 +206,11 @@ public class CoverageController {
      */
     private Map<UUID, String> buildColorMap(AssessmentResultDTO coverageDTO, CoverageType type) {
         Map<UUID, String> colors = new HashMap<>();
-        String hex = type.getHexColor();
         for (TacticAssessmentResult tacticScore : coverageDTO.getCoverageScores().values()) {
             for (Map.Entry<Technique, TechniqueAssessmentResult> entry : tacticScore.getTechniqueAssessmentResults().entrySet()) {
                 UUID techniqueId = entry.getKey().getId();
                 double score = entry.getValue().getAssessmentResults().get(type).getEffectiveCoverageScore();
-                colors.put(techniqueId, tintColor(hex, score));
+                colors.put(techniqueId, type.tintColor(score));
             }
         }
         return colors;
@@ -261,7 +260,7 @@ public class CoverageController {
         double max = maxPriority;
         for (Map.Entry<UUID, Double> entry : priorities.entrySet()) {
             double normalised = max > 0 ? (entry.getValue() / max) * 5.0 : 0.0;
-            colors.put(entry.getKey(), tintColor(type.getHexColor(), normalised));
+            colors.put(entry.getKey(), type.tintColor(normalised));
         }
         return colors;
     }
@@ -301,29 +300,5 @@ public class CoverageController {
             top.add(ranked.get(i).getKey());
         }
         return top;
-    }
-
-    /**
-     * Computes a CSS {@code rgb()} colour that is a linear tint of {@code hexColor}.
-     * A score of 0 produces white; a score of 5 produces the unmodified base colour.
-     *
-     * @param hexColor six-digit hex colour string prefixed with {@code #}
-     * @param score    coverage score in the range [0, 5]
-     * @return CSS colour string in the form {@code rgb(r,g,b)}
-     */
-    private static String tintColor(String hexColor, double score) {
-        int r = Integer.parseInt(hexColor.substring(1, 3), 16);
-        int g = Integer.parseInt(hexColor.substring(3, 5), 16);
-        int b = Integer.parseInt(hexColor.substring(5, 7), 16);
-
-        double t = score / 5.0;
-        if (t < 0.0) t = 0.0;
-        if (t > 1.0) t = 1.0;
-
-        int tr = (int) Math.round(255 + (r - 255) * t);
-        int tg = (int) Math.round(255 + (g - 255) * t);
-        int tb = (int) Math.round(255 + (b - 255) * t);
-
-        return String.format("rgb(%d,%d,%d)", tr, tg, tb);
     }
 }
