@@ -47,6 +47,42 @@
     <div id="heatmap-container">
 
         <div th:fragment="heatmap">
+
+            <div th:if="${!topPriorityTechniques.isEmpty()}" class="card border-0 shadow-sm mb-5">
+                <div class="card-body">
+                    <h5 class="mb-3 d-flex align-items-center gap-2">
+                        <span>Top Priorities</span>
+                        <span class="badge"
+                              th:style="'background-color:' + ${coverageTypeHex}"
+                              th:text="${selectedCoverageType.getDisplayValue()}">Type</span>
+                    </h5>
+                    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-3">
+                        <div class="col" th:each="technique, iter : ${topPriorityTechniques}">
+                            <div class="card h-100 border"
+                                 th:attr="hx-get=@{/assessment/{assessmentId}/technique/{id}/coverage-detail(assessmentId=${assessment.getId()},id=${technique.getId()})}"
+                                 hx-target="#techniqueDetailHolder"
+                                 hx-swap="innerHTML"
+                                 data-bs-toggle="modal"
+                                 data-bs-target="#techniqueDetailModal"
+                                 style="cursor: pointer;">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge rounded-pill bg-secondary" th:text="'#' + ${iter.index + 1}">#1</span>
+                                        <span class="badge bg-danger font-monospace" th:text="${technique.getMitreId()}">T0001</span>
+                                    </div>
+                                    <p class="fw-semibold text-body mb-2"
+                                       style="font-size: 0.875rem; line-height: 1.3;"
+                                       th:text="${technique.getName()}">Technique Name</p>
+                                    <span class="badge"
+                                          th:style="'background-color: white; border: 1px solid ' + ${coverageTypeHex} + '; color:' + ${coverageTypeHex} + ';'"
+                                          th:text="'Priority: ' + ${#numbers.formatDecimal(techniquePriorityScores[technique.getId()], 1, 'COMMA', 2, 'POINT')}">Priority: 0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div th:each="tacticEntry : ${tacticsMap}" class="mb-5">
                 <h5 class="border-bottom pb-2 mb-3">
                     <span class="badge bg-dark font-monospace me-2" th:text="${tacticEntry.key.getMitreId()}">TA0001</span>

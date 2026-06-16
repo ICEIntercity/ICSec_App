@@ -93,6 +93,7 @@ public class CoverageController {
         model.addAttribute("techniqueOptimumScores", techniqueOptimumScores);
         model.addAttribute("techniquePriorityColors", techniquePriorityColors);
         model.addAttribute("techniquePriorityScores", techniquePriorityScores);
+        model.addAttribute("topPriorityTechniques", buildTopPriorityTechniques(coverageDTO, selectedType));
 
         return "assessment/assessmentResult";
     }
@@ -122,6 +123,7 @@ public class CoverageController {
         Map<UUID, String> techniquePriorityColors = buildPriorityColorMap(coverageDTO, selectedType);
         Map<UUID, Double> techniquePriorityScores = buildPriorityScoreMap(coverageDTO, selectedType);
 
+        model.addAttribute("assessment", new AssessmentDTO(assessment));
         model.addAttribute("selectedCoverageType", selectedType);
         model.addAttribute("coverageTypeHex", selectedType.getHexColor());
         model.addAttribute("tacticsMap", attackService.getTacticsWithTechniques());
@@ -130,6 +132,7 @@ public class CoverageController {
         model.addAttribute("techniqueOptimumScores", techniqueOptimumScores);
         model.addAttribute("techniquePriorityColors", techniquePriorityColors);
         model.addAttribute("techniquePriorityScores", techniquePriorityScores);
+        model.addAttribute("topPriorityTechniques", buildTopPriorityTechniques(coverageDTO, selectedType));
 
         return "assessment/assessmentResult :: heatmap";
     }
@@ -274,6 +277,30 @@ public class CoverageController {
             }
         }
         return scores;
+    }
+
+    /**
+     * Returns the five techniques with the highest weighted priority for the given coverage type,
+     * in descending order. Techniques with no weighted priority (zero) are excluded, so the list may
+     * hold fewer than five entries.
+     */
+    private List<Technique> buildTopPriorityTechniques(AssessmentResultDTO coverageDTO, CoverageType type) {
+        List<Map.Entry<Technique, Double>> ranked = new ArrayList<>();
+        for (TacticAssessmentResult tacticScore : coverageDTO.getCoverageScores().values()) {
+            for (Map.Entry<Technique, TechniqueAssessmentResult> entry : tacticScore.getTechniqueAssessmentResults().entrySet()) {
+                double priority = entry.getValue().getAssessmentResults().get(type).getWeightedPriority();
+                if (priority > 0.0) {
+                    ranked.add(Map.entry(entry.getKey(), priority));
+                }
+            }
+        }
+        ranked.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+
+        List<Technique> top = new ArrayList<>();
+        for (int i = 0; i < ranked.size() && i < 5; i++) {
+            top.add(ranked.get(i).getKey());
+        }
+        return top;
     }
 
     /**
