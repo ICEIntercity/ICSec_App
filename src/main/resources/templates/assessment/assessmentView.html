@@ -84,7 +84,7 @@ document.getElementById('modalMaturity').addEventListener('change', function () 
         </div>
     </div>
 
-    <div th:replace="~{fragments/assessmentStepper :: assessmentStepper(${savedAssessmentId}, 1, ${assessmentComplete}, 'assessmentForm', 'prioritize')}"></div>
+    <div th:replace="~{fragments/assessmentStepper :: assessmentStepper(${savedAssessmentId}, 1, ${assessmentComplete}, 'assessmentForm', 'technique-relevance')}"></div>
 
     <div class="d-flex align-items-center justify-content-between sticky-top bg-white border-bottom py-2 mb-4">
         <h3 class="mb-0" th:text="${assessment.getName()} ?: 'New Assessment'">Assessment</h3>

@@ -32,7 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Handles HTTP requests for creating, editing, and saving {@link Assessment} records,
- * as well as managing MITRE ATT&amp;CK technique prioritisation within an assessment.
+ * as well as managing the MITRE ATT&amp;CK technique relevance assessment within an assessment.
  */
 @Controller
 public class AssessmentController {
@@ -84,8 +84,8 @@ public class AssessmentController {
 
     /**
      * Persists the assessment form submission.
-     * When {@code redirectTo} is {@code "prioritize"}, redirects to the MITRE prioritisation view;
-     * otherwise redirects back to the assessment edit view.
+     * When {@code redirectTo} is {@code "technique-relevance"}, redirects to the technique relevance
+     * assessment view; otherwise redirects back to the assessment edit view.
      *
      * @param redirectTo optional hint controlling the post-save redirect destination
      */
@@ -93,8 +93,8 @@ public class AssessmentController {
     public String saveAssessment(@ModelAttribute AssessmentDTO dto,
                                  @org.springframework.web.bind.annotation.RequestParam(required = false) String redirectTo) {
         Assessment assessment = assessmentService.saveAssessment(dto);
-        if ("prioritize".equals(redirectTo)) {
-            return "redirect:/assessment/" + assessment.getId() + "/prioritize";
+        if ("technique-relevance".equals(redirectTo)) {
+            return "redirect:/assessment/" + assessment.getId() + "/technique-relevance";
         }
         return "redirect:/assessment/" + assessment.getId();
     }
@@ -103,8 +103,8 @@ public class AssessmentController {
      * Renders the MITRE ATT&amp;CK technique coverage assessment view for the given assessment,
      * pre-populating each technique card with any previously saved priority value.
      */
-    @GetMapping("/assessment/{assessmentId}/prioritize")
-    public String prioritizeMitre(Model model, @PathVariable UUID assessmentId) {
+    @GetMapping("/assessment/{assessmentId}/technique-relevance")
+    public String assessTechniqueRelevance(Model model, @PathVariable UUID assessmentId) {
         Optional<Assessment> existing = assessmentRepository.findById(assessmentId);
         if (existing.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assessment not found");
@@ -222,11 +222,11 @@ public class AssessmentController {
     /**
      * Persists technique priority scores for the given assessment.
      * When {@code redirectTo} is {@code "result"}, redirects to the coverage heatmap;
-     * otherwise redirects back to the prioritisation view.
+     * otherwise redirects back to the technique relevance assessment view.
      *
      * @param redirectTo optional hint controlling the post-save redirect destination
      */
-    @PostMapping("/assessment/{assessmentId}/prioritize")
+    @PostMapping("/assessment/{assessmentId}/technique-relevance")
     public String saveTechniquePriorities(@PathVariable UUID assessmentId,
                                           @ModelAttribute TechniquePrioritiesFormDTO formDTO,
                                           @org.springframework.web.bind.annotation.RequestParam(required = false) String redirectTo) {
@@ -234,6 +234,6 @@ public class AssessmentController {
         if ("result".equals(redirectTo)) {
             return "redirect:/assessment/" + assessmentId + "/coverage";
         }
-        return "redirect:/assessment/" + assessmentId + "/prioritize";
+        return "redirect:/assessment/" + assessmentId + "/technique-relevance";
     }
 }

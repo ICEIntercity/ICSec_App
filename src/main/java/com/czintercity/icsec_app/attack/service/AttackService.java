@@ -19,7 +19,7 @@ public class AttackService {
 
     /**
      * Returns all tactics sorted by MITRE ID, each paired with its techniques sorted
-     * by MITRE ID. Used to populate the prioritisation and coverage heatmap views.
+     * by MITRE ID. Used to populate the technique relevance assessment and coverage heatmap views.
      */
     @Transactional
     public LinkedHashMap<Tactic, List<Technique>> getTacticsWithTechniques() {
