@@ -1,7 +1,7 @@
 package com.czintercity.icsec_app.relationships.techniqueCoverage;
 
 /**
- * Classifies the mechanism by which a security control addresses a MITRE ATT&CK for ICS technique.
+ * Classifies the mechanism by which a security control addresses a MITRE ATT&amp;CK for ICS technique.
  *
  * <ul>
  *   <li>{@link #DETERRENT} — discourages an attacker from attempting the technique.</li>

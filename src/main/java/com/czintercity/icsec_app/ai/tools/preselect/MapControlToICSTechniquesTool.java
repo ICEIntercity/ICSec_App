@@ -18,18 +18,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Agent tool that maps a security control to candidate MITRE ATT&CK for ICS techniques.
+ * Agent tool that maps a security control to candidate MITRE ATT&amp;CK for ICS techniques.
  *
  * <p>This tool acts as a pre-selection step in an agentic evaluation pipeline. Given a
  * security control title and description, it queries Claude (via the Anthropic API) to
- * identify which MITRE ATT&CK for ICS techniques the control may address. Techniques
+ * identify which MITRE ATT&amp;CK for ICS techniques the control may address. Techniques
  * are evaluated across five mapping categories:
  * <ul>
- *   <li><b>Detection</b> – the control helps detect attempted technique execution.</li>
- *   <li><b>Prevention</b> – the control prevents technique execution from succeeding.</li>
- *   <li><b>Deterrence</b> – the control influences adversary choice away from the technique.</li>
- *   <li><b>Containment</b> – the control limits the blast radius of successful execution.</li>
- *   <li><b>Recovery</b> – the control aids restoration or eradication after execution.</li>
+ *   <li><b>Detection</b> - the control helps detect attempted technique execution.</li>
+ *   <li><b>Prevention</b> - the control prevents technique execution from succeeding.</li>
+ *   <li><b>Deterrence</b> - the control influences adversary choice away from the technique.</li>
+ *   <li><b>Containment</b> - the control limits the blast radius of successful execution.</li>
+ *   <li><b>Recovery</b> - the control aids restoration or eradication after execution.</li>
  * </ul>
  *
  * <p>On construction, all known techniques are fetched from {@link TechniqueRepository} and
@@ -93,7 +93,7 @@ public class MapControlToICSTechniquesTool extends AgentTool {
      * repeated database queries at inference time.
      *
      * @param anthropicClient     the Anthropic API client used to call Claude
-     * @param techniqueRepository repository providing all available MITRE ATT&CK for ICS techniques
+     * @param techniqueRepository repository providing all available MITRE ATT&amp;CK for ICS techniques
      * @param mapper              Jackson object mapper used for serialising/deserialising Claude's JSON response
      */
     public MapControlToICSTechniquesTool(AnthropicClient anthropicClient,
@@ -124,8 +124,8 @@ public class MapControlToICSTechniquesTool extends AgentTool {
      *
      * <p>Required fields:
      * <ul>
-     *   <li>{@code control_title} – short title of the security control.</li>
-     *   <li>{@code control_description} – detailed description of the security control.</li>
+     *   <li>{@code control_title} - short title of the security control.</li>
+     *   <li>{@code control_description} - detailed description of the security control.</li>
      * </ul>
      *
      * @return the input schema describing the expected tool invocation payload
@@ -199,7 +199,7 @@ public class MapControlToICSTechniquesTool extends AgentTool {
         String userMessage = String.format(USER_PROMPT_TEMPLATE, input.controlTitle, input.controlDescription);
 
         MessageCreateParams params = MessageCreateParams.builder()
-                .model(Model.CLAUDE_HAIKU_4_5)
+                .model(Model.CLAUDE_SONNET_4_6)
                 .maxTokens(8192)
                 .system(this.dynamicSystemPrompt)
                 .addUserMessage(userMessage)
@@ -218,7 +218,7 @@ public class MapControlToICSTechniquesTool extends AgentTool {
     }
 
     /**
-     * Loads all MITRE ATT&CK for ICS techniques from the repository and builds the
+     * Loads all MITRE ATT&amp;CK for ICS techniques from the repository and builds the
      * Claude system prompt.
      *
      * <p>Techniques are formatted as a Markdown table wrapped in {@code <available_techniques>}
@@ -268,7 +268,7 @@ public class MapControlToICSTechniquesTool extends AgentTool {
     }
 
     /**
-     * A single candidate MITRE ATT&CK for ICS technique, including the categories through
+     * A single candidate MITRE ATT&amp;CK for ICS technique, including the categories through
      * which the control is assessed to address it.
      */
     public static final class CandidateTechnique {

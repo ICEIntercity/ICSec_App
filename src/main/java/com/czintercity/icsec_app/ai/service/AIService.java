@@ -25,12 +25,12 @@ import java.util.Map;
  * using a two-stage extraction pipeline:
  *
  * <ol>
- *   <li><b>Direct parse</b> — attempt to deserialise the provided JSON string
+ *   <li><b>Direct parse</b> - attempt to deserialise the provided JSON string
  *       immediately via {@link #parseAssessmentOutput(String, Control)}.</li>
- *   <li><b>AI extractor fallback</b> — if direct parsing fails, delegate to
+ *   <li><b>AI extractor fallback</b> - if direct parsing fails, delegate to
  *       {@link JsonArrayExtractorAgent} to strip surrounding prose and code fences,
  *       then retry parsing via {@link #invokeExtractorAgent(String, Control)}.</li>
- *   <li><b>Hard failure</b> — if the AI extractor's output also cannot be parsed,
+ *   <li><b>Hard failure</b> - if the AI extractor's output also cannot be parsed,
  *       an {@link IllegalStateException} is thrown with the original raw agent
  *       output attached, suitable for logging and diagnosis.</li>
  * </ol>
@@ -91,10 +91,10 @@ public class AIService {
      *
      * <p>Each element of the array is expected to contain the following fields:
      * <ul>
-     *   <li>{@code technique_id} — MITRE ATT&CK for ICS technique identifier (e.g. {@code "T0859"})</li>
-     *   <li>{@code coverage_type} — coverage category string (e.g. {@code "detective"})</li>
-     *   <li>{@code coverage_rating} — integer rating from 1 to 5</li>
-     *   <li>{@code reasoning} — plain-language justification for the score</li>
+     *   <li>{@code technique_id} - MITRE ATT&amp;CK for ICS technique identifier (e.g. {@code "T0859"})</li>
+     *   <li>{@code coverage_type} - coverage category string (e.g. {@code "detective"})</li>
+     *   <li>{@code coverage_rating} - integer rating from 1 to 5</li>
+     *   <li>{@code reasoning} - plain-language justification for the score</li>
      * </ul>
      *
      * <p>Elements whose {@code technique_id} cannot be resolved in the database are

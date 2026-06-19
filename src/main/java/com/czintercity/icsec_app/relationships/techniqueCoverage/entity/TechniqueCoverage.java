@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Persistent entity representing a security control's coverage of a MITRE ATT&CK for ICS technique.
+ * Persistent entity representing a security control's coverage of a MITRE ATT&amp;CK for ICS technique.
  *
  * <p>Each instance associates a {@link Control} with a {@link Technique} and describes how
  * effectively the control addresses that technique via a numeric {@code coverageRating} (0–5),

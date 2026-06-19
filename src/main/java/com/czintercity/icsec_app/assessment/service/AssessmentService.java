@@ -286,9 +286,23 @@ public class AssessmentService {
 
     /**
      * Computes the per-technique reduction in residual failure probability obtained by moving a single
-     * control from its current scope/maturity to a target scope/maturity.
+     * control from its current scope/maturity to a target scope/maturity, then weights each reduction by
+     * the technique's priority.
+     * <p>
+     * For every technique/{@link CoverageType} the control covers, the control's failure-probability
+     * contribution is recomputed at both the current and target levels (aggregated across multiple
+     * coverage entries for the same technique/type). The control's current contribution is divided out of
+     * the baseline {@code residual} to isolate the rest of the deployment, the target contribution is
+     * folded back in, and the difference gives the reduction. Reductions are summed across coverage types
+     * per technique and finally multiplied by the technique's priority weight.
      *
-     * @param priorities technique ID to priority weight (0–5); missing entries are treated as 0
+     * @param control         the control being improved; its {@link TechniqueCoverage} entries define which techniques are affected
+     * @param currentScope    the control's current coverage scope (0–{@value CoverageCalculationService#MAX_RATING})
+     * @param currentMaturity the control's current coverage maturity (0–{@value CoverageCalculationService#MAX_RATING})
+     * @param targetScope     the scope the control is being raised to
+     * @param targetMaturity  the maturity the control is being raised to
+     * @param residual        per-technique, per-{@link CoverageType} baseline residual failure probability compounded from all deployed controls
+     * @param priorities      technique ID to priority weight (0–5); missing entries are treated as 0
      * @return a map of technique to the total priority-weighted risk reduction it gains; entries may be zero
      */
     private Map<Technique, Double> riskReduction(Control control, double currentScope, double currentMaturity,

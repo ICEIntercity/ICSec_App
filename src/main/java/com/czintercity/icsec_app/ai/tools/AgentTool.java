@@ -14,7 +14,7 @@ import java.util.Map;
 public abstract class AgentTool {
 
     // -----------------------------------------------------------------------
-    // Identity & schema – used when registering the tool with Claude
+    // Identity & schema - used when registering the tool with Claude
     // -----------------------------------------------------------------------
 
     /**
@@ -108,12 +108,12 @@ public abstract class AgentTool {
             this.content = content;
         }
 
-        /** Factory – successful result. */
+        /** Factory - successful result. */
         public static ToolResult ok(String content) {
             return new ToolResult(true, content);
         }
 
-        /** Factory – error result. */
+        /** Factory - error result. */
         public static ToolResult error(String message) {
             return new ToolResult(false, message);
         }

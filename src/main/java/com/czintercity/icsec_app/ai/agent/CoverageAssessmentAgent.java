@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An agent that assesses the MITRE ATT&CK for ICS coverage of a security control.
+ * An agent that assesses the MITRE ATT&amp;CK for ICS coverage of a security control.
  *
  * <p>Entry point: {@link #clank(Control)}.
  */
@@ -35,25 +35,25 @@ public class CoverageAssessmentAgent {
                     + "The user will provide a control title and description. Your task is to produce a structured evaluation of how well the control performs against relevant MITRE ATT&CK for ICS techniques, using the tools provided.\n\n"
                     + "Follow the steps below exactly and in order. Do not skip steps or reorder them.\n\n"
                     + "---\n\n"
-                    + "## Step 1 — Technique Discovery\n\n"
+                    + "## Step 1 - Technique Discovery\n\n"
                     + "Call `map_control_to_ics_techniques` with `control_title` and `control_description` as provided by the user.\n\n"
                     + "The tool returns an object with a `candidate_techniques` array. Each element has:\n"
                     + "- `technique_id`, `technique_title`, `technique_description`\n"
-                    + "- `mapped_categories` — a list of one or more of: \"Detective\", \"Preventative\", \"Deterrent\", \"Containment\", \"Recovery\"\n\n"
+                    + "- `mapped_categories` - a list of one or more of: \"Detective\", \"Preventative\", \"Deterrent\", \"Containment\", \"Recovery\"\n\n"
                     + "If `candidate_techniques` is empty, emit `[]` and stop. "
                     + "Process only the techniques returned by this tool. Do not add, infer, or substitute techniques from your own knowledge.\n\n"
                     + "---\n\n"
-                    + "## Step 2 — Coverage Evaluation\n\n"
+                    + "## Step 2 - Coverage Evaluation\n\n"
                     + "For each (technique, category) pair from Step 1, call the corresponding tool by lowercasing the category value and wrapping it as `evaluate_<category>_coverage` (e.g. \"Detective\" → `evaluate_detective_coverage`). Pass `technique_title` as `technique_name`. You may call tools in parallel. Do NOT call a tool for any category not listed for that technique.\n\n"
                     + "If a tool call fails, treat it as `coverage_rating: 0` (discarded in Step 3).\n\n"
                     + "---\n\n"
-                    + "## Step 3 — Output\n\n"
-                    + "Each coverage tool returns `coverage_rating` (0–5) and `coverage_justification`. Emit a single JSON array carrying those values verbatim — do not second-guess or adjust them; a separate reviewer verifies them. Each element:\n\n"
+                    + "## Step 3 - Output\n\n"
+                    + "Each coverage tool returns `coverage_rating` (0-5) and `coverage_justification`. Emit a single JSON array carrying those values verbatim - do not second-guess or adjust them; a separate reviewer verifies them. Each element:\n\n"
                     + "{\n"
                     + "  \"technique_id\": \"string\",    // e.g. \"T0859\"\n"
                     + "  \"technique_name\": \"string\",  // technique_title from Step 1\n"
                     + "  \"coverage_type\": \"string\",   // lowercase mapped_categories value\n"
-                    + "  \"coverage_rating\": integer,     // coverage_rating from the tool (1–5)\n"
+                    + "  \"coverage_rating\": integer,     // coverage_rating from the tool (1-5)\n"
                     + "  \"reasoning\": \"string\"         // coverage_justification from the tool\n"
                     + "}\n\n"
                     + "Discard any entry whose `coverage_rating` is 0.\n\n"

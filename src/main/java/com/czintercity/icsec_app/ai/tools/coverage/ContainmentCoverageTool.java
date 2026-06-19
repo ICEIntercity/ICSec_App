@@ -90,7 +90,7 @@ public class ContainmentCoverageTool extends AgentTool {
 
 
     // -----------------------------------------------------------------------
-    // AgentTool – identity & schema
+    // AgentTool - identity & schema
     // -----------------------------------------------------------------------
 
     @Override
@@ -138,7 +138,7 @@ public class ContainmentCoverageTool extends AgentTool {
     }
 
     // -----------------------------------------------------------------------
-    // AgentTool – execution
+    // AgentTool - execution
     // -----------------------------------------------------------------------
 
     /**

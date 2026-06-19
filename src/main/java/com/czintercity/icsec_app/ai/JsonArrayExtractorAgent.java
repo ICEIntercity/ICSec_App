@@ -21,7 +21,7 @@ public class JsonArrayExtractorAgent {
 
     private static final String SYSTEM_PROMPT =
             "You will receive text that contains a JSON array somewhere within it. "
-            + "Find the JSON array and return it exactly as it appears — character-for-character, "
+            + "Find the JSON array and return it exactly as it appears - character-for-character, "
             + "with no modifications to its contents. "
             + "Do not add code fences, markdown, commentary, preamble, or any other text. "
             + "Your entire response must be the raw JSON array and only the JSON array, starting with '[' and ending with ']'. "
