@@ -48,3 +48,4 @@
 2026-06-14 18:55:59.780 INFO  - INPUT  control='Watchdog timers' (id=9a7395a3-648b-4ca7-872d-8b37a53b9cb9)
 2026-06-14 19:16:19.866 INFO  - INPUT  control='Configuration audit' (id=92cbebc9-410b-48ab-ba26-47900b25f263)
 2026-06-14 19:26:45.689 INFO  - INPUT  control='Supply chain security management' (id=e8f7b072-3ba4-466b-9681-f796ab8c5702)
+2026-06-21 14:57:37.786 INFO  - INPUT  control='Hardware tokens' (id=9801a0b6-fea2-4b6e-95e9-f796edb0d72b)

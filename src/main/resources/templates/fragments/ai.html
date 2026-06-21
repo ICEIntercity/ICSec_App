@@ -42,7 +42,7 @@
     <div class="modal-body">
         <div id="aiProposedCoverageList">
             <div th:each="cov, iter : ${coverageList}">
-                <div th:replace="~{fragments/techniqueCoverage :: techniqueCoverageRow(coverage=${cov}, index=${iter.index})}"></div>
+                <div th:replace="~{fragments/techniqueCoverage :: techniqueCoverageRow(coverage=${cov}, index=${iter.index}, preview=true)}"></div>
             </div>
         </div>
     </div>
@@ -55,6 +55,12 @@
             if (sourceList && targetList) {
                 // Replace main form contents
                 targetList.innerHTML = sourceList.innerHTML;
+
+                // The preview disables the Edit/Remove buttons to protect the AI output.
+                // Once accepted into the editable form, re-enable them.
+                targetList.querySelectorAll('button[disabled]').forEach(function (btn) {
+                    btn.removeAttribute('disabled');
+                });
 
                 // Reprocess the new DOM elements with HTMX so any inline hx-* tags work correctly
                 if (typeof htmx !== 'undefined') {

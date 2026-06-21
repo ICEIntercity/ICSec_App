@@ -4832,3 +4832,240 @@ All evaluations are complete. Compiling the final output, discarding all entries
     "overridden": true
   }
 ]
+2026-06-21 15:02:36.412 INFO  - INPUT  control='Hardware tokens' (id=9801a0b6-fea2-4b6e-95e9-f796edb0d72b)
+[
+  {
+    "technique_id": "T0859",
+    "technique_name": "Valid Accounts",
+    "coverage_type": "preventative",
+    "coverage_rating": 5,
+    "reasoning": "Hardware tokens provide comprehensive prevention of Valid Accounts abuse in ICS environments. The technique relies on adversaries leveraging stolen credentials to gain unauthorized access. Hardware tokens directly counter this mechanism by requiring a second authentication factor—physical possession of the token—that cannot be obtained through credential theft alone. Even if an attacker successfully compromises a user's password or gains access to credential material through any credential access technique, the hardware token requirement makes authentication impossible without the physical device. This creates a complete barrier to the technique's success. The control's effectiveness is further strengthened in ICS contexts where: (1) hardware tokens do not depend on mobile phones or internet connectivity, addressing unique ICS operational constraints; (2) environmental-hardened tokens can function in harsh industrial settings; (3) rapid authentication methods enable practical deployment even with PPE requirements. The control addresses the fundamental attack vector—using stolen credentials for unauthorized access—by making credentials alone insufficient for authentication. The only theoretical edge case where this control might not provide complete prevention is if an adversary physically steals both the credentials AND the hardware token simultaneously, which represents a different attack scenario beyond typical credential compromise. Therefore, hardware tokens fully prevent T0859 across all standard attack vectors in typical OT environments."
+  },
+  {
+    "technique_id": "T0859",
+    "technique_name": "Valid Accounts",
+    "coverage_type": "deterrent",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide robust deterrence against T0859 (Valid Accounts) by implementing a possession-based second factor that directly counters credential theft exploitation. The control addresses the core vulnerability of the technique—that stolen passwords alone are insufficient for unauthorized access—by requiring physical possession of a cryptographic device that an attacker cannot obtain through credential compromise alone.\n\nStrengths of this control:\n- Directly prevents unauthorized access even when user credentials are compromised, as the attacker would need both the password AND the physical token\n- Hardware-based cryptographic isolation makes credential extraction from the token itself virtually impossible through software attacks\n- Applicable across ICS environments where mobile-dependent MFA solutions may be impractical, ruggedized tokens can operate in harsh industrial conditions\n- Eliminates the primary attack vector for Valid Accounts technique when properly deployed to high-privilege accounts and critical access points\n\nLimitations preventing a rating of 5:\n- Does not deter all vectors: physical theft of the hardware token itself, insider threats with access to tokens, or compromise of accounts that predate token implementation remain viable\n- Deployment coverage may be incomplete—if not mandated for all accounts/systems, attackers can target non-token-protected accounts or legacy systems\n- Social engineering to obtain the physical token or trick users into authenticating on attacker-controlled systems bypasses the control\n- Does not address techniques where attackers gain access through service accounts that may not use tokens, or through token-less authentication mechanisms\n- In an ICS environment, not all access methods may support hardware tokens (some legacy systems, emergency access procedures)\n\nThe control effectively deters 75-90% of typical Valid Accounts exploitation vectors in a well-implemented environment, making it highly effective against both opportunistic and moderately skilled attackers, though determined adversaries with physical access, insider knowledge, or alternative access paths may still succeed."
+  },
+  {
+    "technique_id": "T0812",
+    "technique_name": "Default Credentials",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide a high degree of prevention against default credential exploitation by adding a mandatory possession-based factor (something you have) to the authentication process. Even if an adversary obtains or uses default credentials, they cannot successfully authenticate without physical possession of the hardware token. This effectively prevents unauthorized access in 75-90% of scenarios in a typical OT environment.\n\nThe control's strengths include: (1) cryptographic isolation of authentication material that resists credential extraction; (2) mandatory physical interaction requirement that cannot be bypassed remotely; (3) particular suitability for ICS environments where mobile-based MFA is impractical; and (4) resilience to both credential compromise and phishing attacks targeting authentication factors.\n\nHowever, the control does not achieve a rating of 5 because several edge cases and attack vectors remain: (1) direct physical access attacks where an adversary steals or duplicates the hardware token itself; (2) insider threats where authorized personnel with both credentials and tokens are compromised; (3) attacks targeting shared or poorly managed tokens in environments with multiple users; (4) initial provisioning and enrollment processes that may be vulnerable before tokens are fully deployed; and (5) legacy OT systems that may lack hardware token integration capability, requiring workarounds or exceptions.\n\nThe control's effectiveness is further limited by deployment and operational factors: inconsistent implementation across all privileged accounts, improper physical security of tokens themselves, and the assumption that hardware tokens are properly implemented and not circumvented through alternative authentication paths. For default credentials specifically, the control directly addresses this technique but does not prevent exploitation of default credentials on systems not protected by hardware token MFA."
+  },
+  {
+    "technique_id": "T0812",
+    "technique_name": "Default Credentials",
+    "coverage_type": "deterrent",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide strong deterrence against default credential exploitation by adding a mandatory possession-based second factor. The control directly addresses the attack mechanism by making default credentials alone insufficient for authentication—an attacker would need both the compromised default credential AND physical possession of the hardware token. This effectively eliminates the viability of remote default credential exploitation for most attack vectors.\n\nThe control achieves a rating of 4 rather than 5 because several vectors remain viable: (1) Physical proximity attacks where an attacker can obtain or clone the hardware token; (2) Insider threats with legitimate token access; (3) Supply chain compromises where default credentials and tokens are pre-distributed together; (4) Scenarios where hardware tokens are not deployed to all control system devices or accounts—legacy systems, field devices, or maintenance accounts may still rely solely on default credentials; (5) Shared token scenarios common in industrial environments where multiple users access a single token, reducing the possession factor's effectiveness.\n\nIn a best-in-class deployment covering all critical access points with individual token assignment, hardware tokens would deter the vast majority (75-90%) of default credential attacks, particularly automated exploitation and remote attacks. However, the persistence of these residual vectors—especially physical/insider threats and incomplete deployments—prevents a rating of 5."
+  },
+  {
+    "technique_id": "T0891",
+    "technique_name": "Hardcoded Credentials",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide a high degree of prevention against hardcoded credential exploitation by establishing a mandatory second factor of authentication that cannot be bypassed through credential compromise alone. The control directly addresses the technique's core mechanism by requiring physical possession of a hardware token in addition to any hardcoded or compromised credentials, making unauthorized interactive user sessions significantly more difficult to achieve.\n\nStrengths of this control:\n1. Hardware tokens implement possession-based MFA that is resistant to software-based attacks and credential theft, including hardcoded credentials embedded in firmware or software\n2. Cryptographic hardware isolation makes private keys stored on tokens virtually immune to extraction techniques\n3. The physical possession requirement cannot be satisfied by an attacker with only stolen credentials\n4. Hardware tokens are particularly well-suited for ICS environments where they can be designed to withstand harsh industrial conditions and function without mobile phone dependency\n5. They effectively prevent unauthorized interactive sessions even when hardcoded credentials are discovered or extracted\n\nLimitations preventing a rating of 5:\n1. The control does not prevent initial credential discovery or usage for non-interactive access (e.g., API calls, automated scripts that may not require interactive sessions)\n2. If hardcoded credentials are embedded in firmware or software and the system is already compromised at a low level, the attacker may bypass authentication prompts entirely\n3. Token loss, theft, or compromise could still enable unauthorized access if proper token revocation and replacement procedures are not in place\n4. Side-channel attacks or physical attacks against the token itself remain theoretically possible, though practically difficult\n5. Some legacy ICS systems may lack integration points for hardware token authentication, limiting deployment scope\n\nThe control is architecturally sound and practically effective for most threat scenarios involving hardcoded credentials, but edge cases involving firmware-level compromise, non-interactive access patterns, or legacy system limitations prevent full coverage."
+  },
+  {
+    "technique_id": "T0891",
+    "technique_name": "Hardcoded Credentials",
+    "coverage_type": "deterrent",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide strong deterrence against hardcoded credential exploitation by enforcing multi-factor authentication as a possession-based requirement. The control directly addresses the attack vector by ensuring that even if hardcoded credentials are discovered and used, an attacker still cannot authenticate without the physical hardware token. This covers approximately 75-90% of typical hardcoded credential exploitation scenarios in ICS environments.\n\nSpecific strengths: (1) Hardware tokens are immune to credential extraction attacks that target software storage mechanisms, (2) They provide cryptographic isolation that prevents offline attacks against stored credentials, (3) Physical possession requirement creates an insurmountable barrier for remote attackers without access to the token, (4) ICS-optimized variants exist that work in harsh environments and with PPE, enabling broader organizational adoption.\n\nLimitations preventing a rating of 5: (1) Hardcoded credentials in legacy systems or devices may still allow lateral movement if those systems lack token-based authentication, (2) Some operational scenarios in ICS may have legacy systems or backup authentication mechanisms that bypass token requirements, (3) Physical compromise or theft of hardware tokens themselves could allow credential use, though this is a different attack vector, (4) Systems where hardcoded credentials provide direct device access rather than user authentication (e.g., firmware updates, embedded system communication) may not be protected by user-facing hardware tokens.\n\nThe control is highly effective at deterring skilled attackers from leveraging hardcoded credentials in standard authentication flows but does not fully eliminate the technique across all possible vectors in heterogeneous ICS environments."
+  },
+  {
+    "technique_id": "T0822",
+    "technique_name": "External Remote Services",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide a high degree of prevention against External Remote Services attacks by enforcing possession-based multi-factor authentication. The control directly addresses the technique's attack vector by making it extremely difficult for adversaries to gain initial access through remote services like VPNs and Citrix, even if they have compromised credentials.\n\nStrengths: (1) Hardware tokens create a fundamental barrier by requiring physical possession of a device in addition to valid credentials, making remote exploitation significantly harder; (2) The cryptographic isolation of private keys stored in hardware prevents credential extraction attacks that could compromise the authentication mechanism; (3) The control is specifically designed for and effective in ICS environments where mobile phones or internet connectivity may be unavailable; (4) Hardware tokens mitigate the risk of credential theft through keylogging, phishing, or compromise of endpoint devices.\n\nLimitations preventing a rating of 5: (1) Social engineering could potentially persuade legitimate users to grant remote access to adversaries who have their credentials; (2) Insider threats with physical access to tokens present residual risk; (3) Lost, stolen, or misplaced hardware tokens could be exploited if not properly revoked; (4) Hardware token implementation requires proper enrollment, lifecycle management, and revocation procedures—weaknesses in these processes could reduce effectiveness; (5) Zero-day vulnerabilities in hardware token implementations, though rare, could theoretically be exploited; (6) Organizations may not universally deploy hardware tokens across all remote access systems.\n\nThe control directly and substantially prevents the primary attack mechanism of T0822 by introducing a cryptographic possession factor, making it highly effective for 75-90% of typical vectors while acknowledging residual risks from social engineering, insider threats, and operational implementation gaps."
+  },
+  {
+    "technique_id": "T0822",
+    "technique_name": "External Remote Services",
+    "coverage_type": "deterrent",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide strong deterrence against T0822 (External Remote Services) by implementing possession-based multi-factor authentication that directly addresses the initial access vector through remote services like VPNs and Citrix. The control's effectiveness stems from several key factors: (1) it requires physical possession of the token, making it extremely difficult for remote attackers to bypass even if they obtain passwords through credential compromise; (2) the cryptographic hardware isolation prevents extraction of private keys through software-based attacks; (3) it eliminates reliance on mobile phones or online connectivity, addressing ICS-specific constraints; and (4) it provides environmental hardening suitable for industrial settings. The control deters the technique across approximately 75-85% of available attack vectors in a typical OT environment, particularly those involving credential-based remote access, password spraying, and phishing attacks targeting remote gateway access. However, the rating does not reach 5 because: (1) determined attackers with physical access to the facility or insider threats could potentially compromise token distribution/storage; (2) social engineering could potentially convince users to authorize access through their tokens; (3) vulnerabilities in the remote service itself (not the authentication mechanism) could still be exploited; (4) if token enrollment or recovery processes are weak, attackers might bypass the token requirement; and (5) the control assumes proper implementation and policy enforcement across all remote access endpoints. For a skilled attacker with insider knowledge or physical access capabilities, alternative pathways around the hardware token requirement may exist. Nevertheless, as the technique description specifically identifies hardware tokens as 'a foundational control,' this control demonstrates direct architectural alignment and strong practical deterrence against the stated technique."
+  },
+  {
+    "technique_id": "T0892",
+    "technique_name": "Change Credential",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide a high degree of prevention against T0892 (Change Credential) by implementing a possession-based second authentication factor for credential management operations. The control directly addresses the technique's mechanism in several ways: (1) it prevents unauthorized credential changes by requiring physical device possession in addition to a compromised password, making it virtually impossible for an attacker with only password access to modify credentials; (2) the cryptographic hardware isolation prevents extraction of authentication material even if the attacker has obtained system-level access; (3) it ensures that credential management operations (which typically involve high-privilege accounts) require both knowledge (password) and possession (hardware token) factors. The control is particularly well-suited for ICS environments as noted, since it doesn't rely on mobile phones or internet connectivity. However, the rating is 4 rather than 5 because: (1) the control's effectiveness depends on proper implementation—if credential management systems don't consistently enforce hardware token requirements for all credential change operations, adversaries could bypass it; (2) physical theft or loss of the hardware token itself could theoretically allow an attacker to perform credential changes if paired with a compromised password; (3) social engineering or insider threats might convince legitimate users to perform credential changes on behalf of an attacker; (4) certain legacy or specialized ICS systems might not support hardware token integration, leaving gaps. In a best-in-class implementation with comprehensive coverage across the ICS environment, hardware tokens would prevent 75-90% of credential change attack vectors, stopping skilled attackers in the majority of cases while leaving edge cases and highly determined adversaries with specialized knowledge possible pathways."
+  },
+  {
+    "technique_id": "T0892",
+    "technique_name": "Change Credential",
+    "coverage_type": "deterrent",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide strong deterrence against the credential change technique by requiring a possession-based factor that an attacker cannot easily obtain or compromise. The control directly addresses the core vulnerability exploited in T0892: even if an adversary obtains valid credentials through compromise, they cannot execute credential changes without physical possession of the hardware token. This is particularly effective in ICS environments where hardware tokens can be designed to withstand harsh conditions and operate without requiring mobile devices or connectivity.\n\nThe control deters the technique for the majority of credential change vectors (75-90%) because:\n1. It prevents unauthorized credential modifications when tokens are properly managed and not physically stolen\n2. It protects high-privilege accounts used for credential administration\n3. It eliminates the viability of remote-only credential compromise attacks\n4. It would deter both automated exploitation and moderately skilled attackers\n\nThe rating is 4 rather than 5 because some attack vectors remain viable:\n1. Physical theft of the hardware token itself would bypass this control\n2. Insider threats with legitimate access to both credentials and tokens\n3. Token spoofing or cloning in some non-hardened implementations\n4. Compromise of the credential management system itself before token validation occurs\n5. Social engineering or coercion of authorized personnel holding tokens\n\nThe control is architecturally well-aligned with the technique's mechanism and would reliably deter most attackers from attempting credential changes through standard compromise pathways."
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide strong prevention of the Remote Services (T0886) technique by implementing possession-based MFA that directly counters the attack mechanism. When properly deployed, hardware tokens require physical possession of a device in addition to knowing credentials, making stolen credentials alone insufficient for lateral movement via RDP, SMB, SSH, or other remote services. This control addresses the primary vulnerability the technique exploits: reliance on password-only authentication.\n\nThe rating of 4 rather than 5 reflects several practical limitations:\n\n1. Coverage gaps: The control's effectiveness depends on comprehensive deployment across all remote service access points. If some services (legacy systems, maintenance interfaces, out-of-band management) lack hardware token enforcement, attackers can exploit these gaps for lateral movement.\n\n2. Implementation variations: Some ICS environments may implement hardware tokens in ways that reduce effectiveness (e.g., tokens used only for initial gateway access rather than for each remote service session, or tokens that can be physically stolen from personnel).\n\n3. Persistence mechanisms: An attacker who already has remote code execution may be able to establish persistent sessions, jump to other systems while authenticated, or use techniques that bypass the need for re-authentication within established sessions.\n\n4. Physical security assumptions: The control assumes hardware tokens are properly managed, not lost or stolen, and that personnel do not share authenticated sessions or tokens with others.\n\n5. Advanced techniques: Sophisticated attackers may employ side-channel attacks, exploit token implementation flaws, or use compromised host systems to intercept authenticated sessions after token verification occurs.\n\nFor a well-resourced defender with comprehensive hardware token deployment across all remote services and strong token management practices, this control would prevent 75-90% of remote service-based lateral movement attempts, stopping both unskilled attackers using stolen credentials and many moderately skilled attackers."
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "deterrent",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide strong deterrence against T0886 (Remote Services) by effectively blocking a primary attack vector: credential compromise. The control directly addresses the technique's mechanism by requiring possession of a physical device in addition to stolen credentials, which creates a significant barrier for attackers attempting to leverage remote services like RDP, SMB, and SSH.\n\nStrengths of this control: (1) Hardware tokens are inherently resistant to credential theft since private keys are cryptographically isolated and not extractable via software exploitation; (2) They eliminate the viability of password reuse or credential stuffing attacks that are common in lateral movement; (3) They prevent attackers from using harvested credentials from compromised systems to authenticate to remote services; (4) The control is particularly well-suited for ICS environments where mobile phone-based MFA may be impractical, and hardware tokens designed for industrial environments can be deployed effectively.\n\nLimitations preventing a rating of 5: (1) Hardware tokens do not prevent all vectors—phishing attacks that trick users into authorizing access, token-sharing scenarios where a user willingly shares their device, or physical theft of the token itself could still enable remote service access; (2) The control assumes tokens are universally deployed across all remote service endpoints and accounts; gaps in coverage (unprotected accounts, legacy systems without MFA support) create bypass opportunities; (3) If an attacker gains physical access to an unlocked workstation with an authenticated session, they may not need to re-authenticate; (4) Insider threats or coerced users could potentially provision attackers with token access.\n\nThe control deters approximately 75-90% of typical remote service-based lateral movement vectors in a well-implemented environment, making it highly effective against most skilled attackers using stolen credentials, while still acknowledging that determined adversaries with physical access, social engineering capabilities, or knowledge of unprotected systems could potentially circumvent it."
+  },
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide a high degree of prevention against T0883 (Internet Accessible Device) by implementing a robust possession-based MFA mechanism. The control directly addresses the attack vector by requiring adversaries to possess the physical hardware token in addition to knowing valid credentials, which significantly raises the barrier to unauthorized remote access. This is particularly effective because: (1) Hardware tokens are immune to most credential extraction techniques due to cryptographic hardware isolation, preventing password compromise alone from enabling access; (2) The physical possession requirement cannot be bypassed through network-based attacks, phishing, or credential stuffing; (3) The control is well-suited to ICS environments as noted, supporting operation without mobile phones or internet connectivity, and functioning in harsh industrial conditions. However, the rating does not reach 5 because: (1) The control only prevents access if properly deployed on all internet-accessible ICS devices—gaps in deployment coverage would allow alternative attack paths; (2) Physical token loss, theft, or sharing could provide adversaries with legitimate access; (3) Social engineering or coercion could potentially compromise token possession; (4) Implementation weaknesses (e.g., poor token lifecycle management, backup authentication methods, or inadequate physical security of tokens) could introduce bypass vectors. In a best-in-class deployment with comprehensive coverage, hardware tokens would prevent the majority (75-90%) of remote access attempts via compromised credentials or brute force, effectively stopping most attackers who lack physical access to the token."
+  },
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "deterrent",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide strong deterrence against T0883 (Internet Accessible Device) attacks by implementing possession-based MFA that significantly raises the barrier for unauthorized remote access. The control directly addresses the technique's mechanism by requiring attackers to obtain the physical hardware token in addition to compromising credentials, which is a substantial practical obstacle for remote attackers attempting to exploit internet-exposed ICS devices. Hardware tokens are resistant to credential harvesting, phishing, brute force attacks, and password compromise—all common vectors for exploiting internet-accessible systems. The control is particularly effective because: (1) it introduces a physical possession requirement that remote attackers cannot easily overcome; (2) it leverages cryptographic hardware isolation making token-based credentials extremely difficult to extract; (3) it requires no dependency on mobile connectivity or online services, making it practical in industrial environments; and (4) it can be hardened against environmental factors and integrated into workflows with PPE. However, the rating is 4 rather than 5 because determined attackers with sufficient resources and time may pursue alternative vectors such as: (1) supply chain compromises to obtain tokens during manufacturing; (2) social engineering or physical theft of tokens from authorized personnel; (3) targeting unprotected ICS assets that do not have token-based MFA; (4) exploiting systems during token provisioning or onboarding phases; and (5) compromising the authentication infrastructure itself rather than individual tokens. The control therefore deters 75-90% of typical attack vectors while remaining vulnerable to highly sophisticated, resourced, or persistent adversaries willing to pursue these alternative approaches."
+  },
+  {
+    "technique_id": "T0817",
+    "technique_name": "Drive-by Compromise",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide a high degree of prevention against drive-by compromise attacks by implementing possession-based multi-factor authentication (MFA). Here's the analysis:\n\nStrengths:\n1. The control directly addresses the credential harvesting vector of drive-by compromise. Even if an attacker successfully captures a user's password through a malicious website (via credential harvesting, keylogging, or network interception), they cannot authenticate without the physical hardware token.\n2. Hardware tokens store cryptographic credentials in isolated hardware, making them resistant to standard credential extraction techniques used in drive-by attacks.\n3. The requirement for physical possession ensures that remote attackers cannot authenticate without the actual token, creating a fundamental barrier to account compromise.\n4. Hardware tokens are particularly effective in ICS environments where they don't require mobile phones or internet connectivity, addressing specific OT operational constraints.\n5. The control prevents success across multiple attack vectors: credential harvesting via fake login pages, keylogging on compromised browsers, and password theft through network sniffing.\n\nLimitations:\n1. Hardware tokens do not prevent the initial compromise of the user's workstation or browser from a drive-by attack. An attacker could still establish persistent malware or conduct reconnaissance.\n2. If an attacker compromises a system after successful authentication (e.g., credential stuffing against poorly patched systems or exploiting post-authentication vulnerabilities), the token's protection becomes irrelevant.\n3. The control assumes proper deployment and user compliance. Tokens left unattended, shared between users, or disabled for convenience reduce effectiveness.\n4. Social engineering attacks targeting token holders (e.g., phishing for simultaneous credential+token usage) or physical theft of tokens could circumvent the control.\n5. A small percentage of OT environments may have legacy systems unable to support hardware token integration.\n\nRating Justification:\nHardware tokens prevent 75-90% of drive-by compromise attack vectors in typical OT environments by specifically blocking the credential authentication pathway. However, they don't prevent the initial malicious website visit, browser compromise, or sophisticated attacks that occur post-authentication, placing this at a rating of 4 rather than 5."
+  },
+  {
+    "technique_id": "T0817",
+    "technique_name": "Drive-by Compromise",
+    "coverage_type": "containment",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide strong protection against drive-by compromise attacks by preventing unauthorized access even when credentials are harvested. The control's effectiveness stems from its ability to enforce possession-based authentication: even if an attacker captures credentials through a malicious website visit, they cannot authenticate to critical ICS systems without the physical hardware token. This significantly reduces the blast radius in several ways: (1) it prevents lateral movement to high-privilege accounts and critical systems, (2) it limits the attacker's ability to establish persistent access to OT networks, and (3) it protects against credential reuse across multiple systems. However, the rating does not reach 5 because edge cases exist where the control may not provide complete protection. These include scenarios where: attackers target users who do not use hardware tokens for all systems, phishing attacks focus on systems that authenticate without hardware tokens, or social engineering directly targets possession of the token itself. Additionally, the effectiveness depends on proper implementation (e.g., all critical access points requiring hardware token authentication) and user compliance. In a well-implemented ICS environment with best-in-class coverage, hardware tokens would reduce operational disruption and compromise impact from drive-by attacks by 75-90%, as they effectively prevent the primary attack vector's success while allowing some limited exposure in less-protected attack paths."
+  }
+]
+2026-06-21 15:03:13.242 INFO  - OUTPUT [
+  {
+    "technique_id": "T0859",
+    "technique_name": "Valid Accounts",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens directly prevent exploitation of stolen credentials by requiring physical possession of the token as a second factor, making credentials alone insufficient for authentication. The rating is 4 rather than 5 because coverage is only as complete as deployment—accounts or systems not protected by hardware token MFA remain exploitable, and insider threats with both credentials and tokens are not prevented.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0859",
+    "technique_name": "Valid Accounts",
+    "coverage_type": "deterrent",
+    "coverage_rating": 3,
+    "reasoning": "Hardware tokens deter adversaries from attempting credential-based access by making stolen passwords alone insufficient, but the deterrent effect is moderate since determined attackers may still pursue physical token theft, insider compromise, or target legacy accounts lacking MFA enforcement. Deterrence applies primarily to remote, opportunistic attackers rather than sophisticated or physically proximate threats.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0812",
+    "technique_name": "Default Credentials",
+    "coverage_type": "preventative",
+    "coverage_rating": 3,
+    "reasoning": "Hardware tokens can prevent exploitation of default credentials on systems where MFA is enforced at the authentication layer, requiring physical token possession even when default passwords are known. However, many ICS field devices and embedded systems using default credentials authenticate at the device level without supporting MFA integration, significantly limiting the control's applicability to this technique.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0812",
+    "technique_name": "Default Credentials",
+    "coverage_type": "deterrent",
+    "coverage_rating": 2,
+    "reasoning": "Hardware tokens provide only limited deterrence against default credential exploitation because many ICS devices with default credentials do not support MFA and authenticate independently of user-facing token infrastructure. The deterrent effect is largely confined to gateway or management-plane access points where MFA is enforceable.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0891",
+    "technique_name": "Hardcoded Credentials",
+    "coverage_type": "preventative",
+    "coverage_rating": 2,
+    "reasoning": "Hardcoded credentials are typically embedded in firmware, software, or configuration files and are used for device-to-device or service-to-service authentication that does not involve interactive user sessions—meaning hardware token MFA is generally not applicable to these authentication flows. The control provides minimal prevention as it targets user authentication layers rather than the automated credential usage characteristic of this technique.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0891",
+    "technique_name": "Hardcoded Credentials",
+    "coverage_type": "deterrent",
+    "coverage_rating": 2,
+    "reasoning": "Hardware tokens offer little deterrence against hardcoded credential exploitation because the technique typically involves non-interactive, automated authentication flows between devices or services that bypass user-facing MFA controls entirely. Deterrence is limited to edge cases where hardcoded credentials are used within an authentication flow that also enforces hardware token MFA.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0822",
+    "technique_name": "External Remote Services",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens are a direct and well-established control for securing remote access gateways such as VPNs and remote desktop services, requiring physical possession of the token in addition to credentials and thus preventing unauthorized remote access even when credentials are compromised. Coverage gaps remain for remote services not integrated with MFA enforcement and for insider threats with legitimate token access.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0822",
+    "technique_name": "External Remote Services",
+    "coverage_type": "deterrent",
+    "coverage_rating": 3,
+    "reasoning": "Hardware tokens deter credential-based exploitation of external remote services by making remote authentication significantly harder for adversaries without physical token possession, discouraging opportunistic and many skilled attackers. However, the deterrent effect is reduced for adversaries with physical access, insider knowledge of token management weaknesses, or the ability to exploit the remote service through non-credential vulnerabilities.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0892",
+    "technique_name": "Change Credential",
+    "coverage_type": "preventative",
+    "coverage_rating": 3,
+    "reasoning": "Hardware tokens can prevent unauthorized credential changes when the credential management system enforces MFA, requiring an attacker to have both compromised credentials and physical token possession to perform changes. However, this protection depends entirely on whether credential change operations are gated behind hardware token authentication, which is not consistently the case across ICS environments.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0892",
+    "technique_name": "Change Credential",
+    "coverage_type": "deterrent",
+    "coverage_rating": 3,
+    "reasoning": "Hardware tokens deter credential change attempts by requiring physical possession alongside compromised credentials, making remote-only attacks impractical. The deterrent effect is moderate as it does not address physical access scenarios, insider threats, or compromise of the credential management infrastructure itself.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens directly prevent credential-based lateral movement via remote services such as RDP, SSH, and SMB by requiring physical token possession in addition to passwords, making stolen credentials insufficient for authentication. Effectiveness is limited by deployment gaps on legacy or unmanaged ICS systems and by the fact that attackers with established sessions or code execution may not need to re-authenticate.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0886",
+    "technique_name": "Remote Services",
+    "coverage_type": "deterrent",
+    "coverage_rating": 3,
+    "reasoning": "Hardware tokens deter credential-based lateral movement via remote services by significantly raising the barrier for attackers who have compromised passwords but lack physical token access. The deterrent effect is moderate since determined adversaries may exploit deployment gaps, pivot from already-authenticated sessions, or target systems where MFA is not enforced.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "preventative",
+    "coverage_rating": 4,
+    "reasoning": "Hardware tokens provide strong prevention for authentication-based exploitation of internet-accessible ICS devices by requiring physical possession of the token alongside credentials, directly blocking remote credential-based attacks. Prevention is limited to devices where MFA can be enforced at the authentication layer; many embedded ICS devices exposed to the internet lack the capability to integrate hardware token authentication.",
+    "overridden": false
+  },
+  {
+    "technique_id": "T0883",
+    "technique_name": "Internet Accessible Device",
+    "coverage_type": "deterrent",
+    "coverage_rating": 3,
+    "reasoning": "Hardware tokens deter remote exploitation of internet-accessible devices by making credential-based access substantially harder, discouraging opportunistic attackers and reducing automated attack success. Deterrence is moderate because many internet-exposed ICS devices do not support MFA integration and because determined adversaries may exploit unprotected assets or pursue vulnerability-based access rather than credential compromise.",
+    "overridden": true
+  },
+  {
+    "technique_id": "T0817",
+    "technique_name": "Drive-by Compromise",
+    "coverage_type": "preventative",
+    "coverage_rating": 2,
+    "reasoning": "Drive-by compromise achieves initial access through browser or client-side exploitation—delivering malware or executing code on the victim's machine—rather than through credential-based authentication. Hardware tokens do not prevent the browser exploitation, malware delivery, or code execution that constitutes this technique, providing only marginal benefit by protecting subsequent credential use if the attacker attempts to authenticate with harvested credentials.",
+    "overridden": true
+  }
+]

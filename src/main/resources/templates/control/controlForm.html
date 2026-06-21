@@ -184,7 +184,7 @@
 
             <div id="coverageList">
                 <div th:each="coverage, iter : *{techniqueCoverage}">
-                    <div th:replace="~{fragments/techniqueCoverage :: techniqueCoverageRow(coverage=${coverage}, index=${iter.index})}"></div>
+                    <div th:replace="~{fragments/techniqueCoverage :: techniqueCoverageRow(coverage=${coverage}, index=${iter.index}, preview=false)}"></div>
                 </div>
             </div>
             <div th:replace="~{fragments/ai :: aiLoadingTemplate}"></div>

@@ -1,5 +1,6 @@
 secrets.properties
 target/
+!target/*.jar
 .git/
 *.iml
 log/
